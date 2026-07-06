@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estore — Top Up</title>
+<style>
+  :root{
+    --navy:#0e1b45;
+    --blue-bright:#2f8dff;
+    --blue-mid:#1656c9;
+    --blue-deep:#0b3fae;
+    --white:#ffffff;
+    --page-bg:#f4f7fd;
+    --card-bg:#ffffff;
+    --grey-text:#6b7590;
+    --grey-light:#eef2fa;
+    --field-border:#dde4f2;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:#dfe6f5;
+    display:flex;
+    justify-content:center;
+    padding:20px 0;
+  }
+
+  .phone{
+    width:390px;
+    max-width:100%;
+    height:844px;
+    background:var(--page-bg);
+    border-radius:36px;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(14,27,69,0.25);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .status-bar{
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 20px 6px;
+    flex-shrink:0;
+  }
+
+  /* ---------- Header ---------- */
+  .page-header{
+    background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright));
+    padding:14px 18px 16px;
+    color:#fff;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .back-btn{
+    width:34px; height:34px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    cursor:pointer;
+    border:none;
+    color:#fff;
+  }
+  .page-title{ font-size:17px; font-weight:800; }
+
+  /* ---------- Scroll body ---------- */
+  .scroll-area{
+    flex:1;
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:16px 16px 30px;
+  }
+  .scroll-area::-webkit-scrollbar{ display:none; }
+
+  .form-card{
+    background:var(--card-bg);
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    padding:18px 16px;
+  }
+
+  .field-label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:8px;
+    display:block;
+  }
+  .field-label.sp{ margin-top:18px; }
+
+  .select-box{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    border:1.5px solid var(--field-border);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:var(--navy);
+    font-weight:600;
+  }
+  .select-box .chev{ color:var(--grey-text); font-size:12px; }
+
+  /* ---------- QR block ---------- */
+  .qr-block{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    margin-top:20px;
+    background:var(--grey-light);
+    border-radius:14px;
+    padding:14px;
+  }
+  .qr-code{
+    width:96px; height:96px;
+    border-radius:8px;
+    overflow:hidden;
+    flex-shrink:0;
+    background:#fff;
+    border:1px solid var(--field-border);
+  }
+  .qr-code svg{ width:100%; height:100%; display:block; }
+
+  .qr-text{ flex:1; min-width:0; }
+  .qr-hint{ font-size:11px; color:var(--grey-text); margin-bottom:6px; }
+  .qr-address{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--navy);
+    word-break:break-all;
+    line-height:1.4;
+  }
+  .copy-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--blue-mid);
+    margin-top:8px;
+    cursor:pointer;
+  }
+
+  /* ---------- Inputs ---------- */
+  .text-input{
+    width:100%;
+    border:1.5px solid var(--blue-bright);
+    border-radius:12px;
+    padding:13px 14px;
+    font-size:13.5px;
+    color:var(--navy);
+    outline:none;
+  }
+  .text-input::placeholder{ color:#a9b3cf; }
+
+  .readonly-box{
+    background:var(--grey-light);
+    border:1.5px solid var(--field-border);
+    border-radius:12px;
+    padding:13px 14px;
+    font-size:13.5px;
+    color:#a6afc8;
+  }
+
+  /* ---------- Upload box ---------- */
+  .upload-wrap{
+    display:flex;
+    justify-content:center;
+    margin-top:10px;
+  }
+  .upload-box{
+    width:130px; height:130px;
+    border:1.6px dashed #c3cbe0;
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:var(--grey-text);
+    background:#fbfcff;
+  }
+  .upload-box .plus{ font-size:28px; color:#c3cbe0; }
+  .upload-box .lbl{ font-size:12px; font-weight:600; text-align:center; color:var(--navy); }
+
+  .submit-btn{
+    width:100%;
+    margin-top:22px;
+    border:none;
+    border-radius:14px;
+    padding:14px;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(47,141,255,0.4);
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="icons">📶 🔋</div>
+  </div>
+
+  <div class="page-header">
+    <button class="back-btn" onclick="window.history.back()">←</button>
+    <span class="page-title">Top Up</span>
+  </div>
+
+  <div class="scroll-area">
+    <div class="form-card">
+
+      <span class="field-label">Recharge Methods</span>
+      <div class="select-box">
+        <span>USDT</span>
+        <span class="chev">⌄</span>
+      </div>
+
+      <span class="field-label sp">Please select the recharge network</span>
+      <div class="select-box">
+        <span>TRC-20</span>
+        <span class="chev">⌄</span>
+      </div>
+
+      <div class="qr-block">
+        <div class="qr-code">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="#fff"/>
+            <g fill="#0e1b45">
+              <rect x="6" y="6" width="24" height="24"/>
+              <rect x="12" y="12" width="12" height="12" fill="#fff"/>
+              <rect x="70" y="6" width="24" height="24"/>
+              <rect x="76" y="12" width="12" height="12" fill="#fff"/>
+              <rect x="6" y="70" width="24" height="24"/>
+              <rect x="12" y="76" width="12" height="12" fill="#fff"/>
+              <rect x="38" y="6" width="6" height="6"/>
+              <rect x="50" y="6" width="6" height="6"/>
+              <rect x="60" y="14" width="6" height="6"/>
+              <rect x="38" y="20" width="6" height="6"/>
+              <rect x="46" y="30" width="6" height="6"/>
+              <rect x="58" y="30" width="6" height="6"/>
+              <rect x="70" y="38" width="6" height="6"/>
+              <rect x="82" y="38" width="6" height="6"/>
+              <rect x="38" y="40" width="6" height="6"/>
+              <rect x="6" y="40" width="6" height="6"/>
+              <rect x="18" y="46" width="6" height="6"/>
+              <rect x="30" y="50" width="6" height="6"/>
+              <rect x="50" y="50" width="6" height="6"/>
+              <rect x="62" y="52" width="6" height="6"/>
+              <rect x="74" y="56" width="6" height="6"/>
+              <rect x="86" y="50" width="6" height="6"/>
+              <rect x="38" y="60" width="6" height="6"/>
+              <rect x="46" y="66" width="6" height="6"/>
+              <rect x="58" y="66" width="6" height="6"/>
+              <rect x="70" y="70" width="6" height="6"/>
+              <rect x="82" y="70" width="6" height="6"/>
+              <rect x="38" y="78" width="6" height="6"/>
+              <rect x="50" y="80" width="6" height="6"/>
+              <rect x="62" y="86" width="6" height="6"/>
+              <rect x="74" y="82" width="6" height="6"/>
+              <rect x="86" y="88" width="6" height="6"/>
+              <rect x="46" y="88" width="6" height="6"/>
+            </g>
+          </svg>
+        </div>
+        <div class="qr-text">
+          <div class="qr-hint">Scan the QR code to recharge</div>
+          <div class="qr-address">TR4x6A1h4uHGkDQdT44BnZbrsjmVaXp4bY</div>
+          <div class="copy-link">📋 Copy deposit address</div>
+        </div>
+      </div>
+
+      <span class="field-label sp">Recharge amount (USDT)</span>
+      <input type="text" class="text-input" placeholder="Please enter the recharge amount (USDT)">
+
+      <span class="field-label sp">Amount received (USDT)</span>
+      <div class="readonly-box">0.00</div>
+
+      <span class="field-label sp">Upload recharge voucher</span>
+      <div class="upload-wrap">
+        <div class="upload-box">
+          <span class="plus">+</span>
+          <span class="lbl">Upload<br>Credentials</span>
+        </div>
+      </div>
+
+      <button class="submit-btn">Submit Recharge</button>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

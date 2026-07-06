@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estore — Mine (Buyer)</title>
+<style>
+  :root{
+    --navy:#0e1b45;
+    --blue-bright:#2f8dff;
+    --blue-mid:#1656c9;
+    --blue-deep:#0b3fae;
+    --white:#ffffff;
+    --page-bg:#f4f7fd;
+    --card-bg:#ffffff;
+    --grey-text:#6b7590;
+    --grey-light:#eef2fa;
+    --gold:#ffb020;
+    --green:#12b886;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:#dfe6f5;
+    display:flex;
+    justify-content:center;
+    margin:0;
+  }
+
+  .phone{
+    width:390px;
+    max-width:100%;
+    height:100vh;
+    background:var(--page-bg);
+    border-radius:0;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(14,27,69,0.25);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- Header ---------- */
+  .page-header{
+    background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright));
+    padding:16px 18px 46px;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .header-title{ font-size:17px; font-weight:800; }
+  .settings-icon{ font-size:18px; opacity:0.9; }
+
+  /* ---------- Scroll body ---------- */
+  .scroll-area{
+    flex:1;
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:0 14px 30px;
+    margin-top:-30px;
+  }
+  .scroll-area::-webkit-scrollbar{ display:none; }
+
+  /* ---------- Seller approved banner ---------- */
+  .approved-banner{
+    background:linear-gradient(120deg, #0e9f6e, #12b886);
+    border-radius:16px;
+    padding:14px 16px;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 10px 24px rgba(18,184,134,0.3);
+    margin-bottom:14px;
+  }
+  .approved-icon{ font-size:24px; flex-shrink:0; }
+  .approved-text{ flex:1; }
+  .approved-title{ font-size:13px; font-weight:800; }
+  .approved-sub{ font-size:11px; opacity:0.9; margin-top:2px; }
+  .approved-link{
+    background:#fff;
+    color:#0e9f6e;
+    font-size:11px;
+    font-weight:800;
+    padding:7px 12px;
+    border-radius:9px;
+    white-space:nowrap;
+    flex-shrink:0;
+    text-decoration:none;
+  }
+
+  /* ---------- Profile card ---------- */
+  .profile-card{
+    background:var(--card-bg);
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(20,40,100,0.1);
+    padding:16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .avatar{
+    width:58px; height:58px;
+    border-radius:50%;
+    overflow:hidden;
+    flex-shrink:0;
+    border:2px solid var(--grey-light);
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .profile-info{ flex:1; min-width:0; }
+  .profile-name{ font-size:15.5px; font-weight:800; color:var(--navy); }
+  .profile-email{ font-size:11.5px; color:var(--grey-text); margin-top:3px; }
+  .profile-id{ font-size:11px; color:var(--grey-text); margin-top:2px; }
+  .profile-arrow{ font-size:16px; color:#c3cbe0; }
+
+  /* ---------- Stats row ---------- */
+  .stats-row{
+    display:flex;
+    background:var(--card-bg);
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    margin-top:12px;
+    padding:16px 4px;
+  }
+  .stat-item{ flex:1; text-align:center; border-right:1px solid var(--grey-light); }
+  .stat-item:last-child{ border-right:none; }
+  .stat-value{ font-size:15px; font-weight:800; color:var(--navy); }
+  .stat-label{ font-size:9.5px; color:var(--grey-text); margin-top:4px; line-height:1.3; }
+
+  /* ---------- Orders card ---------- */
+  .orders-card{
+    background:var(--card-bg);
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    margin-top:12px;
+    padding:14px 6px;
+  }
+  .orders-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 12px 12px;
+  }
+  .orders-head .t{ font-size:14px; font-weight:800; color:var(--navy); }
+  .orders-head .view-all{ font-size:11.5px; color:var(--blue-mid); font-weight:600; }
+  .orders-icons{ display:flex; justify-content:space-around; }
+  .order-icon-item{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    font-size:19px;
+  }
+  .order-icon-item .lbl{ font-size:9.5px; color:var(--navy); font-weight:600; text-align:center; max-width:56px; line-height:1.2; }
+
+  /* ---------- Quick action row ---------- */
+  .quick-row{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+  }
+  .quick-btn{
+    flex:1;
+    background:var(--card-bg);
+    border-radius:14px;
+    box-shadow:0 8px 18px rgba(20,40,100,0.06);
+    padding:12px 6px;
+    text-align:center;
+    text-decoration:none;
+    display:block;
+  }
+  .quick-btn .ic{ font-size:18px; }
+  .quick-btn .lbl{ font-size:11px; font-weight:700; color:var(--navy); margin-top:5px; }
+
+  /* ---------- Menu list ---------- */
+  .menu-card{
+    background:var(--card-bg);
+    margin-top:12px;
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(20,40,100,0.06);
+    overflow:hidden;
+  }
+  .menu-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    border-top:1px solid var(--grey-light);
+    text-decoration:none;
+  }
+  .menu-item:first-child{ border-top:none; }
+  .menu-icon{
+    width:32px; height:32px;
+    border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px;
+    flex-shrink:0;
+  }
+  .menu-text{ flex:1; font-size:13px; font-weight:600; color:var(--navy); }
+  .menu-arrow{ color:#c3cbe0; font-size:13px; }
+
+  .logout-btn{
+    margin-top:16px;
+    background:var(--card-bg);
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(20,40,100,0.06);
+    padding:13px;
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:#ff5470;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="page-header">
+    <div class="header-top">
+      <span class="header-title">My Account</span>
+      <span class="settings-icon">⚙️</span>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="approved-banner">
+      <span class="approved-icon">✅</span>
+      <div class="approved-text">
+        <div class="approved-title">Store Application Approved!</div>
+        <div class="approved-sub">Your seller account is active.</div>
+      </div>
+      <a href="estore-mine-seller.html" class="approved-link">Go to Seller Dashboard</a>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar"><img src="https://loremflickr.com/140/140/portrait,person/all?lock=501" alt="Mike01 avatar"></div>
+      <div class="profile-info">
+        <div class="profile-name">Mike01</div>
+        <div class="profile-email">mike100@gmail.com</div>
+        <div class="profile-id">ID: 451505</div>
+      </div>
+      <span class="profile-arrow">›</span>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-value">0</div>
+        <div class="stat-label">My Collection</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Shop Collection</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">0</div>
+        <div class="stat-label">My Browse</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">$20,000.00</div>
+        <div class="stat-label">Account Balance</div>
+      </div>
+    </div>
+
+    <div class="orders-card">
+      <div class="orders-head">
+        <span class="t">My Orders</span>
+        <a href="#" class="view-all">View All ›</a>
+      </div>
+      <div class="orders-icons">
+        <div class="order-icon-item">
+          💳
+          <span class="lbl">Payment pending</span>
+        </div>
+        <div class="order-icon-item">
+          🚚
+          <span class="lbl">In shipping</span>
+        </div>
+        <div class="order-icon-item">
+          📬
+          <span class="lbl">Received</span>
+        </div>
+        <div class="order-icon-item">
+          ✅
+          <span class="lbl">Completed</span>
+        </div>
+        <div class="order-icon-item">
+          ↩️
+          <span class="lbl">Refund/After-sales</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-row">
+      <a href="#" class="quick-btn">
+        <div class="ic">⬆️</div>
+        <div class="lbl">Top up</div>
+      </a>
+      <a href="#" class="quick-btn">
+        <div class="ic">⬇️</div>
+        <div class="lbl">Withdrawal</div>
+      </a>
+      <a href="estore-mine-seller.html" class="quick-btn">
+        <div class="ic">🏪</div>
+        <div class="lbl">Seller Dashboard</div>
+      </a>
+    </div>
+
+    <div class="menu-card">
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#e8f1ff;">🧾</div>
+        <div class="menu-text">Billing records</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#fdeef4;">📍</div>
+        <div class="menu-text">Delivery address</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#fff3e6;">❤️</div>
+        <div class="menu-text">My Collection</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#f1edfd;">🎧</div>
+        <div class="menu-text">Service Center</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#eafaf1;">👛</div>
+        <div class="menu-text">Wallet Management</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#e8f1ff;">🔒</div>
+        <div class="menu-text">Login Password</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#fdeef4;">🕘</div>
+        <div class="menu-text">My Browse</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#fff3e6;">🔑</div>
+        <div class="menu-text">Payment password</div>
+        <span class="menu-arrow">›</span>
+      </a>
+      <a href="#" class="menu-item">
+        <div class="menu-icon" style="background:#eafaf1;">⚙️</div>
+        <div class="menu-text">Set up</div>
+        <span class="menu-arrow">›</span>
+      </a>
+    </div>
+
+    <div class="logout-btn">Log out</div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

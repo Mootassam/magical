@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estore — Create Account</title>
+<style>
+  :root{
+    --navy:#0e1b45;
+    --blue-bright:#2f8dff;
+    --blue-mid:#1656c9;
+    --white:#ffffff;
+    --page-bg:#f4f7fd;
+    --card-bg:#ffffff;
+    --grey-text:#6b7590;
+    --field-bg:#f3f6fc;
+    --field-border:#dde4f2;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background: radial-gradient(circle at 30% 15%, #eaf1ff 0%, var(--page-bg) 55%, #e6ecfa 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+
+  .card{
+    width:100%;
+    max-width:380px;
+    background:var(--card-bg);
+    border:1px solid var(--field-border);
+    border-radius:20px;
+    padding:36px 28px 30px;
+    box-shadow:0 20px 50px rgba(20,40,100,0.10), 0 0 0 1px rgba(47,141,255,0.03) inset;
+  }
+
+  .logo-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:22px;
+  }
+
+  .logo-badge{
+    width:100px;
+    height:100px;
+    border-radius:24px;
+    background:#f7faff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 24px rgba(47,141,255,0.18), 0 0 0 1px rgba(47,141,255,0.12);
+    overflow:hidden;
+  }
+  .logo-badge svg{ width:74px; height:74px; }
+
+  .brand-name{
+    margin-top:10px;
+    font-size:20px;
+    font-weight:800;
+    letter-spacing:1px;
+  }
+  .brand-name .e{ color:var(--blue-bright); }
+  .brand-name .rest{ color:var(--navy); }
+
+  .form-title{
+    font-size:19px;
+    font-weight:800;
+    color:var(--navy);
+    text-align:center;
+    margin-top:4px;
+  }
+  .form-sub{
+    font-size:12px;
+    color:var(--grey-text);
+    text-align:center;
+    margin-top:6px;
+    margin-bottom:6px;
+  }
+
+  .field-label{
+    font-size:12.5px;
+    color:var(--grey-text);
+    margin:16px 0 8px;
+    display:block;
+  }
+
+  .field-wrap{ position:relative; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"]{
+    width:100%;
+    padding:13px 16px;
+    background:var(--field-bg);
+    border:1px solid var(--field-border);
+    border-radius:12px;
+    color:var(--navy);
+    font-size:13.5px;
+    outline:none;
+    transition:border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  input::placeholder{ color:#a3adc7; }
+  input:focus{
+    border-color:var(--blue-bright);
+    box-shadow:0 0 0 3px rgba(47,141,255,0.15);
+  }
+
+  .toggle-eye{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    color:var(--grey-text);
+    font-size:15px;
+    user-select:none;
+    background:none;
+    border:none;
+  }
+
+  /* ---------- Email + OTP row ---------- */
+  .otp-row{
+    display:flex;
+    gap:8px;
+  }
+  .otp-row input{ flex:1; min-width:0; }
+  .otp-btn{
+    flex-shrink:0;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-mid));
+    color:#fff;
+    font-size:11.5px;
+    font-weight:700;
+    border:none;
+    border-radius:12px;
+    padding:0 14px;
+    cursor:pointer;
+    white-space:nowrap;
+    box-shadow:0 8px 18px rgba(47,141,255,0.3);
+  }
+  .otp-btn:disabled{
+    background:#c3cbe0;
+    box-shadow:none;
+    cursor:not-allowed;
+  }
+
+  .otp-hint{
+    font-size:10.5px;
+    color:var(--grey-text);
+    margin-top:6px;
+  }
+
+  .register-btn{
+    width:100%;
+    margin-top:26px;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-mid));
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    box-shadow:0 10px 25px rgba(47,141,255,0.35);
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .register-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 30px rgba(47,141,255,0.45);
+  }
+  .register-btn:active{ transform:translateY(0); }
+
+  .terms-note{
+    font-size:10.5px;
+    color:var(--grey-text);
+    text-align:center;
+    margin-top:14px;
+    line-height:1.6;
+  }
+  .terms-note a{ color:var(--blue-mid); text-decoration:none; font-weight:600; }
+
+  .login-note{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--grey-text);
+    margin-top:16px;
+  }
+  .login-note a{ color:var(--blue-mid); font-weight:700; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="logo-wrap">
+    <div class="logo-badge">
+      <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e5fd6"/>
+            <stop offset="100%" stop-color="#3fb0ff"/>
+          </linearGradient>
+        </defs>
+        <path d="M60 40 h70 a10 10 0 0 1 10 10 v110 a10 10 0 0 1 -10 10 h-70 a10 10 0 0 1 -10 -10 v-110 a10 10 0 0 1 10 -10 z" fill="#0e1b45"/>
+        <path d="M78 40 v-8 a17 17 0 0 1 34 0 v8" fill="none" stroke="#0e1b45" stroke-width="8"/>
+        <path d="M78 40 v-8 a17 17 0 0 1 34 0 v8" fill="none" stroke="#f7faff" stroke-width="3"/>
+        <rect x="20" y="95" width="35" height="6" rx="3" fill="url(#blueGrad)"/>
+        <rect x="10" y="112" width="45" height="6" rx="3" fill="url(#blueGrad)"/>
+        <path d="M95 75 h55 l-12 18 h-33 v14 h30 l-10 16 h-20 v16 h35 l-12 18 h-53 a8 8 0 0 1 -8 -8 v-58 a8 8 0 0 1 8 -8 z" fill="url(#blueGrad)"/>
+        <circle cx="82" cy="182" r="7" fill="#0e1b45"/>
+        <circle cx="118" cy="182" r="7" fill="#0e1b45"/>
+      </svg>
+    </div>
+    <div class="brand-name"><span class="e">E</span><span class="rest">store</span></div>
+  </div>
+
+  <div class="form-title">Create your account</div>
+  <div class="form-sub">Join Estore and start shopping smarter</div>
+
+  <label class="field-label" for="email">Email</label>
+  <div class="otp-row">
+    <input type="email" id="email" placeholder="Enter your email">
+    <button type="button" class="otp-btn" onclick="startOtpTimer(this)">Get OTP</button>
+  </div>
+
+  <label class="field-label" for="otp">Verification Code</label>
+  <input type="text" id="otp" placeholder="Enter the OTP sent to your email">
+  <div class="otp-hint">Didn't receive it? Check spam or tap "Get OTP" again in a moment.</div>
+
+  <label class="field-label" for="nickname">Nickname / Username</label>
+  <input type="text" id="nickname" placeholder="Choose a nickname or username">
+
+  <label class="field-label" for="password">Password</label>
+  <div class="field-wrap">
+    <input type="password" id="password" placeholder="Create a password">
+    <button type="button" class="toggle-eye" onclick="togglePassword('password')">👁</button>
+  </div>
+
+  <label class="field-label" for="confirm-password">Confirm Password</label>
+  <div class="field-wrap">
+    <input type="password" id="confirm-password" placeholder="Re-enter your password">
+    <button type="button" class="toggle-eye" onclick="togglePassword('confirm-password')">👁</button>
+  </div>
+
+  <button class="register-btn">Register</button>
+
+  <div class="terms-note">By registering, you agree to Estore's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
+
+  <div class="login-note">Already have an account? <a href="#">Log in</a></div>
+
+</div>
+
+<script>
+function togglePassword(id){
+  const pw = document.getElementById(id);
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+}
+
+function startOtpTimer(btn){
+  let seconds = 60;
+  btn.disabled = true;
+  btn.textContent = seconds + 's';
+  const interval = setInterval(() => {
+    seconds -= 1;
+    if(seconds <= 0){
+      clearInterval(interval);
+      btn.disabled = false;
+      btn.textContent = 'Get OTP';
+    } else {
+      btn.textContent = seconds + 's';
+    }
+  }, 1000);
+}
+</script>
+
+</body>
+</html>

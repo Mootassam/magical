@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estore — Wholesale Management</title>
+<style>
+  :root{
+    --navy:#0e1b45;
+    --blue-bright:#2f8dff;
+    --blue-mid:#1656c9;
+    --blue-deep:#0b3fae;
+    --white:#ffffff;
+    --page-bg:#f4f7fd;
+    --card-bg:#ffffff;
+    --grey-text:#6b7590;
+    --grey-light:#eef2fa;
+    --field-border:#dde4f2;
+    --red:#ff3b30;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:#dfe6f5;
+    display:flex;
+    justify-content:center;
+    margin:0;
+  }
+
+  .phone{
+    width:390px;
+    max-width:100%;
+    height:100vh;
+    background:var(--page-bg);
+    border-radius:0;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(14,27,69,0.25);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ---------- Header ---------- */
+  .page-header{
+    background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright));
+    padding:14px 18px 16px;
+    color:#fff;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .back-btn{
+    width:34px; height:34px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    cursor:pointer;
+    border:none;
+    color:#fff;
+  }
+  .page-title{ font-size:17px; font-weight:800; }
+
+  /* ---------- Category tabs ---------- */
+  .tabs-wrap{
+    background:#fff;
+    flex-shrink:0;
+    box-shadow:0 4px 12px rgba(20,40,100,0.05);
+  }
+  .tabs-scroll{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    padding:12px 12px 10px;
+  }
+  .tabs-scroll::-webkit-scrollbar{ display:none; }
+  .tab-chip{
+    flex:0 0 auto;
+    font-size:12px;
+    font-weight:600;
+    color:var(--grey-text);
+    padding:7px 13px;
+    border-radius:16px;
+    white-space:nowrap;
+  }
+  .tab-chip.active{
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    font-weight:700;
+  }
+
+  /* ---------- Price filter ---------- */
+  .filter-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 12px 12px;
+  }
+  .price-input{
+    flex:1;
+    min-width:0;
+    border:1.4px solid var(--field-border);
+    border-radius:10px;
+    padding:9px 10px;
+    font-size:12px;
+    color:var(--navy);
+    outline:none;
+  }
+  .price-input::placeholder{ color:#a9b3cf; }
+  .dash{ color:var(--grey-text); font-size:12px; }
+  .filter-btn{
+    flex-shrink:0;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    border:none;
+    border-radius:10px;
+    padding:9px 16px;
+    box-shadow:0 6px 14px rgba(47,141,255,0.35);
+  }
+
+  /* ---------- Scroll body / grid ---------- */
+  .scroll-area{
+    flex:1;
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:14px 12px 30px;
+    position:relative;
+  }
+  .scroll-area::-webkit-scrollbar{ display:none; }
+
+  .result-count{
+    font-size:11.5px;
+    color:var(--grey-text);
+    margin-bottom:10px;
+  }
+  .result-count b{ color:var(--navy); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .prod-card{
+    background:var(--card-bg);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 8px 18px rgba(20,40,100,0.07);
+  }
+  .prod-thumb{ width:100%; height:130px; background:#f6f8fd; }
+  .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .prod-info{ padding:10px 10px 12px; }
+  .prod-name{
+    font-size:12px;
+    font-weight:700;
+    color:var(--navy);
+    line-height:1.35;
+    display:-webkit-box;
+    -webkit-line-clamp:1;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .prod-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:9px;
+  }
+  .prod-price{ font-size:13.5px; font-weight:800; color:var(--red); }
+  .add-store-btn{
+    width:30px; height:30px;
+    border-radius:9px;
+    border:1.4px solid var(--blue-bright);
+    background:#eef5ff;
+    color:var(--blue-mid);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+
+  /* ---------- Assistant floating button ---------- */
+  .assistant-fab{
+    position:absolute;
+    right:16px; bottom:20px;
+    width:50px; height:50px; border-radius:50%;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:20px;
+    box-shadow:0 10px 24px rgba(47,141,255,0.45);
+    z-index:15;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="page-header">
+    <button class="back-btn" onclick="window.history.back()">←</button>
+    <span class="page-title">Wholesale Management</span>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="tabs-scroll">
+      <div class="tab-chip active">All</div>
+      <div class="tab-chip">Lifestyle</div>
+      <div class="tab-chip">Men Shoes</div>
+      <div class="tab-chip">Women Shoes</div>
+      <div class="tab-chip">Accessories</div>
+      <div class="tab-chip">Men Clothing</div>
+      <div class="tab-chip">Women Bags</div>
+      <div class="tab-chip">Men Bags</div>
+      <div class="tab-chip">Women Clothing</div>
+      <div class="tab-chip">Girls</div>
+      <div class="tab-chip">Boys</div>
+    </div>
+    <div class="filter-row">
+      <input type="text" class="price-input" placeholder="Lowest Price">
+      <span class="dash">–</span>
+      <input type="text" class="price-input" placeholder="Highest Price">
+      <button class="filter-btn">Filter</button>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+
+    <div class="result-count">Showing <b>128</b> items in Accessories</div>
+
+    <div class="grid">
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/luxurywatch/all?lock=301" alt="Land-Dweller 40 watch"></div>
+        <div class="prod-info">
+          <div class="prod-name">Land-Dweller 40</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$17,400.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/necklace,gold/all?lock=302" alt="Long necklace"></div>
+        <div class="prod-info">
+          <div class="prod-name">Long Necklace White Gold</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$35,090.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/diamond,necklace/all?lock=303" alt="Diamond necklace"></div>
+        <div class="prod-info">
+          <div class="prod-name">Pink Gold Diamond Necklace</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$15,530.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/earrings,jewelry/all?lock=304" alt="Pendant earrings"></div>
+        <div class="prod-info">
+          <div class="prod-name">Pendant Earrings White Gold</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$3,810.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/bracelet,silver/all?lock=305" alt="Ankle bracelet"></div>
+        <div class="prod-info">
+          <div class="prod-name">Ankle Bracelet Pavé Silver</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$3,470.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/bracelet,gold/all?lock=306" alt="Pink gold bracelet"></div>
+        <div class="prod-info">
+          <div class="prod-name">Ankle Bracelet Pink Gold</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$2,690.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/hoopearrings/all?lock=307" alt="Large hoop earrings"></div>
+        <div class="prod-info">
+          <div class="prod-name">Large Hoop Earrings Gold</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$7,020.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/silverearrings/all?lock=308" alt="Small hoop earrings"></div>
+        <div class="prod-info">
+          <div class="prod-name">Small Hoop Earrings Silver</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$3,810.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/goldring/all?lock=309" alt="Double yellow gold ring"></div>
+        <div class="prod-info">
+          <div class="prod-name">Double Yellow Gold Diamond Ring</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$7,870.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/whitegoldnecklace/all?lock=310" alt="White gold necklace rows"></div>
+        <div class="prod-info">
+          <div class="prod-name">2 Rows White Gold Necklace</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$4,060.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/pinkgoldbracelet/all?lock=311" alt="Hand bracelet pink gold"></div>
+        <div class="prod-info">
+          <div class="prod-name">Hand Bracelet Pink Gold</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$3,670.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-card">
+        <div class="prod-thumb"><img src="https://loremflickr.com/300/300/monoearring/all?lock=312" alt="Pavé mono earring"></div>
+        <div class="prod-info">
+          <div class="prod-name">Pavé Mono Earring White Gold</div>
+          <div class="prod-bottom">
+            <span class="prod-price">$1,600.00</span>
+            <button class="add-store-btn">＋</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="assistant-fab">💬</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+import React from "react";
+
+function Withdrawal() {
+  return (
+    <>
+      <div className="phone">
+
+        <div className="page-header">
+          <div className="left">
+            <button className="back-btn" onClick={() => window.history.back()}>←</button>
+            <span className="page-title">Withdrawal Center</span>
+          </div>
+          <span className="close-x">✕</span>
+        </div>
+
+        <div className="scroll-area">
+          <div className="form-card">
+
+            <span className="field-label">Withdrawal Methods</span>
+            <div className="select-box">
+              <span>USDT-TRC20</span>
+              <span className="chev">⌄</span>
+            </div>
+
+            <div className="info-row">
+              <span className="info-label">Currency</span>
+              <span className="info-value">USDT</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Chain Name</span>
+              <span className="chain-pill">TRC-20</span>
+            </div>
+
+            <span className="field-label sp"><span className="required">*</span>Withdrawal address:</span>
+            <div className="select-box placeholder">
+              <span>Select or paste your address</span>
+              <span className="chev">⌄</span>
+            </div>
+
+            <span className="field-label sp"><span className="required">*</span>Withdrawal amount:</span>
+            <input type="text" className="text-input" placeholder="Please enter the withdrawal amount" />
+
+            <span className="field-label sp"><span className="required">*</span>Withdrawal password:</span>
+            <div className="pw-wrap">
+              <input type="password" className="text-input" placeholder="Please enter the withdrawal password" />
+              <span className="eye">👁</span>
+            </div>
+
+            <div className="balance-line">Available balance: <b>$0.00</b></div>
+
+            <div className="notice">
+              <p>The credited amount will be settled according to the relevant fees charged by your receiving account or the real-time exchange rate.</p>
+              <p>Your withdrawal will be credited within 24 hours, please wait patiently! If it is not credited within 24 hours, please contact online customer support.</p>
+            </div>
+
+            <button className="submit-btn">Confirm Withdrawal</button>
+
+          </div>
+        </div>
+
+      </div>
+
+      <style>{`
+  :root{
+    --navy:#0e1b45;
+    --blue-bright:#2f8dff;
+    --blue-mid:#1656c9;
+    --blue-deep:#0b3fae;
+    --white:#ffffff;
+    --page-bg:#f4f7fd;
+    --card-bg:#ffffff;
+    --grey-text:#6b7590;
+    --grey-light:#eef2fa;
+    --field-border:#dde4f2;
+    --red:#ff5470;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:var(--page-bg);
+    margin:0;
+  }
+
+  .phone{
+    width:390px;
+    max-width:390px;
+    height:100vh;
+    background:var(--page-bg);
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    margin:0 auto;
+  }
+
+  /* ---------- Header ---------- */
+  .page-header{
+    background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright));
+    padding:14px 18px 16px;
+    color:#fff;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .page-header .left{ display:flex; align-items:center; gap:12px; }
+  .back-btn{
+    width:34px; height:34px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    cursor:pointer;
+    border:none;
+    color:#fff;
+  }
+  .page-title{ font-size:17px; font-weight:800; }
+  .close-x{ font-size:18px; opacity:0.85; cursor:pointer; }
+
+  /* ---------- Scroll body ---------- */
+  .scroll-area{
+    flex:1;
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:16px 16px 30px;
+  }
+  .scroll-area::-webkit-scrollbar{ display:none; }
+
+  .form-card{
+    background:var(--card-bg);
+    border-radius:18px;
+    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    padding:18px 16px;
+  }
+
+  .field-label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:8px;
+    display:block;
+  }
+  .field-label.sp{ margin-top:18px; }
+  .required{ color:var(--red); margin-right:2px; }
+
+  .select-box{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    border:1.5px solid var(--field-border);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13.5px;
+    color:var(--navy);
+    font-weight:600;
+  }
+  .select-box .chev{ color:var(--grey-text); font-size:12px; }
+  .select-box.placeholder span{ color:#a9b3cf; font-weight:400; }
+
+  /* ---------- Info rows ---------- */
+  .info-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 2px;
+    border-top:1px solid var(--grey-light);
+  }
+  .info-row:first-of-type{ border-top:none; margin-top:16px; }
+  .info-label{ font-size:13px; color:var(--navy); font-weight:600; }
+  .info-value{ font-size:14px; font-weight:800; color:var(--navy); }
+  .chain-pill{
+    border:1.4px solid var(--blue-bright);
+    color:var(--blue-mid);
+    font-size:12px;
+    font-weight:700;
+    padding:5px 12px;
+    border-radius:8px;
+  }
+
+  /* ---------- Inputs ---------- */
+  .text-input{
+    width:100%;
+    border:1.5px solid var(--field-border);
+    border-radius:12px;
+    padding:13px 14px;
+    font-size:13.5px;
+    color:var(--navy);
+    outline:none;
+  }
+  .text-input::placeholder{ color:#a9b3cf; }
+  .text-input:focus{ border-color:var(--blue-bright); box-shadow:0 0 0 3px rgba(47,141,255,0.12); }
+
+  .pw-wrap{ position:relative; }
+  .pw-wrap .eye{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    color:var(--grey-text); font-size:15px;
+  }
+
+  .balance-line{
+    margin-top:16px;
+    font-size:12.5px;
+    color:var(--grey-text);
+  }
+  .balance-line b{ color:var(--navy); }
+
+  .notice{
+    margin-top:14px;
+    background:#f6f9ff;
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:11.5px;
+    line-height:1.6;
+    color:var(--grey-text);
+  }
+  .notice p + p{ margin-top:8px; }
+
+  .submit-btn{
+    width:100%;
+    margin-top:20px;
+    border:none;
+    border-radius:14px;
+    padding:14px;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(47,141,255,0.4);
+  }
+      `}</style>
+    </>
+  );
+}
+
+export default Withdrawal;

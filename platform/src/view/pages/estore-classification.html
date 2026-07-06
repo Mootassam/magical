@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estore — Classification</title>
+<style>
+  :root{
+    --navy:#0e1b45;
+    --blue-bright:#2f8dff;
+    --blue-mid:#1656c9;
+    --blue-deep:#0b3fae;
+    --white:#ffffff;
+    --page-bg:#f4f7fd;
+    --sidebar-bg:#eef2fb;
+    --card-bg:#ffffff;
+    --grey-text:#6b7590;
+    --gold:#ffb020;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  body{
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:#dfe6f5;
+    display:flex;
+    justify-content:center;
+    padding:20px 0;
+  }
+
+  .phone{
+    width:390px;
+    max-width:100%;
+    height:844px;
+    background:var(--page-bg);
+    border-radius:36px;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(14,27,69,0.25);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .status-bar{
+    background:var(--navy);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 20px 6px;
+    flex-shrink:0;
+  }
+  .status-bar .icons{ display:flex; gap:6px; align-items:center; font-size:12px; }
+
+  /* ---------- Top header ---------- */
+  .page-header{
+    background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright));
+    padding:14px 18px 16px;
+    color:#fff;
+    flex-shrink:0;
+  }
+  .page-title{ font-size:19px; font-weight:800; margin-bottom:12px; }
+  .search-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fff;
+    border-radius:14px;
+    padding:10px 14px;
+  }
+  .search-row input{
+    border:none; outline:none; flex:1;
+    font-size:14px; color:var(--navy); background:transparent;
+  }
+  .search-row input::placeholder{ color:#9aa4c0; }
+  .search-icon{ font-size:16px; color:var(--blue-mid); }
+
+  /* ---------- Body split ---------- */
+  .body-split{
+    flex:1;
+    display:flex;
+    overflow:hidden;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    width:96px;
+    flex-shrink:0;
+    background:var(--sidebar-bg);
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding-bottom:100px;
+  }
+  .sidebar::-webkit-scrollbar{ display:none; }
+
+  .side-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:14px 6px;
+    cursor:pointer;
+    position:relative;
+    color:var(--grey-text);
+    font-size:11px;
+    font-weight:600;
+    text-align:center;
+  }
+  .side-item .thumb{
+    width:44px; height:44px;
+    border-radius:12px;
+    overflow:hidden;
+    border:2px solid transparent;
+  }
+  .side-item .thumb img{ width:100%; height:100%; object-fit:cover; }
+
+  .side-item.active{
+    background:var(--page-bg);
+    color:var(--blue-deep);
+  }
+  .side-item.active::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:4px;
+    background:linear-gradient(180deg, var(--blue-bright), var(--blue-deep));
+    border-radius:0 4px 4px 0;
+  }
+  .side-item.active .thumb{ border-color:var(--blue-bright); }
+
+  /* Content panel */
+  .content-panel{
+    flex:1;
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:16px 14px 110px;
+  }
+  .content-panel::-webkit-scrollbar{ display:none; }
+
+  .cat-banner{
+    position:relative;
+    border-radius:18px;
+    overflow:hidden;
+    height:100px;
+    margin-bottom:16px;
+    color:#fff;
+  }
+  .cat-banner img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  }
+  .cat-banner .overlay{
+    position:absolute; inset:0;
+    background:linear-gradient(120deg, rgba(11,26,74,0.85), rgba(47,141,255,0.35));
+  }
+  .cat-banner .txt{
+    position:relative;
+    padding:14px 16px;
+  }
+  .cat-banner .eyebrow{ font-size:9px; letter-spacing:2px; text-transform:uppercase; opacity:0.85; }
+  .cat-banner .name{ font-size:19px; font-weight:800; margin-top:2px; }
+  .cat-banner .off{
+    display:inline-block; margin-top:6px;
+    background:var(--gold); color:var(--navy);
+    font-size:10px; font-weight:800;
+    padding:3px 9px; border-radius:8px;
+  }
+
+  .subcat-row{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    margin-bottom:16px;
+  }
+  .subcat-row::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex:0 0 auto;
+    font-size:12px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:20px;
+    background:#fff;
+    color:var(--navy);
+    box-shadow:0 4px 12px rgba(20,40,100,0.08);
+    white-space:nowrap;
+  }
+  .chip.active{
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    box-shadow:0 6px 16px rgba(47,141,255,0.4);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .prod-card{
+    background:var(--card-bg);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 8px 20px rgba(20,40,100,0.08);
+  }
+  .prod-thumb{ width:100%; height:120px; position:relative; }
+  .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .prod-thumb .badge{
+    position:absolute; top:7px; left:7px;
+    background:rgba(14,27,69,0.75); color:#fff; font-size:9px; font-weight:700;
+    padding:3px 7px; border-radius:6px;
+  }
+  .prod-thumb .off-tag{
+    position:absolute; top:7px; right:7px;
+    background:#ff5470; color:#fff; font-size:9px; font-weight:800;
+    padding:3px 6px; border-radius:6px;
+  }
+  .prod-info{ padding:9px 11px 11px; }
+  .prod-name{ font-size:12.5px; font-weight:700; color:var(--navy); line-height:1.3; }
+  .prod-meta{ font-size:10.5px; color:var(--grey-text); margin-top:3px; }
+  .prod-price-row{ display:flex; justify-content:space-between; align-items:center; margin-top:7px; }
+  .prod-price{ font-size:13.5px; font-weight:800; color:var(--blue-deep); }
+  .add-btn{
+    width:26px; height:26px; border-radius:50%;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-mid));
+    color:#fff; border:none; font-size:15px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(47,141,255,0.4);
+  }
+
+  /* ---------- Fixed bottom nav ---------- */
+  .bottom-nav{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    background:#fff;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    padding:12px 10px calc(14px + env(safe-area-inset-bottom));
+    box-shadow:0 -10px 26px rgba(20,40,100,0.12);
+    border-top:1px solid #eef2fa;
+    z-index:20;
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    color:#a6afc8; font-size:11px; font-weight:600;
+    position:relative;
+    background:none; border:none;
+    padding:2px 10px;
+  }
+  .nav-item .icon{ font-size:20px; line-height:1; }
+  .nav-item.active{ color:var(--blue-deep); }
+  .nav-item.active::before{
+    content:"";
+    position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+    width:26px; height:3px; border-radius:3px;
+    background:linear-gradient(90deg, var(--blue-bright), var(--blue-deep));
+  }
+  .nav-item .cart-badge{
+    position:absolute; top:-4px; right:2px;
+    background:#ff4d4f; color:#fff; font-size:9px; font-weight:700;
+    width:15px; height:15px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="icons"><span>📶</span><span>🔋</span></div>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">Categories</div>
+    <div class="search-row">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search in categories">
+    </div>
+  </div>
+
+  <div class="body-split">
+
+    <div class="sidebar">
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/clothing,fashion/all?lock=61" alt="Fashion"></div>
+        <span>Fashion</span>
+      </div>
+      <div class="side-item active">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/sneakers,shoes/all?lock=62" alt="Shoes"></div>
+        <span>Shoes</span>
+      </div>
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/handbag,purse/all?lock=63" alt="Bags"></div>
+        <span>Bags</span>
+      </div>
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/cosmetics,beauty/all?lock=64" alt="Beauty"></div>
+        <span>Beauty</span>
+      </div>
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/headphones,electronics/all?lock=65" alt="Electronics"></div>
+        <span>Electronics</span>
+      </div>
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/livingroom,home/all?lock=66" alt="Home"></div>
+        <span>Home</span>
+      </div>
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/kids,toys/all?lock=67" alt="Kids"></div>
+        <span>Kids</span>
+      </div>
+      <div class="side-item">
+        <div class="thumb"><img src="https://loremflickr.com/100/100/sports,fitness/all?lock=68" alt="Sports"></div>
+        <span>Sports</span>
+      </div>
+    </div>
+
+    <div class="content-panel">
+
+      <div class="cat-banner">
+        <img src="https://loremflickr.com/700/300/sneakers,shoes/all?lock=70" alt="Shoes banner">
+        <div class="overlay"></div>
+        <div class="txt">
+          <div class="eyebrow">Category Spotlight</div>
+          <div class="name">Shoes</div>
+          <div class="off">Up to 50% off</div>
+        </div>
+      </div>
+
+      <div class="subcat-row">
+        <div class="chip active">All</div>
+        <div class="chip">Sneakers</div>
+        <div class="chip">Sandals</div>
+        <div class="chip">Boots</div>
+        <div class="chip">Heels</div>
+        <div class="chip">Sports</div>
+      </div>
+
+      <div class="grid">
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <img src="https://loremflickr.com/300/300/sneakers,shoes/all?lock=71" alt="Runner sneakers">
+            <span class="off-tag">-40%</span>
+          </div>
+          <div class="prod-info">
+            <div class="prod-name">Runner Sneakers</div>
+            <div class="prod-meta">⭐ 4.8 · 1.2k sold</div>
+            <div class="prod-price-row"><span class="prod-price">$48</span><button class="add-btn">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <img src="https://loremflickr.com/300/300/sandals,footwear/all?lock=72" alt="Summer sandals">
+            <span class="badge">NEW</span>
+          </div>
+          <div class="prod-info">
+            <div class="prod-name">Summer Sandals</div>
+            <div class="prod-meta">⭐ 4.6 · 430 sold</div>
+            <div class="prod-price-row"><span class="prod-price">$22</span><button class="add-btn">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <img src="https://loremflickr.com/300/300/boots,leather/all?lock=73" alt="Leather boots">
+          </div>
+          <div class="prod-info">
+            <div class="prod-name">Leather Boots</div>
+            <div class="prod-meta">⭐ 4.9 · 980 sold</div>
+            <div class="prod-price-row"><span class="prod-price">$74</span><button class="add-btn">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <img src="https://loremflickr.com/300/300/heels,shoes/all?lock=74" alt="Heels">
+            <span class="off-tag">-25%</span>
+          </div>
+          <div class="prod-info">
+            <div class="prod-name">Classic Heels</div>
+            <div class="prod-meta">⭐ 4.5 · 210 sold</div>
+            <div class="prod-price-row"><span class="prod-price">$39</span><button class="add-btn">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <img src="https://loremflickr.com/300/300/running,shoes/all?lock=75" alt="Sport trainers">
+          </div>
+          <div class="prod-info">
+            <div class="prod-name">Sport Trainers</div>
+            <div class="prod-meta">⭐ 4.7 · 1.5k sold</div>
+            <div class="prod-price-row"><span class="prod-price">$56</span><button class="add-btn">+</button></div>
+          </div>
+        </div>
+        <div class="prod-card">
+          <div class="prod-thumb">
+            <img src="https://loremflickr.com/300/300/slippers/all?lock=76" alt="Cozy slippers">
+            <span class="badge">HOT</span>
+          </div>
+          <div class="prod-info">
+            <div class="prod-name">Cozy Slippers</div>
+            <div class="prod-meta">⭐ 4.4 · 640 sold</div>
+            <div class="prod-price-row"><span class="prod-price">$16</span><button class="add-btn">+</button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item">
+      <span class="icon">🏠</span>
+      <span>Home</span>
+    </button>
+    <button class="nav-item active">
+      <span class="icon">🗂️</span>
+      <span>Classification</span>
+    </button>
+    <button class="nav-item">
+      <span class="icon">🛒</span>
+      <span class="cart-badge">3</span>
+      <span>Cart</span>
+    </button>
+    <button class="nav-item">
+      <span class="icon">👤</span>
+      <span>Mine</span>
+    </button>
+  </div>
+
+</div>
+
+</body>
+</html>
