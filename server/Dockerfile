@@ -10,7 +10,7 @@ COPY . /app/
 RUN npm install
 
 # Set environment variables
-ENV BACKEND_URL="https://papperstoneaus.com/api/"
+ENV BACKEND_URL="http://162.0.228.113:8081/api/"
 
 # Expose your app port
 EXPOSE 8081
