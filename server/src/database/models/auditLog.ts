@@ -10,17 +10,17 @@ export default (database) => {
 
   const AuditLogSchema = new Schema(
     {
-      user: {
-        type: String,
-        ref: 'user',
-        required: true,
-      },
-      country: {
+      entityName: {
         type: String,
         maxlength: 255,
         required: true,
       },
-      clientIP: {
+      entityId: {
+        type: String,
+        maxlength: 255,
+        required: true,
+      },
+      action: {
         type: String,
         maxlength: 255,
         required: true,
@@ -29,6 +29,8 @@ export default (database) => {
         type: String,
         maxlength: 255,
       },
+      createdById: { type: String, maxlength: 255 },
+      createdByEmail: { type: String, maxlength: 255 },
       timestamp: { type: Date, required: true },
       values: { type: Schema.Types.Mixed },
     },

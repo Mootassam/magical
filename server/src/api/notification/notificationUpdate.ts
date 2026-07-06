@@ -1,15 +1,18 @@
-import PermissionChecker from "../../services/user/permissionChecker";
-import ApiResponseHandler from "../apiResponseHandler";
-import Permissions from "../../security/permissions";
-import NotifServicess from "../../services/notifServices";
+import PermissionChecker from '../../services/user/permissionChecker';
+import ApiResponseHandler from '../apiResponseHandler';
+import Permissions from '../../security/permissions';
+import NotificationService from '../../services/notificationService';
 
-export default (io) => async (req, res, next) => {
+export default async (req, res, next) => {
   try {
     // new PermissionChecker(req).validateHas(
     //   Permissions.values.categoryRead,
     // );
 
-    const payload = await new NotifServicess(req).update(req.params.id, io);
+    const payload = await new NotificationService(req).update(
+      req.params.id,
+      req.body.data,
+    );
 
     await ApiResponseHandler.success(req, res, payload);
   } catch (error) {

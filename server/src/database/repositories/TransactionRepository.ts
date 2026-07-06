@@ -8,6 +8,7 @@ import Transaction from "../models/transaction";
 import Error400 from "../../errors/Error400";
 import UserRepository from "./userRepository";
 import Error405 from "../../errors/Error405";
+import User from "../models/user";
 
 class TransactionRepository {
   static async create(data, options: IRepositoryOptions) {
@@ -35,35 +36,8 @@ class TransactionRepository {
     return this.findById(record.id, options);
   }
 
-  static async NewSolde(data, options) {
-    try {
-      // Assuming MongooseRepository.getCurrentUser is a synchronous function
-      const currentUser = MongooseRepository.getCurrentUser(options);
+  
 
-      const oldAmount = parseFloat(currentUser.balance);
-      if (isNaN(oldAmount)) {
-throw new Error400(options.language, "errors.invalidUserBalance");
-      }
-
-      const requestAmount = parseFloat(data.amount);
-      if (isNaN(requestAmount)) {
-throw new Error400(options.language, "errors.invalidRequestAmount");
-      }
-
-      const id = currentUser.id;
-      const newBalance = oldAmount - requestAmount;
-
-      const values = {
-        balances: newBalance,
-        ...data.vip,
-      };
-
-      await UserRepository.updateSolde(id, values, options);
-    } catch (error) {
-      console.error("Error updating balance:", error);
-      throw error; // Rethrow the error to propagate it further if needed
-    }
-  }
 
   static async update(id, data, options: IRepositoryOptions) {
     const currentTenant = MongooseRepository.getCurrentTenant(options);
@@ -119,31 +93,8 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
     );
   }
 
-  static async totalReward(options: IRepositoryOptions) {
-    const currentTenant = MongooseRepository.getCurrentTenant(options);
-    const currentUser = MongooseRepository.getCurrentUser(options);
 
-    const { ObjectId } = require("mongoose").Types;
-    const result = await Transaction(options.database).aggregate([
-      {
-        $match: {
-          type: "reward",
-          asset: "USDT",
-          status: "completed",
-          user: ObjectId(currentUser.id),
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalAmount: { $sum: "$amount" },
-        },
-      },
-    ]);
-
-    // If no results, return 0
-    return { total: result.length > 0 ? result[0].totalAmount : 0 };
-  }
+  
 
   static async findById(id, options: IRepositoryOptions) {
     const currentTenant = MongooseRepository.getCurrentTenant(options);
@@ -159,202 +110,321 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
     return this._fillFileDownloadUrls(record);
   }
 
-  static async findAndCountAll(
-    { filter, limit = 0, offset = 0, orderBy = "" },
-    options: IRepositoryOptions
-  ) {
-    const currentTenant = MongooseRepository.getCurrentTenant(options);
-    const currentUser = MongooseRepository.getCurrentUser(options);
+static async findAndCountAll(
+  { filter, limit = 0, offset = 0, orderBy = "" },
+  options: IRepositoryOptions
+) {
+  const currentTenant = MongooseRepository.getCurrentTenant(options);
+  const currentUser = MongooseRepository.getCurrentUser(options);
 
-    let criteriaAnd: any = [];
+  let criteriaAnd: any = [];
 
+  // Base tenant filter (always applied)
+  criteriaAnd.push({
+    tenant: currentTenant.id,
+  });
+
+  // Determine user's role within this tenant
+  const tenantMembership = currentUser?.tenants?.find(
+    (tenantUser: any) => {
+      const tenantId = tenantUser.tenant?._id || tenantUser.tenant;
+      return tenantId?.toString() === currentTenant.id?.toString();
+    }
+  );
+
+  const userRole = tenantMembership?.roles?.[0] || "member"; // default to member
+
+  // Apply role-based filtering on transactions.user field
+  if (userRole === "admin") {
+    // Admin sees all transactions – no additional user filter
+    // (only tenant filter applies)
+  } 
+  else if (userRole === "agent") {
+    // Agent sees their own + downline users' transactions
+    if (currentUser?.refcode) {
+      const referralUserIds = await this.getAllReferralUserIds(currentUser.refcode, options);
+      referralUserIds.push(currentUser._id);
+      criteriaAnd.push({
+        user: { $in: referralUserIds }
+      });
+    } else {
+      // Agent without refcode sees only themselves
+      criteriaAnd.push({
+        user: currentUser?._id
+      });
+    }
+  } 
+  else {
+    // Member (default) sees only their own transactions
     criteriaAnd.push({
-      tenant: currentTenant.id,
+      user: currentUser?._id
     });
+  }
 
-    //   criteriaAnd.push({
-    //     user: currentUser.id,
-    //   });
-
-    // criteriaAnd.push({
-    //     asset: filter,
-    //   });
-    if (filter) {
-      if (filter.id) {
-        criteriaAnd.push({
-          ["_id"]: MongooseQueryUtils.uuid(filter.id),
-        });
-      }
-      if (filter.user) {
+  // Apply additional filters if provided
+  if (filter) {
+    if (filter.id) {
+      criteriaAnd.push({
+        ["_id"]: MongooseQueryUtils.uuid(filter.id),
+      });
+    }
+    
+    if (filter.user) {
+      // For admin: can filter by any user
+      if (userRole === "admin") {
         criteriaAnd.push({
           user: filter.user,
         });
-      }
-
-      if (filter.amount) {
-        criteriaAnd.push({
-          amount: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.amount),
-            $options: "i",
-          },
-        });
-      }
-
-      if (filter.status) {
-        criteriaAnd.push({
-          status: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.status),
-            $options: "i",
-          },
-        });
-      }
-
-      if (filter.type) {
-        criteriaAnd.push({
-          type: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.type),
-            $options: "i",
-          },
-        });
-      }
-
-      if (filter.datetransaction) {
-        const [start, end] = filter.datetransaction;
-
-        if (start !== undefined && start !== null && start !== "") {
-          criteriaAnd.push({
-            ["createdAt"]: {
-              $gte: start,
-            },
-          });
+      } 
+      // For agent: only allow filtering to users within their referral chain
+      else if (userRole === "agent") {
+        const referralUserIds = await this.getAllReferralUserIds(currentUser.refcode, options);
+        referralUserIds.push(currentUser._id);
+        if (referralUserIds.includes(filter.user)) {
+          criteriaAnd.push({ user: filter.user });
+        } else {
+          return { rows: [], count: 0 };
         }
-
-        if (end !== undefined && end !== null && end !== "") {
-          criteriaAnd.push({
-            ["createdAt"]: {
-              $lte: end,
-            },
-          });
+      } 
+      // For member: only allow filtering to themselves
+      else {
+        if (filter.user.toString() === currentUser?._id.toString()) {
+          criteriaAnd.push({ user: filter.user });
+        } else {
+          return { rows: [], count: 0 };
         }
       }
     }
 
-    const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
+    if (filter.amount) {
+      criteriaAnd.push({
+        amount: {
+          $regex: MongooseQueryUtils.escapeRegExp(filter.amount),
+          $options: "i",
+        },
+      });
+    }
 
-    const skip = Number(offset || 0) || undefined;
-    const limitEscaped = Number(limit || 0) || undefined;
-    const criteria = criteriaAnd.length ? { $and: criteriaAnd } : null;
+    if (filter.status) {
+      criteriaAnd.push({
+        status: {
+          $regex: MongooseQueryUtils.escapeRegExp(filter.status),
+          $options: "i",
+        },
+      });
+    }
 
-    let rows = await Transaction(options.database)
-      .find(criteria)
-      .skip(skip)
-      .limit(limitEscaped)
-      .sort(sort);
+    if (filter.type) {
+      criteriaAnd.push({
+        type: {
+          $regex: MongooseQueryUtils.escapeRegExp(filter.type),
+          $options: "i",
+        },
+      });
+    }
 
-    const count = await Transaction(options.database).countDocuments(criteria);
-
-    rows = await Promise.all(rows.map(this._fillFileDownloadUrls));
-
-    return { rows, count };
-  }
-  static async findAndCountAllMobile(
-    { filter, limit = 0, offset = 0, orderBy = "" },
-    options: IRepositoryOptions
-  ) {
-    const currentTenant = MongooseRepository.getCurrentTenant(options);
-    const currentUser = MongooseRepository.getCurrentUser(options);
-
-    let criteriaAnd: any = [];
-
-    criteriaAnd.push({
-      tenant: currentTenant.id,
-    });
-
-    //   criteriaAnd.push({
-    //     user: currentUser.id,
-    //   });
-
-    // criteriaAnd.push({
-    //     asset: filter,
-    //   });
-    if (filter) {
-      if (filter.id) {
+    if (filter.datetransaction) {
+      const [start, end] = filter.datetransaction;
+      if (start && start !== "") {
         criteriaAnd.push({
-          ["_id"]: MongooseQueryUtils.uuid(filter.id),
+          createdAt: { $gte: start },
         });
       }
-      if (filter.user) {
+      if (end && end !== "") {
         criteriaAnd.push({
-          user: filter.user,
+          createdAt: { $lte: end },
         });
-      }
-
-      if (filter.amount) {
-        criteriaAnd.push({
-          amount: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.amount),
-            $options: "i",
-          },
-        });
-      }
-
-      if (filter.status) {
-        criteriaAnd.push({
-          status: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.status),
-            $options: "i",
-          },
-        });
-      }
-
-      if (filter.type) {
-        criteriaAnd.push({
-          type: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.type),
-            $options: "i",
-          },
-        });
-      }
-
-      if (filter.datetransaction) {
-        const [start, end] = filter.datetransaction;
-
-        if (start !== undefined && start !== null && start !== "") {
-          criteriaAnd.push({
-            ["createdAt"]: {
-              $gte: start,
-            },
-          });
-        }
-
-        if (end !== undefined && end !== null && end !== "") {
-          criteriaAnd.push({
-            ["createdAt"]: {
-              $lte: end,
-            },
-          });
-        }
       }
     }
 
-    const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
-
-    const skip = Number(offset || 0) || undefined;
-    const limitEscaped = Number(limit || 0) || undefined;
-    const criteria = criteriaAnd.length ? { $and: criteriaAnd } : null;
-
-    let rows = await Transaction(options.database)
-      .find(criteria)
-      .skip(skip)
-      .limit(limitEscaped)
-      .sort(sort);
-
-    const count = await Transaction(options.database).countDocuments(criteria);
-
-    rows = await Promise.all(rows.map(this._fillFileDownloadUrls));
-
-    return { rows, count };
+    // Amount range filter
+    if (filter.amountMin !== undefined || filter.amountMax !== undefined) {
+      const amountFilter: any = {};
+      if (filter.amountMin !== undefined) {
+        amountFilter.$gte = parseFloat(filter.amountMin);
+      }
+      if (filter.amountMax !== undefined) {
+        amountFilter.$lte = parseFloat(filter.amountMax);
+      }
+      criteriaAnd.push({ amount: amountFilter });
+    }
   }
+
+  const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
+  const skip = Number(offset || 0) || undefined;
+  const limitEscaped = Number(limit || 0) || undefined;
+  const criteria = criteriaAnd.length ? { $and: criteriaAnd } : null;
+
+  let rows = await Transaction(options.database)
+    .find(criteria)
+    .skip(skip)
+    .limit(limitEscaped)
+    .sort(sort)
+    .populate("user");
+
+  const count = await Transaction(options.database).countDocuments(criteria);
+
+  rows = await Promise.all(rows.map(this._fillFileDownloadUrls));
+
+  return { rows, count };
+}
+
+  /**
+   * Get ALL user IDs in the complete referral tree (all levels)
+   * @param {string} refcode - The reference code to start from
+   * @param {IRepositoryOptions} options - Repository options
+   * @returns {Promise<Array>} - Array of user IDs in the referral tree
+   */
+  static async getAllReferralUserIds(refcode, options) {
+    const allUserIds: any[] = [];
+    const processedRefcodes = new Set<string>(); // Track processed refcodes to avoid cycles
+    const queue: string[] = [refcode]; // Queue for BFS traversal
+    
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+    
+    while (queue.length > 0) {
+      const currentRefcode = queue.shift();
+      
+      // Skip if we've already processed this refcode
+      if (!currentRefcode || processedRefcodes.has(currentRefcode)) {
+        continue;
+      }
+      processedRefcodes.add(currentRefcode);
+      
+      // Find all users who used this refcode as their invitation code
+      const referrals = await MongooseRepository.wrapWithSessionIfExists(
+        User(options.database)
+          .find({ 
+            invitationcode: currentRefcode,
+            tenants: { $elemMatch: { tenant: currentTenant.id } }
+          })
+          .select('_id refcode invitationcode')
+          .lean(),
+        options
+      );
+      
+      for (const referral of referrals) {
+        // Add this user's ID to the result list
+        allUserIds.push(referral._id);
+        
+        // If this referral has their own refcode, add it to the queue to find their referrals
+        if (referral.refcode) {
+          queue.push(referral.refcode);
+        }
+      }
+    }
+    
+    return allUserIds;
+  }
+
+  /**
+   * Alternative: Get all users in referral chain with their details
+   * Useful if you need user information for additional filtering
+   */
+  static async getAllReferralUsers(refcode, options) {
+    const allUsers: any[] = [];
+    const processedRefcodes = new Set<string>();
+    const queue: string[] = [refcode];
+    
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+    
+    while (queue.length > 0) {
+      const currentRefcode = queue.shift();
+      
+      if (!currentRefcode || processedRefcodes.has(currentRefcode)) {
+        continue;
+      }
+      processedRefcodes.add(currentRefcode);
+      
+      const referrals = await MongooseRepository.wrapWithSessionIfExists(
+        User(options.database)
+          .find({ 
+            invitationcode: currentRefcode,
+            tenants: { $elemMatch: { tenant: currentTenant.id } }
+          })
+          .select('_id refcode invitationcode fullName email balance')
+          .lean(),
+        options
+      );
+      
+      for (const referral of referrals) {
+        allUsers.push(referral);
+        
+        if (referral.refcode) {
+          queue.push(referral.refcode);
+        }
+      }
+    }
+    
+    return allUsers;
+  }
+
+  /**
+   * Check if a user is an admin for the current tenant
+   */
+  static async isUserAdmin(userId, tenantId, options) {
+    const user = await MongooseRepository.wrapWithSessionIfExists(
+      User(options.database)
+        .findOne({
+          _id: userId,
+          tenants: {
+            $elemMatch: {
+              tenant: tenantId,
+              roles: 'admin',
+              status: 'active'
+            }
+          }
+        })
+        .select('_id'),
+      options
+    );
+    
+    return !!user;
+  }
+
+  /**
+   * Get transaction summary for referral chain (optional helper method)
+   */
+  static async getReferralTransactionSummary(refcode, options) {
+    const referralUserIds = await this.getAllReferralUserIds(refcode, options);
+    const currentUser = MongooseRepository.getCurrentUser(options);
+    
+    // Include current user
+    if (currentUser) {
+      referralUserIds.push(currentUser._id);
+    }
+    
+    const summary = await Transaction(options.database).aggregate([
+      {
+        $match: {
+          user: { $in: referralUserIds },
+          tenant: MongooseRepository.getCurrentTenant(options).id
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalTransactions: { $sum: 1 },
+          totalAmount: { $sum: '$amount' },
+          avgAmount: { $avg: '$amount' },
+          byType: {
+            $push: {
+              type: '$type',
+              amount: '$amount'
+            }
+          }
+        }
+      }
+    ]);
+    
+    return summary.length > 0 ? summary[0] : {
+      totalTransactions: 0,
+      totalAmount: 0,
+      avgAmount: 0,
+      byType: []
+    };
+  }
+
 
   static async findAndCountByUser(
     { filter, limit = 0, offset = 0, orderBy = "" },
@@ -365,39 +435,26 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
 
     let criteriaAnd: any = [];
 
+    const search = filter
+
     criteriaAnd.push({
       tenant: currentTenant.id,
-    });
-
-    criteriaAnd.push({
       user: currentUser.id,
     });
-    if (filter) {
-      criteriaAnd.push({
-        wallet: filter,
-      });
-    }
 
-    //   criteriaAnd.push({
-    //     user: currentUser.id,
-    //   });
-
-    // criteriaAnd.push({
-    //     asset: filter,
-    //   });
-    if (filter) {
-      if (filter.id) {
+    if (search) {
+      if (search.id) {
         criteriaAnd.push({
           ["_id"]: MongooseQueryUtils.uuid(filter.id),
         });
       }
-      if (filter.user) {
+      if (search.user) {
         criteriaAnd.push({
           user: filter.user,
         });
       }
 
-      if (filter.amount) {
+      if (search.amount) {
         criteriaAnd.push({
           amount: {
             $regex: MongooseQueryUtils.escapeRegExp(filter.amount),
@@ -406,7 +463,7 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
         });
       }
 
-      if (filter.status) {
+      if (search.status) {
         criteriaAnd.push({
           status: {
             $regex: MongooseQueryUtils.escapeRegExp(filter.status),
@@ -415,17 +472,17 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
         });
       }
 
-      if (filter.type) {
+      if (search.type) {
         criteriaAnd.push({
           type: {
-            $regex: MongooseQueryUtils.escapeRegExp(filter.type),
+            $regex: MongooseQueryUtils.escapeRegExp(search.type),
             $options: "i",
           },
         });
       }
 
-      if (filter.datetransaction) {
-        const [start, end] = filter.datetransaction;
+      if (search.datetransaction) {
+        const [start, end] = search.datetransaction;
 
         if (start !== undefined && start !== null && start !== "") {
           criteriaAnd.push({
@@ -453,8 +510,10 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
 
     let rows = await Transaction(options.database)
       .find(criteria)
-      .skip(skip)
-      .sort(sort);
+      // .skip(skip)
+      // .limit(limitEscaped)
+      .sort(sort)
+      .populate("user");
 
     const count = await Transaction(options.database).countDocuments(criteria);
 
@@ -505,15 +564,15 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
   }
 
   static async _createAuditLog(action, id, data, options: IRepositoryOptions) {
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: Transaction(options.database).modelName,
-    //     entityId: id,
-    //     action,
-    //     values: data,
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: Transaction(options.database).modelName,
+        entityId: id,
+        action,
+        values: data,
+      },
+      options
+    );
   }
 
   static async _fillFileDownloadUrls(record) {
@@ -522,8 +581,7 @@ throw new Error400(options.language, "errors.invalidRequestAmount");
     }
 
     const output = record.toObject ? record.toObject() : record;
-
-    output.pv = await FileRepository.fillDownloadUrl(output.pv);
+    output.photo = await FileRepository.fillDownloadUrl(output.photo);
 
     return output;
   }

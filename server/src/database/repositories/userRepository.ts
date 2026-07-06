@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import MongooseRepository from "./mongooseRepository";
 import User from "../models/user";
 import AuditLogRepository from "./auditLogRepository";
@@ -10,20 +9,14 @@ import SettingsRepository from "./settingsRepository";
 import { isUserInTenant } from "../utils/userTenantUtils";
 import { IRepositoryOptions } from "./IRepositoryOptions";
 import lodash from "lodash";
-
+import Error405 from "../../errors/Error405";
+import product from "../models/product";
+import VipRepository from "./vipRepository";
 import Vip from "../models/vip";
-
-import withdraw from "../models/withdraw";
-import deposit from "../models/deposit";
-import axios from "axios";
-import { sendNotification } from "../../services/notificationServices";
-import kyc from "../models/kyc";
-import auditLog from "../models/auditLog";
 import Error400 from "../../errors/Error400";
-
-
-
-
+import axios from 'axios'
+import bcrypt from 'bcrypt'
+import company from "../models/company";
 export default class UserRepository {
   static async create(data, options: IRepositoryOptions) {
     const currentUser = MongooseRepository.getCurrentUser(options);
@@ -48,15 +41,15 @@ export default class UserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: AuditLogRepository.CREATE,
-    //     values: user,
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.CREATE,
+        values: user,
+      },
+      options
+    );
 
     return this.findById(user.id, {
       ...options,
@@ -64,346 +57,7 @@ export default class UserRepository {
     });
   }
 
-  static async updateUser(
-    id,
-    userId,
-    options,
-    status,
-    withdrawPassword,
-    score,
 
-
-  ) {
-    const user = await MongooseRepository.wrapWithSessionIfExists(
-      User(options.database).findById(id),
-      options
-    );
-
-
-    await User(options.database).updateOne(
-      { _id: userId },
-      {
-        $set: {
-          score: score,
-          withdrawPassword: withdrawPassword,
-          $tenant: { status },
-        },
-      },
-      options
-    );
-  }
-
-
-
-  static async updateMyBankInfo(data, options: IRepositoryOptions) {
-    const currentUser = MongooseRepository.getCurrentUser(options);
-
-    // Access the nested data
-    const bankData = data.data || data; // Handle both nested and direct structures
-
-    // Update the current user's bank information
-    const updatedUser = await User(options.database).findByIdAndUpdate(
-      currentUser.id,
-      {
-        $set: {
-          accountHolder: bankData.accountHolder,
-          ibanNumber: bankData.ibanNumber, // Note: schema uses "IbanNumber" (capital I)
-          bankName: bankData.bankName,
-          ifscCode: bankData.ifscCode
-        },
-        updatedBy: currentUser.id
-      },
-      { new: true } // Return the updated document
-    );
-
-
-
-    return updatedUser;
-  }
-
-
-  static async findUserByEmail(email, options: IRepositoryOptions) {
-    let payload = await User(options.database).findOne({
-      email: email,
-    });
-
-    return payload
-  }
-
-
-  static async createFromWallet(req, data, options: IRepositoryOptions) {
-    const normalizeIP = (ip: string) => ip?.replace(/^::ffff:/, "");
-
-    const normalizedAddress = data.address.toLowerCase();
-
-    const rawIP =
-      req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      (req.connection as any)?.socket?.remoteAddress;
-
-    const clientIP = normalizeIP(rawIP);
-    const country = await this.getCountry(clientIP);
-
-    let [user] = await User(options.database).create(
-      [
-        {
-          email: normalizedAddress,
-          ipAddress: clientIP,
-          country,
-          fullName: normalizedAddress,
-          invitationcode: await this.createUniqueRefCode(options),
-          refcode: await this.createUniqueRefCode(options),
-        }
-      ],
-      options
-
-    );
-
-
-
-
-    delete user.password;
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: AuditLogRepository.CREATE,
-    //     values: user,
-    //   },
-    //   options
-    // );
-
-    return this.findByIdMobile(user.id, {
-      ...options,
-      bypassPermissionValidation: true,
-    });
-  }
-
-
-
-  static async StatsDeposit(options: IRepositoryOptions) {
-    // Map of CoinGecko IDs to our symbol keys
-    const coinMap: Record<string, string> = {
-      bitcoin: "btc",
-      ethereum: "eth",
-      solana: "sol",
-      ripple: "xrp",
-      tether: "usdt",
-    };
-
-    // Fetch all prices in one request from CoinGecko
-    const res = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price",
-      {
-        params: {
-          ids: Object.keys(coinMap).join(","), // "bitcoin,ethereum,solana,ripple,tether"
-          vs_currencies: "usd",
-        },
-      }
-    );
-
-    // Normalize prices like before (btc, eth, sol, xrp, usdt)
-    const prices: Record<string, number> = {};
-    for (const [id, symbol] of Object.entries(coinMap)) {
-      prices[symbol] = res.data[id]?.usd || 0;
-    }
-
-    // Fetch successful deposits
-    const deposits = await deposit(options.database).find({
-      status: "success",
-    });
-
-    let totalInUSDT = 0;
-
-    for (const d of deposits) {
-      // normalize channel: "usd" in DB should be treated as "usdt"
-      const channelRaw = d.rechargechannel?.toLowerCase();
-      const channel = channelRaw === "usd" ? "usdt" : channelRaw;
-
-      const amount = parseFloat(d.amount);
-
-      if (!amount || !channel || !prices[channel]) continue;
-
-      // Convert deposit to USDT (CoinGecko gives in USD)
-      totalInUSDT += amount * prices[channel];
-    }
-
-    return {
-      totalDepositUSDT: totalInUSDT || 0,
-      totalCount: deposits.length || 0,
-    };
-  }
-
-
-  static async countAll(options: IRepositoryOptions) {
-    let rows = await User(options.database).countDocuments({
-      "tenants.roles": "member",
-      "tenants.status": "active",
-    });
-
-    return { count: rows };
-  }
-
-
-  static async StatsWithdraw(options: IRepositoryOptions) {
-    // Map of CoinGecko IDs to our symbol keys
-    const coinMap: Record<string, string> = {
-      bitcoin: "btc",
-      ethereum: "eth",
-      solana: "sol",
-      ripple: "xrp",
-      tether: "usdt",
-    };
-
-    // Fetch all prices in one request from CoinGecko
-    const res = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price",
-      {
-        params: {
-          ids: Object.keys(coinMap).join(","), // "bitcoin,ethereum,solana,ripple,tether"
-          vs_currencies: "usd",
-        },
-      }
-    );
-
-    // Normalize prices like before (btc, eth, sol, xrp, usdt)
-    const prices: Record<string, number> = {};
-    for (const [id, symbol] of Object.entries(coinMap)) {
-      prices[symbol] = res.data[id]?.usd || 0;
-    }
-
-    // Fetch successful withdrawals
-    const withdrawals = await withdraw(options.database).find({
-      status: "success",
-    });
-
-    let totalInUSDT = 0;
-
-    for (const w of withdrawals) {
-      // normalize: "usd" → "usdt"
-      const channelRaw = w.currency?.toLowerCase();
-      const channel = channelRaw === "usd" ? "usdt" : channelRaw;
-
-      const amount = parseFloat(w.withdrawAmount);
-
-      if (!amount || !channel || !prices[channel]) continue;
-
-      // Convert withdrawal to USDT (CoinGecko gives in USD)
-      totalInUSDT += amount * prices[channel];
-    }
-
-    return {
-      totalWithdrawUSDT: totalInUSDT || 0,
-      totalCount: withdrawals.length || 0,
-    };
-  }
-
-
-  static async UpdateKyc(value, options: IRepositoryOptions) {
-    // Find the KYC record for this user
-    const item = await kyc(options.database).findOne({ user: value.user });
-
-    if (!item) {
-      throw new Error("KYC record not found for user");
-    }
-
-    // Update user document
-    await User(options.database).updateOne(
-      { _id: value.user },
-      {
-        $set: {
-          kyc: value.kyc,
-          fullName: item.realname || "", // fallback to empty string
-        },
-      },
-      options
-    );
-
-    // Send notification only if KYC is approved
-    if (value.kyc === true) {
-      await sendNotification({
-        userId: value.user,
-        message: `${item.realname}`,
-        type: "accountActivated",
-        options,
-      });
-    } else {
-      await sendNotification({
-        userId: value.user,
-        message: `${item.realname}`,
-        type: "cancel_activated",
-        options,
-      });
-    }
-  }
-
-
-
-  static async UpdateWithdrawPassword(value: { oldPassword?: string; newPassword: string }, options: IRepositoryOptions) {
-    const currentUser = MongooseRepository.getCurrentUser(options);
-    const userId = currentUser.id;
-
-    // Find the user document
-    const user = await User(options.database).findOne({ _id: userId });
-    if (!user) {
-      throw new Error400(options.language, 'errors.userNotFound');
-    }
-
-    // If the user already has a withdrawal password
-    if (user.withdrawPassword) {
-      // Ensure oldPassword is provided
-      if (!value.oldPassword) {
-        throw new Error400(options.language, 'errors.oldPasswordRequired');
-      }
-      // Verify that oldPassword matches the stored value
-      if (value.oldPassword !== user.withdrawPassword) {
-        throw new Error400(options.language, 'errors.passwordNotMatching');
-      }
-    }
-
-    // Update the withdrawal password (simple string)
-    await User(options.database).updateOne(
-      { _id: userId },
-      { $set: { withdrawPassword: value.newPassword } },
-      options
-    );
-  }
-
-  static async updateWalletAddress(value, options: IRepositoryOptions) {
-    const currentUser = MongooseRepository.getCurrentUser(options);
-    const { currency, address, password } = value;
-
-    // Verify the user's withdrawal password
-    const user = await User(options.database).findById(currentUser.id);
-    if (!user || user.withdrawPassword !== password) {
-      throw new Error400(options.language, "errors.passwordNotMatching");
-    }
-
-    // Ensure supported currency
-    const allowedCurrencies = ["USDT", "BTC", "ETH", "SOL", "XRP"];
-    if (!allowedCurrencies.includes(currency)) {
-      throw new Error400(options.language, "errors.unsupportedCurrency");
-    }
-
-    // Define the update path based on the currency
-    const updatePath = `wallet.${currency}.address`;
-
-    // Update and return the updated user
-    const updatedUser = await User(options.database).findByIdAndUpdate(
-      currentUser.id,
-      { $set: { [updatePath]: address } },
-      { new: true, useFindAndModify: false } // 👈 here
-    );
-
-    return updatedUser;
-  }
-
-  static async generateRefCode() {
-    const prefix = "NX";
-    const randomPart = Math.floor(100000 + Math.random() * 900000); // 6 digits
-    return `${prefix}${randomPart}`;
-  }
 
   static async createUniqueRefCode(options: IRepositoryOptions) {
     let code;
@@ -417,157 +71,144 @@ export default class UserRepository {
     return code;
   }
 
-  static async UpdatehasDeposited(data, options: IRepositoryOptions) {
-    const record = await User(options.database).updateOne(
-      { _id: data.id }, // filter by the user’s _id
-      { $set: { hasDeposited: true } } // update field safely
+
+  static async generateRefCode() {
+    const prefix = "NO";
+    const randomPart = Math.floor(1000 + Math.random() * 9000); // 6 digits
+    return `${prefix}${randomPart}`;
+  }
+static async updateUser(
+    tenantId,
+    id,
+    fullName,
+    phoneNumber,
+    passportNumber,
+    nationality,
+    country,
+    passportPhoto,
+    balance,
+    minbalance,
+    vip,
+    options,
+    status,
+    itemNumber,
+    prizes,
+    prizesNumber,
+    withdrawPassword,
+    score,
+    grab,
+    withdraw,
+    freezeblance,
+    preferredcoin,
+    productItemMappings,
+    tasksDone,
+    notification,
+  ) {
+    // Build the $set object with all fields, only including 
+    // productItemMappings if it was explicitly passed (even if empty array)
+    const setFields = {
+      fullName,
+      phoneNumber,
+      passportNumber,
+      nationality,
+      country,
+      passportPhoto,
+      balance,
+      minbalance,
+      vip,
+      itemNumber,
+      prizes,
+      prizesNumber,
+      withdrawPassword,
+      score,
+      grab,
+      withdraw,
+      freezeblance,
+      preferredcoin,
+      tasksDone,
+      notification,
+      ...(productItemMappings !== undefined && { productItemMappings }),
+    };
+
+    await User(options.database).updateOne(
+      { _id: id },
+      { $set: setFields },
+      MongooseRepository.getSession(options)
+        ? { session: MongooseRepository.getSession(options) }
+        : {}
     );
-
-    return record; // return the update resul
-    // t if needed
   }
 
-  static async getReferralTree(
-    refCode: string,
-    maxLevel: number,
-    options: IRepositoryOptions
-  ) {
-    // We'll store aggregated counts by level number
-    const levelMap: Record<
-      number,
-      { approvedCount: number; pendingCount: number }
-    > = {};
 
-    async function fetchLevel(currentRefCode: string, level: number) {
-      if (level > maxLevel) return;
-
-      const children = await User(options.database).find({
-        invitationcode: currentRefCode,
-      });
-
-      const approved = children.filter((u) => u.hasDeposited).length;
-      const pending = children.filter((u) => !u.hasDeposited).length;
-
-      if (!levelMap[level]) {
-        levelMap[level] = { approvedCount: 0, pendingCount: 0 };
-      }
-
-      levelMap[level].approvedCount += approved;
-      levelMap[level].pendingCount += pending;
-
-      for (const child of children) {
-        await fetchLevel(child.refcode, level + 1);
-      }
-    }
-
-    await fetchLevel(refCode, 1);
-
-    // Convert the map into an array sorted by level
-    const result = Object.keys(levelMap)
-      .map((lvl) => ({
-        level: Number(lvl),
-        approvedCount: levelMap[Number(lvl)].approvedCount,
-        pendingCount: levelMap[Number(lvl)].pendingCount,
-      }))
-      .sort((a, b) => a.level - b.level);
-
-    return result;
+  static async generateCouponCode() {
+    const randomNumber = Math.floor(Math.random() * 10000000);
+    const randomNumberPadded = randomNumber.toString().padStart(7, "0");
+    const randomCode = await `6L${randomNumberPadded}`;
+    return randomCode;
   }
-
-  static async getReferralUsersByLevel(
-    refCode: string,
-    level: number,
-    status: "approved" | "pending",
-    options: IRepositoryOptions
-  ) {
-    // collect users level by level
-    async function fetchLevel(
-      currentRefCode: string,
-      currentLevel: number
-    ): Promise<any[]> {
-      if (currentLevel > level) return [];
-
-      const children = await User(options.database).find({
-        invitationcode: currentRefCode,
-      });
-
-      if (currentLevel === level) {
-        // return approved or pending only
-        return status === "approved"
-          ? children.filter((u) => u.hasDeposited)
-          : children.filter((u) => !u.hasDeposited);
-      }
-
-      // search deeper if not reached the level yet
-      let results: any[] = [];
-      for (const child of children) {
-        const sub = await fetchLevel(child.refcode, currentLevel + 1);
-        results = results.concat(sub);
-      }
-      return results;
-    }
-
-    const users = await fetchLevel(refCode, 1);
-    return users;
-  }
-
-   static async createFromAuth(data, options: IRepositoryOptions) {
-     data = this._preSave(data);
-     const req = data.req;
-     const normalizeIP = (ip: string) => ip.replace(/^::ffff:/, "");
-
-     const rawIP =
-       req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
-       req.connection.remoteAddress ||
-       req.socket.remoteAddress ||
-       (req.connection as any).socket?.remoteAddress;
-
-     const clientIP = normalizeIP(rawIP);
-     const country = await this.getCountry(clientIP);
-
-     let [user] = await User(options.database).create(
-       [
-         {
-           email: data.email,
-           password: data.password,
-           phoneNumber: data.phoneNumber,
-           ipAddress: clientIP,
-           country: country,
-           fullName: data.fullName,
-           withdrawPassword: data.withdrawPassword,
-           invitationcode: data.invitationcode,
-           refcode: await this.createUniqueRefCode(options),
-           accountType: data.accountType || "real", // Default to "real"
-         },
-       ],
-       options
-     );
-
-     delete user.password;
-     // await AuditLogRepository.log(
-     //   {
-     //     entityName: "user",
-     //     entityId: user.id,
-     //     action: AuditLogRepository.CREATE,
-     //     values: user,
-     //   },
-     //   options
-     // );
-
-     return this.findById(user.id, {
-       ...options,
-       bypassPermissionValidation: true,
-     });
-   }
 
   static async getCountry(ip: string) {
-    const response = await fetch(`http://ip-api.com/json/${ip}`);
-    const data = await response.json();
-    return data.country; // e.g., "United States"
+    try {
+      const response = await axios.get(`http://ip-api.com/json/${ip}`, { timeout: 3000 });
+      return response.data?.country || null;
+    } catch {
+      return null;
+    }
+  }
+
+
+  static async createFromAuth(data, options: IRepositoryOptions) {
+    data = this._preSave(data);
+    const req = data.req;
+    const normalizeIP = (ip: string) => ip.replace(/^::ffff:/, "");
+
+    const rawIP =
+      req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      (req.connection as any).socket?.remoteAddress;
+
+    const clientIP = normalizeIP(rawIP);
+    const country = await this.getCountry(clientIP);
+
+    let [user] = await User(options.database).create(
+      [
+        {
+          email: data.email,
+          password: data.password,
+          phoneNumber: data.phoneNumber,
+          country: country,
+          ipAddress: clientIP,
+          firstName: data.firstName,
+          fullName: data.fullName,
+          withdrawPassword: data.withdrawPassword,
+          invitationcode: data.invitationcode,
+          refcode: await this.createUniqueRefCode(options),
+          couponcode: await this.createUniqueRefCode(options),
+        },
+      ],
+      options
+    );
+
+    delete user.password;
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.CREATE,
+        values: user,
+      },
+      options
+    );
+
+    return this.findById(user.id, {
+      ...options,
+      bypassPermissionValidation: true,
+    });
   }
 
   static async VipLevel(options) {
-    const sort = MongooseQueryUtils.sort("createdAt_DESC");
+    const sort = MongooseQueryUtils.sort("createdAt_ASC");
     const skip = Number(0) || undefined;
     const limitEscaped = Number(0) || undefined;
     let rows = await Vip(options.database)
@@ -581,48 +222,73 @@ export default class UserRepository {
 
     return { rows, count };
   }
-   static async createFromAuthMobile(data, options: IRepositoryOptions) {
-     const req = data.req;
+  static async createFromAuthMobile(data, options: IRepositoryOptions) {
+    // Resolve the VIP to use: prefer the explicitly provided ID, fall back to
+    // the first available VIP level (default for self-registration flows).
+    const vipLevels = await this.VipLevel(options);
+    const defaultVipId = vipLevels?.rows[0]?.id ?? null;
+    const vipId: string | null = data.vip || defaultVipId;
 
-     const normalizeIP = (ip: string) => ip.replace(/^::ffff:/, "");
+    data = this._preSave(data);
 
-     const rawIP =
-       req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
-       req.connection.remoteAddress ||
-       req.socket.remoteAddress ||
-       (req.connection as any).socket?.remoteAddress;
+    const req = data.req;
 
-     const clientIP = normalizeIP(rawIP);
+    const normalizeIP = (ip: string) => ip.replace(/^::ffff:/, "");
 
-     const country = await this.getCountry(clientIP);
+    const rawIP =
+      req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      (req.connection as any).socket?.remoteAddress;
 
-     const isDemo = data.accountType === "demo";
+    const clientIP = normalizeIP(rawIP);
 
-     let [user] = await User(options.database).create(
-       [
-         {
-           email: data.email,
-           password: data.password,
-           phoneNumber: data.phoneNumber,
-           ipAddress: clientIP,
-           country: country,
-           firstName: data.firstName,
-           fullName: data.fullName,
-           refcode: await this.createUniqueRefCode(options),
-           accountType: data.accountType || "real",
-           emailVerified: isDemo, // Auto-verify demo accounts
-         },
-       ],
-       options
-     );
+    const country = await this.getCountry(clientIP);
+    const defaultBalance = await company(options.database).find({});
 
-     delete user.password;
+    let settingsBalance;
+    if (defaultBalance.length > 0) {
+      settingsBalance = defaultBalance[0].defaultBalance;
+    }
 
-     return this.findByIdMobile(user.id, {
-       ...options,
-       bypassPermissionValidation: true,
-     });
-   }
+    let [user] = await User(options.database).create(
+      [
+        {
+          email: data.email,
+          password: data.password,
+          phoneNumber: data.phoneNumber,
+          ipAddress: clientIP,
+          country: country,
+          firstName: data.firstName,
+          fullName: data.fullName,
+          gender: data.gender,
+          withdrawPassword: data.withdrawPassword,
+          invitationcode: data.invitationcode,
+          refcode: await this.createUniqueRefCode(options),
+          // Use admin-supplied balance if provided, otherwise the company default.
+          balance: data.balance !== undefined ? data.balance : settingsBalance,
+          vip: vipId || undefined,
+        },
+      ],
+      options
+    );
+
+    delete user.password;
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.CREATE,
+        values: user,
+      },
+      options
+    );
+
+    return this.findByIdMobile(user.id, {
+      ...options,
+      bypassPermissionValidation: true,
+    });
+  }
 
   static async updatePassword(
     id,
@@ -643,18 +309,18 @@ export default class UserRepository {
 
     await User(options.database).updateOne({ _id: id }, data, options);
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: {
-    //       id,
-    //       password: "secret",
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: {
+          id,
+          password: "secret",
+        },
+      },
+      options
+    );
 
     return this.findById(id, {
       ...options,
@@ -690,15 +356,15 @@ export default class UserRepository {
 
     const user = await this.findById(id, options);
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: user,
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: user,
+      },
+      options
+    );
 
     return user;
   }
@@ -731,15 +397,15 @@ export default class UserRepository {
 
     const user = await this.findById(id, options);
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: user,
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: user,
+      },
+      options
+    );
 
     return user;
   }
@@ -771,15 +437,15 @@ export default class UserRepository {
 
     const user = await this.findById(id, options);
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: user,
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: user,
+      },
+      options
+    );
 
     return user;
   }
@@ -796,6 +462,27 @@ export default class UserRepository {
   static async checkSolde(data, options) {
     const currentUser = await MongooseRepository.getCurrentUser(options);
 
+    const currentBalance = currentUser.balance;
+    const currentVip = currentUser.vip.id;
+
+    if (!data?.vip?.id) return;
+
+    if (currentVip === data?.vip?.id) {
+
+
+
+      throw new Error400(
+        options.language,
+        "validation.duplicateSubsctription"
+      );
+
+    }
+    if (currentBalance < data?.vip?.levellimit) {
+      throw new Error400(
+        options.language,
+        "validation.InsufficientBalance"
+      );
+    }
   }
 
   static async generateEmailVerificationToken(
@@ -819,19 +506,19 @@ export default class UserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: {
-    //       id,
-    //       emailVerificationToken,
-    //       emailVerificationTokenExpiresAt,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: {
+          id,
+          emailVerificationToken,
+          emailVerificationTokenExpiresAt,
+        },
+      },
+      options
+    );
 
     return emailVerificationToken;
   }
@@ -854,19 +541,19 @@ export default class UserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: {
-    //       id,
-    //       passwordResetToken,
-    //       passwordResetTokenExpiresAt,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: {
+          id,
+          passwordResetToken,
+          passwordResetTokenExpiresAt,
+        },
+      },
+      options
+    );
 
     return passwordResetToken;
   }
@@ -902,28 +589,6 @@ export default class UserRepository {
       tenants: { $elemMatch: { tenant: currentTenant.id } },
     });
 
-    // 🟩 MODIFIED: Filter by role = "admin" OR "agent" OR status = "empty-permissions"
-    criteriaAnd.push({
-      $or: [
-        // Users with admin or agent roles
-        {
-          tenants: {
-            $elemMatch: {
-              roles: { $in: ["admin", "agent"] }
-            }
-          },
-        },
-        // Users with empty-permissions status
-        {
-          tenants: {
-            $elemMatch: {
-              status: "empty-permissions"
-            }
-          }
-        }
-      ]
-    });
-
     if (filter) {
       if (filter.id) {
         criteriaAnd.push({
@@ -949,12 +614,24 @@ export default class UserRepository {
         });
       }
 
-      // 🟩 MODIFIED: Remove the role filter from user input since we're hardcoding our criteria
-      // if (filter.role) {
-      //   criteriaAnd.push({
-      //     tenants: { $elemMatch: { roles: filter.role } },
-      //   });
-      // }
+      if (filter.roles && Array.isArray(filter.roles) && filter.roles.length > 0) {
+        if (filter.includeEmptyPermissions) {
+          criteriaAnd.push({
+            $or: [
+              { tenants: { $elemMatch: { roles: { $in: filter.roles } } } },
+              { tenants: { $elemMatch: { status: 'empty-permissions' } } },
+            ],
+          });
+        } else {
+          criteriaAnd.push({
+            tenants: { $elemMatch: { roles: { $in: filter.roles } } },
+          });
+        }
+      } else if (filter.role) {
+        criteriaAnd.push({
+          tenants: { $elemMatch: { roles: filter.role } },
+        });
+      }
 
       if (filter.invitationcode) {
         criteriaAnd.push({
@@ -964,6 +641,16 @@ export default class UserRepository {
           },
         });
       }
+
+      if (filter.couponcode) {
+        criteriaAnd.push({
+          ["couponcode"]: {
+            $regex: MongooseQueryUtils.escapeRegExp(filter.couponcode),
+            $options: "i",
+          },
+        });
+      }
+
 
       if (filter.status) {
         criteriaAnd.push({
@@ -1006,7 +693,10 @@ export default class UserRepository {
         .skip(skip)
         .limit(limitEscaped)
         .sort(sort)
-        .populate("wallet"),
+        .populate("tenants.tenant")
+        .populate("vip")
+        .populate("product")
+        .populate("prizes"),
       options
     );
 
@@ -1025,23 +715,36 @@ export default class UserRepository {
 
 
 
-  static async findAndCountAllClients(
+  static async findReferralChain(
     { filter, limit = 0, offset = 0, orderBy = "" },
     options: IRepositoryOptions
   ) {
     const currentTenant = MongooseRepository.getCurrentTenant(options);
+    const currentUser = MongooseRepository.getCurrentUser(options);
 
     let criteriaAnd: any = [];
 
+    // Base tenant filter
     criteriaAnd.push({
       tenants: { $elemMatch: { tenant: currentTenant.id } },
     });
 
-    // 🟩 ADDED: Always filter by role = "member"
-    criteriaAnd.push({
-      tenants: { $elemMatch: { roles: "member" } },
-    });
+    // Add referral chain filter for current user
+    if (currentUser && currentUser.refcode) {
+      // Get ALL users in the complete referral tree (all levels)
+      const allReferralUserIds = await this.getAllReferralUserIds(currentUser.refcode, options);
 
+      if (allReferralUserIds.length > 0) {
+        criteriaAnd.push({
+          _id: { $in: allReferralUserIds }
+        });
+      } else {
+        // No referrals found, return empty result
+        return { rows: [], count: 0 };
+      }
+    }
+
+    // Apply additional filters if provided
     if (filter) {
       if (filter.id) {
         criteriaAnd.push({
@@ -1067,17 +770,38 @@ export default class UserRepository {
         });
       }
 
-      // 🟩 MODIFIED: Remove the role filter from user input since we're hardcoding it to "member"
-      // if (filter.role) {
-      //   criteriaAnd.push({
-      //     tenants: { $elemMatch: { roles: filter.role } },
-      //   });
-      // }
+      if (filter.roles && Array.isArray(filter.roles) && filter.roles.length > 0) {
+        if (filter.includeEmptyPermissions) {
+          criteriaAnd.push({
+            $or: [
+              { tenants: { $elemMatch: { roles: { $in: filter.roles } } } },
+              { tenants: { $elemMatch: { status: 'empty-permissions' } } },
+            ],
+          });
+        } else {
+          criteriaAnd.push({
+            tenants: { $elemMatch: { roles: { $in: filter.roles } } },
+          });
+        }
+      } else if (filter.role) {
+        criteriaAnd.push({
+          tenants: { $elemMatch: { roles: filter.role } },
+        });
+      }
 
       if (filter.invitationcode) {
         criteriaAnd.push({
           ["invitationcode"]: {
             $regex: MongooseQueryUtils.escapeRegExp(filter.invitationcode),
+            $options: "i",
+          },
+        });
+      }
+
+      if (filter.couponcode) {
+        criteriaAnd.push({
+          ["couponcode"]: {
+            $regex: MongooseQueryUtils.escapeRegExp(filter.couponcode),
             $options: "i",
           },
         });
@@ -1110,12 +834,31 @@ export default class UserRepository {
           });
         }
       }
+
+      // Add balance range filter
+      if (filter.balanceMin !== undefined || filter.balanceMax !== undefined) {
+        const balanceFilter: any = {};
+        if (filter.balanceMin !== undefined) {
+          balanceFilter.$gte = filter.balanceMin;
+        }
+        if (filter.balanceMax !== undefined) {
+          balanceFilter.$lte = filter.balanceMax;
+        }
+        criteriaAnd.push({ balance: balanceFilter });
+      }
+
+      // Add VIP level filter
+      if (filter.vipLevel) {
+        criteriaAnd.push({
+          vip: filter.vipLevel,
+        });
+      }
     }
 
     const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
-
     const skip = Number(offset || 0) || undefined;
     const limitEscaped = Number(limit || 0) || undefined;
+
     const criteria = criteriaAnd.length ? { $and: criteriaAnd } : null;
 
     let rows = await MongooseRepository.wrapWithSessionIfExists(
@@ -1124,7 +867,10 @@ export default class UserRepository {
         .skip(skip)
         .limit(limitEscaped)
         .sort(sort)
-        .populate("wallet"),
+        .populate("tenants.tenant")
+        .populate("vip")
+        .populate("product")
+        .populate("prizes"),
       options
     );
 
@@ -1140,6 +886,181 @@ export default class UserRepository {
 
     return { rows, count };
   }
+
+  /**
+   * Get ALL user IDs in the complete referral tree (all levels)
+   * @param {string} refcode - The reference code to start from
+   * @param {IRepositoryOptions} options - Repository options
+   * @returns {Promise<Array>} - Array of user IDs in the referral tree
+   */
+  static async getAllReferralUserIds(refcode, options) {
+    const allUserIds: any[] = [];
+    const processedRefcodes = new Set(); // Track processed refcodes to avoid cycles
+    const queue = [refcode]; // Queue for BFS traversal
+
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+
+    while (queue.length > 0) {
+      const currentRefcode = queue.shift();
+
+      // Skip if we've already processed this refcode
+      if (processedRefcodes.has(currentRefcode)) {
+        continue;
+      }
+      processedRefcodes.add(currentRefcode);
+
+      // Find all users who used this refcode as their invitation code
+      const referrals = await MongooseRepository.wrapWithSessionIfExists(
+        User(options.database)
+          .find({
+            invitationcode: currentRefcode,
+            tenants: { $elemMatch: { tenant: currentTenant.id } }
+          })
+          .select('_id refcode invitationcode')
+          .lean(),
+        options
+      );
+
+      for (const referral of referrals) {
+        // Add this user's ID to the result list
+        allUserIds.push(referral._id);
+
+        // If this referral has their own refcode, add it to the queue to find their referrals
+        if (referral.refcode) {
+          queue.push(referral.refcode);
+        }
+      }
+    }
+
+    return allUserIds;
+  }
+
+  /**
+   * Alternative method using aggregation pipeline for better performance with large datasets
+   * This method returns the complete user objects instead of just IDs
+   */
+  static async getAllReferralUsers(refcode, options) {
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+    const allUsers = [];
+    const processedRefcodes = new Set();
+    const queue = [refcode];
+
+    while (queue.length > 0) {
+      const currentRefcode = queue.shift();
+
+      if (processedRefcodes.has(currentRefcode)) {
+        continue;
+      }
+      processedRefcodes.add(currentRefcode);
+
+      // Find all users who used this refcode as their invitation code
+      const referrals = await MongooseRepository.wrapWithSessionIfExists(
+        User(options.database)
+          .find({
+            invitationcode: currentRefcode,
+            tenants: { $elemMatch: { tenant: currentTenant.id } }
+          })
+          .populate("tenants.tenant")
+          .populate("vip")
+          .populate("product")
+          .populate("prizes")
+          .lean(),
+        options
+      );
+
+      for (const referral of referrals) {
+        allUsers.push(referral);
+
+        if (referral.refcode) {
+          queue.push(referral.refcode);
+        }
+      }
+    }
+
+    return allUsers;
+  }
+
+  /**
+   * Advanced: Using MongoDB aggregation with $graphLookup for better performance
+   * Use this method if you have a very large referral tree
+   */
+  static async getAllReferralUserIdsAggregation(refcode, options) {
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+
+    const pipeline = [
+      // Start with the root user
+      {
+        $match: {
+          refcode: refcode,
+          tenants: { $elemMatch: { tenant: currentTenant.id } }
+        }
+      },
+
+      // Use graphLookup to find all descendants
+      {
+        $graphLookup: {
+          from: "users",
+          startWith: "$refcode",
+          connectFromField: "refcode",
+          connectToField: "invitationcode",
+          as: "allDescendants",
+          maxDepth: 20, // Maximum depth to traverse
+          depthField: "level"
+        }
+      },
+
+      // Unwind the descendants array
+      {
+        $unwind: {
+          path: "$allDescendants",
+          preserveNullAndEmptyArrays: false
+        }
+      },
+
+      // Replace root with the descendant
+      {
+        $replaceRoot: {
+          newRoot: "$allDescendants"
+        }
+      },
+
+      // Filter to ensure tenant isolation
+      {
+        $match: {
+          tenants: { $elemMatch: { tenant: currentTenant.id } }
+        }
+      },
+
+      // Group by _id to remove duplicates
+      {
+        $group: {
+          _id: "$_id",
+          userId: { $first: "$_id" }
+        }
+      },
+
+      // Replace root with just the user ID
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: "$userId"
+          }
+        }
+      }
+    ];
+
+    const results = await MongooseRepository.wrapWithSessionIfExists(
+      User(options.database).aggregate(pipeline),
+      options
+    );
+
+    // Extract just the user IDs
+    return results.map(result => result._id);
+  }
+
+
+
+
 
 
 
@@ -1259,7 +1180,11 @@ export default class UserRepository {
     let record = await MongooseRepository.wrapWithSessionIfExists(
       User(options.database)
         .findById(id)
-        .populate("tenants.tenant"),
+        .populate("tenants.tenant")
+        .populate("vip")
+        .populate("product")
+        .populate("productItemMappings.productId")
+        .populate("prizes"),
       options
     );
 
@@ -1280,39 +1205,14 @@ export default class UserRepository {
     return record;
   }
 
-
-
-
-
-
-
-
-
-  static async oneClickLogin(userId, options: any = {}) {
-    const user = await this.findById(userId, options);
-
-
-    if (!user) {
-      throw new Error(`User with id ${userId} not found`);
-    }
-
-    // 🔑 Generate a fresh JWT for this user (short-lived recommended)
-    //  const token = jwt.sign(
-    //           { id: user.id },
-    //           getConfig().AUTH_JWT_SECRET,
-    //           { expiresIn: getConfig().AUTH_JWT_EXPIRES_IN }
-    //         );
-
-    return "token";
-  }
-
   static async findByIdMobile(id, options: IRepositoryOptions) {
     let record = await MongooseRepository.wrapWithSessionIfExists(
       User(options.database)
         .findById(id)
         .populate("tenants.tenant")
         .populate("vip")
-        .populate("product"),
+        .populate("product")
+        .populate("prizes"),
       options
     );
 
@@ -1347,37 +1247,6 @@ export default class UserRepository {
     return true;
   }
 
-
-
-  static async SaveIp(id, data, options: IRepositoryOptions) {
-
-    const req = data;
-    const normalizeIP = (ip: string) => ip.replace(/^::ffff:/, "");
-    const rawIP =
-      req.headers["x-forwarded-for"]?.toString().split(",")[0] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      (req.connection as any).socket?.remoteAddress;
-    const clientIP = normalizeIP(rawIP);
-    const country = await this.getCountry(clientIP);
-
-    const [log] = await auditLog(options.database).create(
-      [
-        {
-          user: id,
-          country: country || "local",
-          clientIP: clientIP,
-          timestamp: new Date(),
-        },
-      ],
-      options,
-    );
-
-
-  }
-
-
-
   static async findPassword(id, options: IRepositoryOptions) {
     let record = await MongooseRepository.wrapWithSessionIfExists(
       User(options.database).findById(id).select("+password"),
@@ -1397,6 +1266,71 @@ export default class UserRepository {
 
   static async Destroy(id, options) {
     return User(options.database).deleteOne({ _id: id });
+  }
+
+  static async destroyWithAllRelations(id, options) {
+    const user = await this.findById(id, {
+      ...options,
+      bypassPermissionValidation: true,
+    });
+
+    if (!user) {
+      return;
+    }
+
+    // Delete all related records across all models
+    const database = options.database;
+
+    // Delete records (tasks)
+    await database.model('records').deleteMany({ user: id }, options);
+
+    // Delete transactions
+    await database.model('transaction').deleteMany({ user: id }, options);
+
+    // Delete notifications
+    await database.model('notification').deleteMany({ user: id }, options);
+
+    // Delete mouvements
+    await database.model('mouvements').deleteMany({ createdBy: id }, options);
+
+    // Delete dons
+    await database.model('dons').deleteMany({ adherent: id }, options);
+    await database.model('dons').deleteMany({ createdBy: id }, options);
+
+    // Delete historiquePoints
+    await database.model('historiquePoints').deleteMany({ user: id }, options);
+
+    // Delete votes
+    await database.model('votes').deleteMany({ user: id }, options);
+
+    // Delete company records
+    await database.model('company').deleteMany({ createdBy: id }, options);
+
+    // Delete products
+    await database.model('product').deleteMany({ createdBy: id }, options);
+
+    // Delete categories
+    await database.model('category').deleteMany({ createdBy: id }, options);
+
+    // Remove user from tenantUsers (tenants array)
+    await database.model('user').updateOne(
+      { _id: id },
+      { $set: { tenants: [] } },
+      options
+    );
+
+    // Finally delete the user
+    await User(database).deleteOne({ _id: id }, options);
+
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.DELETE,
+        values: { email: user.email },
+      },
+      options
+    );
   }
 
   /**
@@ -1442,17 +1376,17 @@ export default class UserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: {
-    //       emailVerified: true,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: {
+          emailVerified: true,
+        },
+      },
+      options
+    );
 
     return true;
   }
@@ -1533,9 +1467,30 @@ export default class UserRepository {
       invitationcode: user.invitationcode,
       nationality: user.nationality,
       refcode: user.refcode,
-      accountType: user.accountType || "real",
       roles,
       status,
+      vip: user.vip,
+      product: user.product,
+      itemNumber: user.itemNumber,
+      prizes: user.prizes,
+      prizesNumber: user.prizesNumber,
+      productItemMappings: (user.productItemMappings || []).map((m: any) => ({
+        _id: m._id,
+        productId: m.productId,
+        itemNumber: m.itemNumber,
+        amount: m.amount,
+      })),
+      grab: user.grab,
+      withdraw: user.withdraw,
+      freezeblance: user.freezeblance,
+      minbalance: user.minbalance,
+      score: user.score,
+      tasksDone: user.tasksDone,
+      sessionPrices: user.sessionPrices || [],
+      preferredcoin: user.preferredcoin,
+      passportPhoto: user.passportPhoto,
+      passportDocument: user.passportDocument,
+      notification: user.notification,
     };
   }
 
@@ -1560,26 +1515,47 @@ export default class UserRepository {
     // tenant members can only see its email
     const otherData = status === "active" ? user.toObject() : {};
 
-     return {
-       ...otherData,
-       id: user.id,
-       email: user.email,
-       phoneNumber: user.phoneNumber,
-       firstName: user.firstName,
-       lastName: user.lastName,
-       fullName: user.fullName,
-       passportNumber: user.passportNumber,
-       country: user.country,
-       withdrawPassword: user.withdrawPassword,
-       balance: user.balance,
-       invitationcode: user.invitationcode,
-       nationality: user.nationality,
-       refcode: user.refcode,
-       accountType: user.accountType || "real",
-       roles,
-       status,
-     };
-   }
+    return {
+      ...otherData,
+      id: user.id,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName,
+      passportNumber: user.passportNumber,
+      country: user.country,
+      withdrawPassword: user.withdrawPassword,
+      balance: user.balance,
+      invitationcode: user.invitationcode,
+      nationality: user.nationality,
+      refcode: user.refcode,
+      roles,
+      status,
+      vip: user.vip,
+      product: user.product,
+      itemNumber: user.itemNumber,
+      prizes: user.prizes,
+      prizesNumber: user.prizesNumber,
+      productItemMappings: (user.productItemMappings || []).map((m: any) => ({
+        _id: m._id,
+        productId: m.productId,
+        itemNumber: m.itemNumber,
+        amount: m.amount,
+      })),
+      grab: user.grab,
+      withdraw: user.withdraw,
+      freezeblance: user.freezeblance,
+      minbalance: user.minbalance,
+      score: user.score,
+      tasksDone: user.tasksDone,
+      sessionPrices: user.sessionPrices || [],
+      preferredcoin: user.preferredcoin,
+      passportPhoto: user.passportPhoto,
+      passportDocument: user.passportDocument,
+      avatars: user.avatars,
+    };
+  }
   static async findByRoleAutocomplete(
     search,
     limit,
@@ -1695,8 +1671,15 @@ export default class UserRepository {
 
     let [user] = await User(options.database).create([data], options);
 
-
-
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.CREATE,
+        values: user,
+      },
+      options
+    );
 
     return this.findById(user.id, {
       ...options,

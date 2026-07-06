@@ -17,7 +17,24 @@ export default (database) => {
         ref: "user",
         required: true,
       },
+      product: {
+        type: Schema.Types.ObjectId,
+        ref: "product",
+        required: true,
+      },
 
+      price: {
+        type: String,
+      },
+
+      commission: {
+        type: String,
+      },
+      status: {
+        type: String,
+        enum: ["pending", "completed", "frozen"],
+        default: "pending",
+      },
 
       date: {
         type: Date,
@@ -29,55 +46,6 @@ export default (database) => {
       number: {
         type: String,
         required: true,
-      },
-      amount: {
-        type: Number,
-        required: true,
-      },
-      profit: {
-        type: Number,
-        required: true,
-      },
-
-      coin: {
-        type: String,
-        required: true,
-      },
-
-      price :{ 
-        type: Number,
-        required: true,
-      },
-      commission:{
-        type: Number,
-      },
-
-      time: {
-        type: Number,
-        // required: true,
-      },
-
-      // Futures market order fields
-      direction: {
-        type: String,
-        enum: ['buy', 'sell'],
-      },
-      lots: {
-        type: Number,
-      },
-      multiplier: {
-        type: Number,
-      },
-      tradeStatus: {
-        type: String,
-        enum: ['pending', 'closed'],
-        default: 'pending',
-      },
-      closePrice: {
-        type: Number,
-      },
-      pnl: {
-        type: Number,
       },
 
       tenant: {

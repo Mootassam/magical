@@ -164,7 +164,6 @@ export default class TenantService {
         session,
       },
     );
-    console.log("🚀 ~ TenantService ~ joinWithDefaultRolesOrAskApproval ~ tenant:", tenant)
 
     if (!tenant) {
       return;
@@ -474,18 +473,6 @@ export default class TenantService {
   
   async findAndCountAll(args) {
     return TenantRepository.findAndCountAll(
-      args,
-      this.options,
-    );
-  }
-  
-
-
-
-
-    
-  async findAndCountAlls(args) {
-    return TenantRepository.findAll(
       args,
       this.options,
     );

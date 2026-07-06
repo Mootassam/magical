@@ -31,7 +31,7 @@ class Permissions {
       },
       userEdit: {
         id: "userEdit",
-        allowedRoles: [roles.admin],
+        allowedRoles: [roles.admin, roles.agent],
         allowedPlans: [plans.free, plans.growth, plans.enterprise],
         allowedStorage: [storage.donsAttachements, storage.galleryPhotos],
       },
@@ -56,7 +56,7 @@ class Permissions {
       },
       userRead: {
         id: "userRead",
-        allowedRoles: [roles.admin, roles.member, roles.agent],
+        allowedRoles: [roles.admin, roles.agent ,roles.supervisor],
         allowedPlans: [plans.free, plans.growth, plans.enterprise],
         allowedStorage: [storage.donsAttachements, storage.galleryPhotos],
       },
@@ -68,7 +68,7 @@ class Permissions {
       },
       auditLogRead: {
         id: "auditLogRead",
-        allowedRoles: [roles.admin, roles.agent],
+        allowedRoles: [roles.admin],
         allowedPlans: [plans.free, plans.growth, plans.enterprise],
       },
       settingsEdit: {
@@ -105,7 +105,7 @@ class Permissions {
       },
       categoryRead: {
         id: "categoryRead",
-        allowedRoles: [roles.admin, roles.member, roles.agent],
+        allowedRoles: [roles.admin, roles.member,  roles.agent ,roles.supervisor],
         allowedPlans: [plans.free, plans.growth, plans.enterprise],
         allowedStorage: [storage.categoryPhoto],
       },

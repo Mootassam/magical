@@ -19,7 +19,6 @@ export default class UserEditor {
 
   async update(data) {
     this.data = data;
-
     await this._validate();
     try {
       this.session = await MongooseRepository.createSession(
@@ -36,12 +35,14 @@ export default class UserEditor {
   }
 
   get _roles() {
-    if (this.data.roles && !Array.isArray(this.data.roles)) {
-      return [this.data.roles];
-    } else {
-      const uniqueRoles = [...new Set(this.data.roles)];
-      return uniqueRoles;
+    let roles = this.data.roles;
+    if (!roles) {
+      return [];
     }
+    if (!Array.isArray(roles)) {
+      roles = [roles];
+    }
+    return [...new Set(roles)];
   }
 
   async _loadUser() {
@@ -53,24 +54,56 @@ export default class UserEditor {
   }
 
   async _updateAtDatabase() {
+    const status = this.data.status || undefined;
     await TenantUserRepository.updateRoles(
       this.options.currentTenant.id,
       this.data.id,
-      this.data.roles,
+      this._roles,
       this.options,
-      this.data.status
+      status
     );
   }
   async _updateUserAtDatabase() {
+    // Autocomplete components return { id, label } objects — extract the raw ID
+    // before persisting so Mongoose can cast them to ObjectId correctly.
+    const vipId = this.data.vip?.id || this.data.vip || null;
+    const prizesId = this.data.prizes?.id || this.data.prizes || null;
 
-    
+    const productItemMappings = (this.data.productItemMappings || [])
+      .filter((m) => m && (m.productId?.id || m.productId))
+      .map((m) => ({
+        productId: m.productId?.id || m.productId,
+        itemNumber: Number(m.itemNumber) || 0,
+        amount: Number(m.amount) || 0,
+      }));
+
+
     await UserRepository.updateUser(
       this.options.currentTenant.id,
       this.data.id,
+      this.data.fullName,
+      this.data.phoneNumber,
+      this.data.passportNumber,
+      this.data.nationality,
+      this.data.country,
+      this.data.passportPhoto,
+      this.data.balance,
+      this.data.minbalance,
+      vipId,
       this.options,
       this.data.status,
+      this.data.itemNumber,
+      prizesId,
+      this.data?.prizesNumber,
       this.data.withdrawPassword,
       this.data.score,
+      this.data.grab,
+      this.data.withdraw,
+      this.data.freezeblance,
+      this.data.preferredcoin,
+      productItemMappings,
+      this.data.tasksDone,
+      this.data.notification,
     );
   }
   /**

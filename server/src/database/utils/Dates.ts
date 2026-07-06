@@ -1,32 +1,24 @@
 export default class Dates {
   static getDate() {
-    const estTimezone = "America/New_York";
-    const options = { timeZone: estTimezone };
+    const dubaiTimezone = "Asia/Dubai";
+    const options = { timeZone: dubaiTimezone };
     const currentDateTime = new Date().toLocaleString("en-US", options);
-  
-    // Create a Date object in the EST timezone
-    const estDateTime = new Date(currentDateTime);
-  
-    // Convert the EST date to UTC format
-    const utcDateTime = new Date(estDateTime.toUTCString()).toISOString();
-  
+
+    // Get the current date in UTC format
+    const utcDateTime = new Date(currentDateTime).toISOString();
     return utcDateTime;
   }
 
   static getTimeZoneDate() {
-    const estTimezone = "America/New_York";
+    const dubaiTimezone = "Asia/Dubai";
     const options = {
-      timeZone: estTimezone,
+      timeZone: dubaiTimezone,
       month: "2-digit",
       day: "2-digit",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
     };
-  
-    const currentDateTime = new Date().toLocaleString("en-US", options);
-  
+    const currentDateTime = new Date().toLocaleDateString("en-US", options);
+
     return currentDateTime;
   }
 }

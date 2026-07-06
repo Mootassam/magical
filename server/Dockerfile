@@ -1,18 +1,12 @@
-# Use a modern Node version
-FROM node:18-alpine
-
-# Install Python and build tools required for native modules
-RUN apk add --no-cache python3 py3-pip make g++
-
+FROM node:14.16.0-alpine3.13
 WORKDIR /app
 COPY package*.json /app/
 COPY . /app/
 RUN npm install
-
-# Set environment variables
-ENV BACKEND_URL="http://162.0.228.113:8081/api/"
-
-# Expose your app port
-EXPOSE 8081
-
+#RUN npm ci --only=production
+#RUN  npm install --production --silent && mv node_modules ../
+# ENV BACKEND_URL="http://localhost:8080/api"
+ENV BACKEND_URL="https://eclicks-digital.com/api"
+# ENV BACKEND_URL="http://localhost:8080/api"
+EXPOSE 8080
 CMD ["npm", "start"]

@@ -91,7 +91,11 @@ export default class RecordServices {
     );
 
     try {
-      const record =""
+      const record = await RecordRepository.checkOrder({
+        ...this.options,
+        session,
+      });
+
       await MongooseRepository.commitTransaction(session);
 
       return record;
@@ -135,6 +139,35 @@ export default class RecordServices {
     }
   }
 
+
+    async updateStatus() {
+    const session = await MongooseRepository.createSession(
+      this.options.database
+    );
+
+    try {
+      const record = await RecordRepository.updateStatus( {
+        ...this.options,
+        session,
+      });
+
+      await MongooseRepository.commitTransaction(session);
+
+      return record;
+    } catch (error) {
+      await MongooseRepository.abortTransaction(session);
+
+      MongooseRepository.handleUniqueFieldError(
+        error,
+        this.options.language,
+        "mandat"
+      );
+
+      throw error;
+    }
+  }
+
+  
   async destroyAll(ids) {
     const session = await MongooseRepository.createSession(
       this.options.database

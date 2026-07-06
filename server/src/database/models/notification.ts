@@ -1,97 +1,74 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-export default
-  (database) => {
-    try {
-      return database.model("notification");
-    } catch (error) {
-      // continue, because model doesn't exist
-    }
+export default (database) => {
+  try {
+    return database.model("notification");
+  } catch (error) {
+    // continue, because model doesnt exist
+  }
 
-    const NotificationSchema = new Schema(
-      {
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "user",
-          required: false
-        },
-
-        type: {
-          type: String,
-          enum: [
-            "deposit",
-            "withdraw",
-            "staking",
-            "kyc",
-            "commission",
-            "futures",
-            "accountActivated",
-            "custom",
-            "cancel_deposit",
-            "cancel_withdraw",
-            "cancel_activated"
-          ],
-          required: true,
-        },
-
-        message: {
-          type: String,
-          required: true
-        },
-
-        status: {
-          type: String,
-          enum: ["unread", "read"],
-          default: "unread",
-
-        },
-
-        forAdmin: {
-          type: Boolean,
-          default: false,
-        },
-
-        createdBy: {
-          type: Schema.Types.ObjectId,
-          ref: "user",
-          required: false,
-        },
-
-        updatedBy: {
-          type: Schema.Types.ObjectId,
-          ref: "user",
-          required: false,
-        },
-
-        tenant: {
-          type: Schema.Types.ObjectId,
-          ref: "tenant",
-          required: true,
-        },
-
-        importHash: { type: String },
+  const NotificationSchema = new Schema(
+    {
+      type: {
+        type: String,
+        enum: [
+          "deposit_success", 
+          "deposit_canceled", 
+          "withdraw_success", 
+          "withdraw_canceled", 
+          "system", 
+          "alert"
+        ],
+        required: true,
       },
-      { timestamps: true }
-    );
+      status: {
+        type: String,
+        enum: ["unread", "read"],
+        default: "unread",
+      },
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+        required: true,
+      },
+      transaction: {
+        type: Schema.Types.ObjectId,
+        ref: "transaction",
+      },
+      amount: {
+        type: String,
+        required: true,
+      },
+      tenant: {
+        type: Schema.Types.ObjectId,
+        ref: "tenant",
+        required: true,
+      },
+      createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+      },
+      updatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+      },
+    },
+    { timestamps: true }
+  );
 
-    NotificationSchema.index(
-      { importHash: 1, tenant: 1 },
-      {
-        unique: true,
-        partialFilterExpression: {
-          importHash: { $type: "string" },
-        },
-      }
-    );
+  NotificationSchema.virtual("id").get(function () {
+    // @ts-ignore
+    return this._id.toHexString();
+  });
 
-    NotificationSchema.virtual("id").get(function () {
-      // @ts-ignore
-      return this._id.toHexString();
-    });
+  NotificationSchema.set("toJSON", {
+    getters: true,
+  });
 
-    NotificationSchema.set("toJSON", { getters: true });
-    NotificationSchema.set("toObject", { getters: true });
+  NotificationSchema.set("toObject", {
+    getters: true,
+  });
 
-    return database.model("notification", NotificationSchema);
-  };
+  return database.model("notification", NotificationSchema);
+};

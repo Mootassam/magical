@@ -55,19 +55,19 @@ export default class TenantUserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: AuditLogRepository.CREATE,
-    //     values: {
-    //       email: user.email,
-    //       status,
-    //       roles,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.CREATE,
+        values: {
+          email: user.email,
+          status,
+          roles,
+        },
+      },
+      options
+    );
   }
 
 
@@ -91,19 +91,19 @@ export default class TenantUserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: AuditLogRepository.CREATE,
-    //     values: {
-    //       email: user.email,
-    //       status,
-    //       roles,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.CREATE,
+        values: {
+          email: user.email,
+          status,
+          roles,
+        },
+      },
+      options
+    );
   }
 
   static async destroyUser(tenantId, id, options: IRepositoryOptions) {
@@ -122,17 +122,17 @@ export default class TenantUserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: AuditLogRepository.DELETE,
-    //     values: {
-    //       email: user.email,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.DELETE,
+        values: {
+          email: user.email,
+        },
+      },
+      options
+    );
   }
 
   static async destroy(tenantId, id, options: IRepositoryOptions) {
@@ -154,17 +154,17 @@ export default class TenantUserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: AuditLogRepository.DELETE,
-    //     values: {
-    //       email: user.email,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: AuditLogRepository.DELETE,
+        values: {
+          email: user.email,
+        },
+      },
+      options
+    );
   }
 
   static async updateRoles(tenantId, id, roles, options, status) {
@@ -214,13 +214,9 @@ export default class TenantUserRepository {
     }
 
     tenantUser.roles = newRoles;
-    (tenantUser.status = status),
-      // tenantUser.status = selectStatus(
-      //   tenantUser.status,
-      //   newRoles,
-      // );
+    tenantUser.status = status;
 
-      await User(options.database).updateOne(
+    await User(options.database).updateOne(
         { _id: id, "tenants.tenant": tenantId },
         {
           $set: {
@@ -231,21 +227,21 @@ export default class TenantUserRepository {
         options
       );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: user.id,
-    //     action: isCreation
-    //       ? AuditLogRepository.CREATE
-    //       : AuditLogRepository.UPDATE,
-    //     values: {
-    //       email: user.email,
-    //       status: tenantUser.status,
-    //       roles: newRoles,
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: user.id,
+        action: isCreation
+          ? AuditLogRepository.CREATE
+          : AuditLogRepository.UPDATE,
+        values: {
+          email: user.email,
+          status: tenantUser.status,
+          roles: newRoles,
+        },
+      },
+      options
+    );
 
     return tenantUser;
   }
@@ -307,19 +303,19 @@ export default class TenantUserRepository {
       options
     );
 
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: "user",
-    //     entityId: currentUser.id,
-    //     action: AuditLogRepository.UPDATE,
-    //     values: {
-    //       email: currentUser.email,
-    //       roles: tenantUser.roles,
-    //       status: selectStatus("active", tenantUser.roles),
-    //     },
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: currentUser.id,
+        action: AuditLogRepository.UPDATE,
+        values: {
+          email: currentUser.email,
+          roles: tenantUser.roles,
+          status: selectStatus("active", tenantUser.roles),
+        },
+      },
+      options
+    );
   }
 }
 

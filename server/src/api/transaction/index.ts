@@ -11,6 +11,11 @@ export default (app) => {
     `/tenant/:tenantId/transaction/import`,
     require("./transactionImport").default
   );
+
+    app.post(
+    `/tenant/:tenantId/transactionStatus`,
+    require("./transactionStatus").default
+  );
   app.delete(
     `/tenant/:tenantId/transaction`,
     require("./transactionDestroy").default
@@ -22,18 +27,6 @@ export default (app) => {
   app.get(
     `/tenant/:tenantId/transaction`,
     require("./transactionList").default
-  );
-
-
-  app.get(
-    `/tenant/:tenantId/reward`,
-    require("./transactionReward").default
-  );
-
-
-    app.get(
-    `/tenant/:tenantId/transactionMobile`,
-    require("./transactionListMobile").default
   );
 
   app.get(

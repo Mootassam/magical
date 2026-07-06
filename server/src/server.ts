@@ -1,10 +1,12 @@
+/**
+ * Starts the application on the port specified.
+ */
 require("dotenv").config();
-import server from "./api";
+
+import api from "./api";
+
 const PORT = process.env.PORT || 8081;
 
-(async () => {
-
-  server.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`);
-  });
-})();
+api.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
+});

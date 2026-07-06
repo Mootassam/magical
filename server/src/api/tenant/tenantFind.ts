@@ -3,7 +3,6 @@ import TenantService from '../../services/tenantService';
 
 export default async (req, res, next) => {
   try {
-    
     let payload;
 
     if (req.params.id) {

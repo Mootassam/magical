@@ -2,11 +2,12 @@ class Roles {
   static get values() {
     return {
       admin: "admin",
-      member: "member",
+      member: "membre",
       agent: "agent",
       adhérent: "adhérent",
       sponsor: "sponsor",
       partenaire: "partenaire",
+      supervisor: "supervisor",
     };
   }
 }

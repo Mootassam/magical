@@ -2,7 +2,7 @@ import Error400 from "../errors/Error400";
 import MongooseRepository from "../database/repositories/mongooseRepository";
 import { IServiceOptions } from "./IServiceOptions";
 import ProductRepository from "../database/repositories/productRepository";
-import Error405 from "../errors/Error405";
+import RecordRepository from "../database/repositories/recordRepository";
 
 export default class ProductServices {
   options: IServiceOptions;
@@ -76,6 +76,11 @@ export default class ProductServices {
           ...this.options,
           session,
         });
+
+        await RecordRepository.destroyAll(id, {
+          ...this.options,
+          session
+        })
       }
 
       await MongooseRepository.commitTransaction(session);
@@ -89,47 +94,41 @@ export default class ProductServices {
     return ProductRepository.findById(id, this.options);
   }
 
-  async findByCoin(id) {
-    return ProductRepository.findByCoin(id, this.options);
-  }
-
-  async findNews() {
-
-    return ProductRepository.FindNews(this.options);
-  }
-
-  async findTopCoins(data) { 
-    return ProductRepository.findTopCoins(data, this.options)
-  }
-
-
-
   async findAllAutocomplete(search, limit) {
     return ProductRepository.findAllAutocomplete(search, limit, this.options);
+  }
+
+
+    async findAllAutocompleteProduct(search, limit) {
+    return ProductRepository.findAllAutocompleteProduct(search, limit, this.options);
   }
 
   async findAndCountAll(args) {
     return ProductRepository.findAndCountAll(args, this.options);
   }
 
-  async checkPermission(options) {
+  async checkpermission(options) {
     const currentUser = MongooseRepository.getCurrentUser(options);
-    if (!currentUser?.balance && currentUser?.balance === 0) {
-throw new Error400(options.language, "errors.resetAccountContactSupport");    }
+    if (currentUser.grab) return
+
+    throw new Error400(
+      this.options.language,
+      "validation.permissoin"
+    );
+
   }
-  
 
   async grapOrders(args) {
     const session = await MongooseRepository.createSession(
       this.options.database
     );
-
     try {
-      // await this.checkPermission(this.options);
+      // await this.checkpermission(this.options)
       return ProductRepository.grapOrders(this.options);
     } catch (error) {
       await MongooseRepository.abortTransaction(session);
       throw error;
+
     }
   }
 

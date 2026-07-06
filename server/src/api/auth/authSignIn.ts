@@ -9,7 +9,6 @@ export default async (req, res, next) => {
       req.body.invitationToken,
       req.body.tenantId,
       req,
-      req,
     );
 
     await ApiResponseHandler.success(req, res, payload);

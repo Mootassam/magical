@@ -6,8 +6,6 @@ import it from './it';
 import es from './es';
 import ru from './ru';
 import tr from './ru';
-import ne from './ne';
-import In from './in'
 
 import _get from 'lodash/get';
 
@@ -23,8 +21,6 @@ const languages = {
   es: es,
   ru: ru,
   tr: tr,
-  ne: ne,
-  in: In
 };
 
 /**
@@ -49,7 +45,6 @@ function format(message, args) {
  * Checks if the key exists on the language.
  */
 export const i18nExists = (languageCode, key) => {
-  console.log(languageCode, "Returned Checks languageCode");
 
   const dictionary =
     languages[languageCode] || languages['en'];
@@ -63,8 +58,7 @@ export const i18nExists = (languageCode, key) => {
 export const i18n = (languageCode, key, ...args) => {
 
 
-  console.log(languageCode, "Returned languageCode");
-
+  
   const dictionary =
     languages[languageCode] || languages['en'];
   const message = _get(dictionary, key);

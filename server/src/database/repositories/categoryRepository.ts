@@ -1,4 +1,3 @@
-
 import MongooseRepository from "./mongooseRepository";
 import MongooseQueryUtils from "../utils/mongooseQueryUtils";
 import AuditLogRepository from "./auditLogRepository";
@@ -148,7 +147,7 @@ class CategoryRepository {
     { filter, limit = 0, offset = 0, orderBy = "" },
     options: IRepositoryOptions
   ) {
-    
+
     const currentTenant = MongooseRepository.getCurrentTenant(options);
 
     let criteriaAnd: any = [];
@@ -259,6 +258,27 @@ class CategoryRepository {
     return { rows, count };
   }
 
+
+  static async findAll(
+    options: IRepositoryOptions
+  ) {
+
+
+    let criteriaAnd: any = [];
+
+    const sort = MongooseQueryUtils.sort("createdAt_DESC");
+
+
+    let rows = await Category(options.database).find({})
+
+
+    rows = await Promise.all(
+      rows.map(this._mapRelationshipsAndFillDownloadUrl)
+    );
+
+    return { rows };
+  }
+
   static async findAllAutocomplete(search, limit, options: IRepositoryOptions) {
     const currentTenant = MongooseRepository.getCurrentTenant(options);
 
@@ -301,15 +321,15 @@ class CategoryRepository {
   }
 
   static async _createAuditLog(action, id, data, options: IRepositoryOptions) {
-    // await AuditLogRepository.log(
-    //   {
-    //     entityName: Category(options.database).modelName,
-    //     entityId: id,
-    //     action,
-    //     values: data,
-    //   },
-    //   options
-    // );
+    await AuditLogRepository.log(
+      {
+        entityName: Category(options.database).modelName,
+        entityId: id,
+        action,
+        values: data,
+      },
+      options
+    );
   }
 
   static async _mapRelationshipsAndFillDownloadUrl(record) {

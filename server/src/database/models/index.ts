@@ -10,12 +10,11 @@ const models = [
   require('./product').default,
   require('./records').default,
   require("./company").default,
-  require("./stakeProgram").default, // Load this BEFORE stacking
-  require("./stacking").default,
-  require("./depositNetwork").default,
-  require("./depositMethod").default,
-  require("./wallet").default,
-  require("./Transfer").default,    // stacking depends on stakeProgram
+  require('./notification').default,
+  require('./mouvements').default,
+  require('./dons').default,
+  require('./historiquePoints').default,
+  require('./votes').default,
 ];
 
 export default function init(database) {

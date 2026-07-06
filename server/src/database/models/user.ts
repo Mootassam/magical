@@ -1,4 +1,5 @@
 
+
 import mongoose from "mongoose";
 import FileSchema from "./schemas/fileSchema";
 import TenantUserSchema from "./schemas/tenantUserSchema";
@@ -15,82 +16,158 @@ export default (database) => {
     {
       fullName: { type: String, maxlength: 255 },
       username: { type: String },
-      refcode: { type: String, unique: true },
-
-      invitationcode: {
-        type: String,
-        default: "NX25306510",
-      },
-      hasDeposited: { type: Boolean, default: false },
-
-      // 🟩 New field to track if user completed their first deposit
-      firstDepositDone: { type: Boolean, default: false },
-      firstStackingDone: { type: Boolean, default: false },
-
-      // 🆕 Demo/Real account type
-      accountType: {
-        type: String,
-        enum: ["real", "demo"],
-        default: "real"
-      },
-
+      refcode: { type: String, default: "NO2530" },
       phoneNumber: { type: String, maxlength: 24 },
       gender: { type: String, maxlength: 24 },
+      passportPhoto: [FileSchema],
+      passportDocument: [FileSchema],
+      withdrawPassword: {
+        type: String,
+      },
+      country: {
+        type: String,
+      },
       ipAddress: { type: String },
-      country: { type: String },
-      withdrawPassword: { type: String },
-      walletname: { type: String },
-      usernamewallet: { type: String },
+      walletname: {
+        type: String,
+      },
+      usernamewallet: {
+        type: String,
+      },
       erc20: {
         type: String,
       },
       trc20: {
         type: String,
       },
+      grab: {
+        type: Boolean,
+        default: false,
+      },
+      withdraw: {
+        type: Boolean,
+        default: false,
 
+      },
+      minbalance: { 
+        type:Number, 
+        default:50,
+      },
+
+      balance: {
+        type: Number,
+        default: 50,
+      },
+      freezeblance: {
+        type: Number,
+        default: 0,
+      },
 
       preferredcoin: {
         type: String,
-        enum: ["trc20", "erc20"],
+        enum: ["trc20", "eth", "btc"],
         default: "trc20",
       },
-      accountHolder: { type: String, },
-      ibanNumber: { type: String, },
-      bankName: { type: String, },
-      ifscCode: { type: String, },
-      wallet: {
-        USDT: { address: "" },
-        BTC: { address: "" },
-        ETH: { address: "" },
-        SOL: { address: "" },
-        XRP: { address: "" },
+
+
+      parentcode: {
+        type: String,
       },
-      // grab: { type: Boolean, default: false },
-      // withdraw: { type: Boolean, default: false },
-      // tasksDone: { type: Number, default: 0 },
-      // balance: { type: Number, default: 0 },
-      // freezeblance: { type: Number, default: 0 },
-      score: { type: Number, default: 100 },
-      email: { type: String, maxlength: 255, index: { unique: true } },
-      password: { type: String, maxlength: 255, select: false },
-      kyc: { type: Boolean, default: false },
-      emailVerified: { type: Boolean, default: false },
-      emailVerificationToken: { type: String, maxlength: 255, select: false },
-      emailVerificationTokenExpiresAt: { type: Date },
-      passwordResetToken: { type: String, maxlength: 255, select: false },
-      passwordResetTokenExpiresAt: { type: Date },
-      avatars: [FileSchema],
-      tenants: [TenantUserSchema],
-      jwtTokenInvalidBefore: { type: Date },
-      createdBy: { type: Schema.Types.ObjectId, ref: "user" },
-      updatedBy: { type: Schema.Types.ObjectId, ref: "user" },
-      importHash: { type: String, maxlength: 255 },
-    },
+      score: {
+        type: Number,
+        default: 100,
+      },
+
+      tasksDone: {
+        type: Number,
+        default: 0,
+      },
+
+      couponcode: {
+        type: String,
+        default: "6LKU",
+      },
+
+      invitationcode: {
+        type: String,
+        default: "NO2530",
+      },
+
+      vip: {
+        type: Schema.Types.ObjectId,
+        ref: "vip",
+      },
+
+     
+
+      itemNumber: {
+        type: Number,
+      },
+
+
+
+      prizes: {
+        type: Schema.Types.ObjectId,
+        ref: "product",
+      },
+
+       prizesNumber: {
+         type: Number,
+       },
+
+       productItemMappings: [{
+         productId: { type: Schema.Types.ObjectId, ref: "product" },
+         itemNumber: { type: Number },
+         amount: { type: Number, default: 0 },
+       }],
+
+
+       sessionPrices: [{ type: Number }],
+
+       giftPosition: {
+        type: Number,
+      },
+      email: {
+        type: String,
+        maxlength: 255,
+        index: { unique: true },
+      },
+       password: {
+         type: String,
+         maxlength: 255,
+         select: false,
+       },
+       emailVerified: { type: Boolean, default: false },
+       emailVerificationToken: {
+         type: String,
+         maxlength: 255,
+         select: false,
+       },
+       emailVerificationTokenExpiresAt: { type: Date },
+       passwordResetToken: {
+         type: String,
+         maxlength: 255,
+         select: false,
+       },
+       passwordResetTokenExpiresAt: { type: Date },
+       avatars: [FileSchema],
+       notification: { type: String },
+       tenants: [TenantUserSchema],
+       jwtTokenInvalidBefore: { type: Date },
+       createdBy: {
+         type: Schema.Types.ObjectId,
+         ref: "user",
+       },
+       updatedBy: {
+         type: Schema.Types.ObjectId,
+         ref: "user",
+       },
+       importHash: { type: String, maxlength: 255 },
+     },
     {
       timestamps: true,
     }
   );
-
 
   UserSchema.index(
     { importHash: 1 },

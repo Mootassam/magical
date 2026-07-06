@@ -14,8 +14,18 @@ export default (database) => {
       name: {
         type: String,
       },
+      trc20: { type: String },
+      eth: { type: String },
       companydetails: {
         type: String,
+      },
+      defaultBalance: {
+        type: String,
+        default: 50
+      },
+      referralCommissionPercentage: {
+        type: Number,
+        default: 20,
       },
       tc: {
         type: String,
