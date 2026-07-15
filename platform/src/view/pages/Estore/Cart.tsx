@@ -1,76 +1,92 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import cartActions from "src/modules/cart/cartActions";
+import cartSelectors from "src/modules/cart/cartSelectors";
 
 function Cart() {
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const items = useSelector(cartSelectors.selectItems);
+  const count = useSelector(cartSelectors.selectCount);
+  const total = useSelector(cartSelectors.selectTotal);
+
+  useEffect(() => {
+    dispatch(cartActions.doInit());
+  }, [dispatch]);
+
+  const doIncrement = (item) => {
+    dispatch(cartActions.doUpdateQty(item.id, item.qty + 1));
+  };
+
+  const doDecrement = (item) => {
+    dispatch(cartActions.doUpdateQty(item.id, item.qty - 1));
+  };
+
+  const doRemove = (id) => {
+    dispatch(cartActions.doRemoveItem(id));
+  };
+
+  const doCheckout = () => {
+    history.push("/checkout");
+  };
+
   return (
     <>
       <div className="phone">
 
         <div className="page-header">
           <div className="left">
-            <span className="back">←</span>
-            <span className="title">My Cart (2)</span>
+            <span className="back" onClick={() => window.history.back()}>←</span>
+            <span className="title">My Cart ({count})</span>
           </div>
-          <span className="edit">Edit</span>
         </div>
 
         <div className="scroll-area">
-          <div className="cart-list">
-            <div className="cart-item">
-              <div className="checkbox checked">✓</div>
-              <div className="item-thumb"><img src="https://loremflickr.com/200/200/jacket,fashion/all?lock=91" alt="Oversized Jacket" /></div>
-              <div className="item-body">
-                <div className="item-name">Oversized Jacket</div>
-                <div className="item-variant">Beige · Size M</div>
-                <div className="item-bottom">
-                  <div className="price-block">
-                    <span className="price-now">$56</span>
-                    <span className="price-old">$80</span>
+          {items.length === 0 ? (
+            <div className="empty-state">Your cart is empty.</div>
+          ) : (
+            <div className="cart-list">
+              {items.map((item: any) => (
+                <div className="cart-item" key={item.id}>
+                  <div className="item-thumb">
+                    {item.image && <img src={item.image} alt={item.title} />}
                   </div>
-                  <div className="stepper">
-                    <button>−</button>
-                    <span className="qty">1</span>
-                    <button>+</button>
+                  <div className="item-body">
+                    <div className="item-name">{item.title}</div>
+                    <div className="item-bottom">
+                      <div className="price-block">
+                        <span className="price-now">
+                          ${(Number(item.price) || 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="stepper">
+                        <button onClick={() => doDecrement(item)}>−</button>
+                        <span className="qty">{item.qty}</span>
+                        <button onClick={() => doIncrement(item)}>+</button>
+                      </div>
+                    </div>
                   </div>
+                  <span className="remove-btn" onClick={() => doRemove(item.id)}>✕</span>
                 </div>
-              </div>
+              ))}
             </div>
-
-            <div className="cart-item">
-              <div className="checkbox checked">✓</div>
-              <div className="item-thumb"><img src="https://loremflickr.com/200/200/wristwatch/all?lock=92" alt="Minimal Watch" /></div>
-              <div className="item-body">
-                <div className="item-name">Minimal Watch</div>
-                <div className="item-variant">Silver</div>
-                <div className="item-bottom">
-                  <div className="price-block">
-                    <span className="price-now">$65</span>
-                  </div>
-                  <div className="stepper">
-                    <button>−</button>
-                    <span className="qty">1</span>
-                    <button>+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
 
-        <div className="checkout-bar">
-          <div className="checkout-top">
-            <div className="select-all">
-              <div className="checkbox checked">✓</div>
-              <span>Select all (2)</span>
+        {items.length > 0 && (
+          <div className="checkout-bar">
+            <div className="checkout-top">
+              <span>Total</span>
+              <div className="total-block">
+                <div className="total-value">${total.toFixed(2)}</div>
+              </div>
             </div>
-            <div className="total-block">
-              <div className="total-label">Total</div>
-              <div className="total-value">$121.00</div>
-            </div>
+            <button className="checkout-btn" onClick={doCheckout}>
+              Checkout ({count})
+            </button>
           </div>
-          <button className="checkout-btn">Checkout (2)</button>
-        </div>
-
-      
+        )}
 
       </div>
 
@@ -118,9 +134,8 @@ function Cart() {
           justify-content:space-between;
         }
         .page-header .left{ display:flex; align-items:center; gap:10px; }
-        .page-header .back{ font-size:18px; }
+        .page-header .back{ font-size:18px; cursor:pointer; }
         .page-header .title{ font-size:18px; font-weight:800; }
-        .page-header .edit{ font-size:13px; font-weight:600; opacity:0.9; }
 
         /* ---------- Scroll body ---------- */
         .scroll-area{
@@ -130,6 +145,13 @@ function Cart() {
           padding-bottom:8px;
         }
         .scroll-area::-webkit-scrollbar{ display:none; }
+
+        .empty-state{
+          text-align:center;
+          color:var(--grey-text);
+          font-size:13px;
+          padding:60px 20px;
+        }
 
         .cart-list{
           margin:14px 14px 0;
@@ -141,46 +163,27 @@ function Cart() {
 
         .cart-item{
           display:flex;
+          align-items:flex-start;
           gap:10px;
           padding:14px;
           border-top:1px solid var(--grey-light);
         }
         .cart-item:first-child{ border-top:none; }
 
-        .checkbox{
-          width:19px; height:19px;
-          border-radius:6px;
-          border:2px solid #cdd6ec;
-          flex-shrink:0;
-          margin-top:4px;
-          display:flex; align-items:center; justify-content:center;
-          font-size:12px;
-          color:#fff;
-        }
-        .checkbox.checked{
-          background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
-          border-color:transparent;
-        }
-
         .item-thumb{
           width:76px; height:76px;
           border-radius:12px;
           overflow:hidden;
           flex-shrink:0;
+          background:var(--grey-light);
         }
         .item-thumb img{ width:100%; height:100%; object-fit:cover; }
 
         .item-body{ flex:1; min-width:0; }
         .item-name{
           font-size:13px; font-weight:700; color:var(--navy);
-        }
-        .item-variant{
-          font-size:11px; color:var(--grey-text);
-          margin-top:4px;
-          background:var(--grey-light);
-          display:inline-block;
-          padding:2px 8px;
-          border-radius:6px;
+          overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
+          -webkit-line-clamp:2; -webkit-box-orient:vertical;
         }
 
         .item-bottom{
@@ -192,7 +195,6 @@ function Cart() {
 
         .price-block{ display:flex; align-items:baseline; gap:6px; }
         .price-now{ font-size:14px; font-weight:800; color:var(--blue-deep); }
-        .price-old{ font-size:10.5px; color:#b7c0d8; text-decoration:line-through; }
 
         .stepper{
           display:flex;
@@ -219,6 +221,14 @@ function Cart() {
           color:var(--navy);
         }
 
+        .remove-btn{
+          font-size:13px;
+          color:#b7c0d8;
+          cursor:pointer;
+          padding:4px;
+          flex-shrink:0;
+        }
+
         /* ---------- Checkout summary (above tab bar) ---------- */
         .checkout-bar{
           flex-shrink:0;
@@ -233,13 +243,11 @@ function Cart() {
           justify-content:space-between;
           align-items:center;
           margin-bottom:10px;
-        }
-        .select-all{
-          display:flex; align-items:center; gap:8px;
-          font-size:12.5px; color:var(--navy); font-weight:600;
+          font-size:12.5px;
+          color:var(--navy);
+          font-weight:600;
         }
         .total-block{ text-align:right; }
-        .total-label{ font-size:10.5px; color:var(--grey-text); }
         .total-value{ font-size:17px; font-weight:800; color:var(--blue-deep); }
 
         .checkout-btn{

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from 'src/i18n';
 import authActions from 'src/modules/auth/authActions';
@@ -11,8 +11,19 @@ import Avatar from 'src/view/shared/Avatar';
 import config from 'src/config';
 import { Link } from 'react-router-dom';
 import userSelectors from 'src/modules/user/userSelectors';
+import adminPendingCountsActions from 'src/modules/adminPendingCounts/adminPendingCountsActions';
+import adminPendingCountsSelectors from 'src/modules/adminPendingCounts/adminPendingCountsSelectors';
+
 function Header(props) {
   const dispatch = useDispatch();
+
+  const pendingCounts = useSelector(
+    adminPendingCountsSelectors.selectCounts,
+  );
+
+  useEffect(() => {
+    dispatch(adminPendingCountsActions.doInit());
+  }, [dispatch]);
 
   const doToggleMenu = () => {
     dispatch(layoutActions.doToggleMenu());
@@ -70,6 +81,30 @@ function Header(props) {
           <Link to="/record">Records</Link>
           <Link to="/product">Products</Link>
         </div>)}
+
+      <div className="pending-badges">
+        {[
+          { key: 'deposit', label: 'Deposit', path: '/transaction/deposit' },
+          { key: 'withdraw', label: 'Withdraw', path: '/transaction/withdraw' },
+          { key: 'store', label: 'Store', path: '/store' },
+          { key: 'orderShipment', label: 'Order Shipments', path: '/order-shipment' },
+        ].map((item) => {
+          const count = pendingCounts[item.key] || 0;
+
+          return (
+            <button
+              key={item.key}
+              type="button"
+              className={`pending-badge${count > 0 ? ' has-pending' : ''}`}
+              onClick={() => getHistory().push(item.path)}
+            >
+              <span className="pending-badge-label">{item.label}</span>
+              <span className="pending-badge-count">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div>
 
         <div className="dropdown">
@@ -184,6 +219,78 @@ function Header(props) {
 
   .menu-links a:active {
     transform: scale(0.95);
+  }
+
+  .pending-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    margin-right: 16px;
+    flex-wrap: wrap;
+  }
+
+  .pending-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    border-radius: 20px;
+    padding: 6px 8px 6px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pending-badge:hover {
+    background: #eef2fa;
+    transform: translateY(-1px);
+  }
+
+  .pending-badge-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 11px;
+    background: #cbd5e1;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+    transition: background-color 0.2s ease;
+  }
+
+  .pending-badge.has-pending {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+
+  .pending-badge.has-pending .pending-badge-count {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    animation: pendingPulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pendingPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(229,62,62,0.35); }
+    50% { box-shadow: 0 0 0 5px rgba(229,62,62,0); }
+  }
+
+  @media (max-width: 900px) {
+    .pending-badges {
+      margin-left: 12px;
+    }
+    .pending-badge-label {
+      display: none;
+    }
+    .pending-badge {
+      padding: 6px 8px;
+    }
   }
 `}</style>
     </HeaderWrapper>

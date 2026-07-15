@@ -3,6 +3,7 @@ import MongooseRepository from "../database/repositories/mongooseRepository";
 import { IServiceOptions } from "./IServiceOptions";
 import ProductRepository from "../database/repositories/productRepository";
 import RecordRepository from "../database/repositories/recordRepository";
+import ProductCategoryRepository from "../database/repositories/productCategoryRepository";
 
 export default class ProductServices {
   options: IServiceOptions;
@@ -65,6 +66,15 @@ export default class ProductServices {
     }
   }
 
+  async destroyAllRecords() {
+    const { rows } = await ProductRepository.findAndCountAll(
+      { filter: null, limit: 0, offset: 0 },
+      this.options,
+    );
+
+    return this.destroyAll(rows.map((row) => row.id));
+  }
+
   async destroyAll(ids) {
     const session = await MongooseRepository.createSession(
       this.options.database
@@ -72,15 +82,22 @@ export default class ProductServices {
 
     try {
       for (const id of ids) {
-        await ProductRepository.destroy(id, {
+        const deletedProduct = await ProductRepository.destroy(id, {
           ...this.options,
           session,
         });
 
-        await RecordRepository.destroyAll(id, {
+        await RecordRepository.destroyAllByProduct(id, {
           ...this.options,
           session
         })
+
+        if (deletedProduct?.category) {
+          await ProductCategoryRepository.destroy(deletedProduct.category, {
+            ...this.options,
+            session,
+          });
+        }
       }
 
       await MongooseRepository.commitTransaction(session);

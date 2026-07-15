@@ -1,6 +1,97 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import shopCategoryActions from "src/modules/shop/shopCategoryActions";
+import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
+import shopProductActions from "src/modules/shop/shopProductActions";
+import shopProductSelectors from "src/modules/shop/shopProductSelectors";
+import storeListingActions from "src/modules/storeListing/storeListingActions";
+import storeListingSelectors from "src/modules/storeListing/storeListingSelectors";
+import Message from "src/view/shared/message";
+
+const WHOLESALE_DISCOUNT = 0.2;
+
+function toWholesalePrice(price) {
+  const numeric = Number(price) || 0;
+  return numeric * (1 - WHOLESALE_DISCOUNT);
+}
+
+function formatPrice(value) {
+  return `$${(Number(value) || 0).toFixed(2)}`;
+}
 
 function WholesaleManagement() {
+  const dispatch = useDispatch();
+
+  const categories = useSelector(shopCategorySelectors.selectRows);
+  const categoriesLoading = useSelector(shopCategorySelectors.selectLoading);
+  const products = useSelector(shopProductSelectors.selectRows);
+  const productsLoading = useSelector(shopProductSelectors.selectLoading);
+  const listedProductIds = useSelector(storeListingSelectors.selectListedProductIds);
+  const listingSaveLoading = useSelector(storeListingSelectors.selectCreateLoading);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [minPriceInput, setMinPriceInput] = useState("");
+  const [maxPriceInput, setMaxPriceInput] = useState("");
+  const [appliedPriceRange, setAppliedPriceRange] = useState<{ min: string; max: string }>({
+    min: "",
+    max: "",
+  });
+  const [listingProduct, setListingProduct] = useState<any>(null);
+
+  useEffect(() => {
+    dispatch(shopCategoryActions.doFetch());
+    dispatch(storeListingActions.doFetchMine());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(
+      shopProductActions.doFetch(
+        selectedCategoryId || undefined,
+        appliedPriceRange.min,
+        appliedPriceRange.max,
+      ),
+    );
+  }, [dispatch, selectedCategoryId, appliedPriceRange]);
+
+  const doSelectCategory = (categoryId: string | null) => {
+    setSelectedCategoryId(categoryId);
+  };
+
+  const doApplyFilter = () => {
+    setAppliedPriceRange({ min: minPriceInput.trim(), max: maxPriceInput.trim() });
+  };
+
+  const doOpenListingModal = (product: any) => {
+    if (listedProductIds.has(product.id)) {
+      Message.success("Already added to your wholesale listings.");
+      return;
+    }
+
+    setListingProduct(product);
+  };
+
+  const doCloseListingModal = () => {
+    setListingProduct(null);
+  };
+
+  const doConfirmListing = async () => {
+    const record = await dispatch(
+      storeListingActions.doCreate(listingProduct.id) as any,
+    );
+
+    if (record) {
+      Message.success(`"${listingProduct.title}" added to your wholesale listings.`);
+      setListingProduct(null);
+    }
+  };
+
+  const selectedCategory = categories.find(
+    (category: any) => category.id === selectedCategoryId,
+  );
+
+  const isInitialLoading = productsLoading && products.length === 0;
+
   return (
     <>
       <div className="phone">
@@ -12,169 +103,175 @@ function WholesaleManagement() {
 
         <div className="tabs-wrap">
           <div className="tabs-scroll">
-            <div className="tab-chip active">All</div>
-            <div className="tab-chip">Lifestyle</div>
-            <div className="tab-chip">Men Shoes</div>
-            <div className="tab-chip">Women Shoes</div>
-            <div className="tab-chip">Accessories</div>
-            <div className="tab-chip">Men Clothing</div>
-            <div className="tab-chip">Women Bags</div>
-            <div className="tab-chip">Men Bags</div>
-            <div className="tab-chip">Women Clothing</div>
-            <div className="tab-chip">Girls</div>
-            <div className="tab-chip">Boys</div>
+            <div
+              className={`tab-chip${!selectedCategoryId ? " active" : ""}`}
+              onClick={() => doSelectCategory(null)}
+            >
+              All
+            </div>
+            {!categoriesLoading &&
+              categories.map((category: any) => (
+                <div
+                  key={category.id}
+                  className={`tab-chip${category.id === selectedCategoryId ? " active" : ""}`}
+                  onClick={() => doSelectCategory(category.id)}
+                >
+                  {category.name}
+                </div>
+              ))}
+            {categoriesLoading && (
+              <>
+                <div className="tab-chip skeleton-chip" />
+                <div className="tab-chip skeleton-chip" />
+                <div className="tab-chip skeleton-chip" />
+              </>
+            )}
           </div>
           <div className="filter-row">
-            <input type="text" className="price-input" placeholder="Lowest Price" />
+            <input
+              type="number"
+              className="price-input"
+              placeholder="Lowest Price"
+              value={minPriceInput}
+              onChange={(event) => setMinPriceInput(event.target.value)}
+            />
             <span className="dash">–</span>
-            <input type="text" className="price-input" placeholder="Highest Price" />
-            <button className="filter-btn">Filter</button>
+            <input
+              type="number"
+              className="price-input"
+              placeholder="Highest Price"
+              value={maxPriceInput}
+              onChange={(event) => setMaxPriceInput(event.target.value)}
+            />
+            <button className="filter-btn" onClick={doApplyFilter}>Filter</button>
           </div>
         </div>
 
         <div className="scroll-area">
 
-          <div className="result-count">Showing <b>128</b> items in Accessories</div>
-
-          <div className="grid">
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/luxurywatch/all?lock=301" alt="Land-Dweller 40 watch" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Land-Dweller 40</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$17,400.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/necklace,gold/all?lock=302" alt="Long necklace" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Long Necklace White Gold</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$35,090.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/diamond,necklace/all?lock=303" alt="Diamond necklace" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Pink Gold Diamond Necklace</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$15,530.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/earrings,jewelry/all?lock=304" alt="Pendant earrings" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Pendant Earrings White Gold</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$3,810.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/bracelet,silver/all?lock=305" alt="Ankle bracelet" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Ankle Bracelet Pavé Silver</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$3,470.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/bracelet,gold/all?lock=306" alt="Pink gold bracelet" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Ankle Bracelet Pink Gold</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$2,690.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/hoopearrings/all?lock=307" alt="Large hoop earrings" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Large Hoop Earrings Gold</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$7,020.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/silverearrings/all?lock=308" alt="Small hoop earrings" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Small Hoop Earrings Silver</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$3,810.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/goldring/all?lock=309" alt="Double yellow gold ring" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Double Yellow Gold Diamond Ring</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$7,870.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/whitegoldnecklace/all?lock=310" alt="White gold necklace rows" /></div>
-              <div className="prod-info">
-                <div className="prod-name">2 Rows White Gold Necklace</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$4,060.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/pinkgoldbracelet/all?lock=311" alt="Hand bracelet pink gold" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Hand Bracelet Pink Gold</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$3,670.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="prod-card">
-              <div className="prod-thumb"><img src="https://loremflickr.com/300/300/monoearring/all?lock=312" alt="Pavé mono earring" /></div>
-              <div className="prod-info">
-                <div className="prod-name">Pavé Mono Earring White Gold</div>
-                <div className="prod-bottom">
-                  <span className="prod-price">$1,600.00</span>
-                  <button className="add-store-btn">＋</button>
-                </div>
-              </div>
-            </div>
+          <div className="result-count">
+            {isInitialLoading ? (
+              "Loading items…"
+            ) : (
+              <>
+                Showing <b>{products.length}</b> item{products.length === 1 ? "" : "s"}
+                {selectedCategory ? ` in ${selectedCategory.name}` : ""}
+              </>
+            )}
           </div>
+
+          {isInitialLoading && (
+            <div className="grid">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div className="prod-card skeleton-card" key={index}>
+                  <div className="prod-thumb skeleton-block" />
+                  <div className="prod-info">
+                    <div className="skeleton-line skeleton-line-title" />
+                    <div className="prod-bottom">
+                      <div className="skeleton-line skeleton-line-price" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!isInitialLoading && products.length === 0 && (
+            <div className="empty-state">No products match this filter.</div>
+          )}
+
+          {!isInitialLoading && products.length > 0 && (
+            <div className="grid">
+              {products.map((product: any) => {
+                const isListed = listedProductIds.has(product.id);
+
+                return (
+                  <div
+                    className="prod-card"
+                    key={product.id}
+                    onClick={() => doOpenListingModal(product)}
+                  >
+                    <div className="prod-thumb">
+                      {product.image && <img src={product.image} alt={product.title} />}
+                    </div>
+                    <div className="prod-info">
+                      <div className="prod-name">{product.title}</div>
+                      <div className="prod-bottom">
+                        <span className="prod-price">
+                          {formatPrice(toWholesalePrice(product.price))}
+                        </span>
+                        <button
+                          className={`add-store-btn${isListed ? " listed" : ""}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            doOpenListingModal(product);
+                          }}
+                        >
+                          {isListed ? "✓" : "＋"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
         </div>
 
         <div className="assistant-fab">💬</div>
 
       </div>
+
+      {listingProduct && (
+        <div className="modal-overlay" onClick={doCloseListingModal}>
+          <div className="listing-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="listing-modal-header">
+              <div className="listing-modal-thumb">
+                {listingProduct.image && (
+                  <img src={listingProduct.image} alt={listingProduct.title} />
+                )}
+              </div>
+              <div className="listing-modal-title">{listingProduct.title}</div>
+              <button className="listing-modal-close" onClick={doCloseListingModal}>✕</button>
+            </div>
+
+            <div className="listing-modal-divider" />
+
+            <div className="listing-modal-body">
+              <div className="listing-price-row">
+                <span className="listing-price-label">Sales Price</span>
+                <span className="listing-price-value">
+                  {formatPrice(listingProduct.price)}
+                </span>
+              </div>
+              <div className="listing-price-row">
+                <span className="listing-price-label">Wholesale Price:</span>
+                <span className="listing-price-value">
+                  {formatPrice(toWholesalePrice(listingProduct.price))}
+                </span>
+              </div>
+            </div>
+
+            <div className="listing-modal-actions">
+              <button
+                className="listing-cancel-btn"
+                disabled={listingSaveLoading}
+                onClick={doCloseListingModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="listing-confirm-btn"
+                disabled={listingSaveLoading}
+                onClick={doConfirmListing}
+              >
+                {listingSaveLoading ? "Confirming…" : "Confirm listing"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         :root{
@@ -255,11 +352,20 @@ function WholesaleManagement() {
           padding:7px 13px;
           border-radius:16px;
           white-space:nowrap;
+          cursor:pointer;
+          background:var(--grey-light);
         }
         .tab-chip.active{
           background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
           color:#fff;
           font-weight:700;
+        }
+        .skeleton-chip{
+          width:64px;
+          height:26px;
+          background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+          background-size:400% 100%;
+          animation:shimmer 1.4s ease infinite;
         }
 
         /* ---------- Price filter ---------- */
@@ -280,6 +386,11 @@ function WholesaleManagement() {
           outline:none;
         }
         .price-input::placeholder{ color:#a9b3cf; }
+        .price-input::-webkit-outer-spin-button,
+        .price-input::-webkit-inner-spin-button{
+          -webkit-appearance:none;
+          margin:0;
+        }
         .dash{ color:var(--grey-text); font-size:12px; }
         .filter-btn{
           flex-shrink:0;
@@ -291,6 +402,7 @@ function WholesaleManagement() {
           border-radius:10px;
           padding:9px 16px;
           box-shadow:0 6px 14px rgba(47,141,255,0.35);
+          cursor:pointer;
         }
 
         /* ---------- Scroll body / grid ---------- */
@@ -310,6 +422,13 @@ function WholesaleManagement() {
         }
         .result-count b{ color:var(--navy); }
 
+        .empty-state{
+          text-align:center;
+          color:var(--grey-text);
+          font-size:13px;
+          padding:60px 20px;
+        }
+
         .grid{
           display:grid;
           grid-template-columns:1fr 1fr;
@@ -320,6 +439,7 @@ function WholesaleManagement() {
           border-radius:14px;
           overflow:hidden;
           box-shadow:0 8px 18px rgba(20,40,100,0.07);
+          cursor:pointer;
         }
         .prod-thumb{ width:100%; height:130px; background:#f6f8fd; }
         .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
@@ -352,6 +472,33 @@ function WholesaleManagement() {
           cursor:pointer;
           flex-shrink:0;
         }
+        .add-store-btn.listed{
+          border-color:#1ba672;
+          background:#e8f9f1;
+          color:#1ba672;
+          font-weight:800;
+        }
+
+        /* ---------- Skeleton loading ---------- */
+        @keyframes shimmer{
+          0%{ background-position:100% 50%; }
+          100%{ background-position:0 50%; }
+        }
+        .skeleton-block{
+          background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+          background-size:400% 100%;
+          animation:shimmer 1.4s ease infinite;
+        }
+        .skeleton-card{ cursor:default; }
+        .skeleton-line{
+          height:12px;
+          border-radius:6px;
+          background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+          background-size:400% 100%;
+          animation:shimmer 1.4s ease infinite;
+        }
+        .skeleton-line-title{ width:80%; margin-bottom:10px; }
+        .skeleton-line-price{ width:50%; height:14px; }
 
         /* ---------- Assistant floating button ---------- */
         .assistant-fab{
@@ -363,6 +510,100 @@ function WholesaleManagement() {
           color:#fff; font-size:20px;
           box-shadow:0 10px 24px rgba(47,141,255,0.45);
           z-index:15;
+        }
+
+        /* ---------- Confirm listing modal ---------- */
+        .modal-overlay{
+          position:fixed;
+          inset:0;
+          background:rgba(14,27,69,0.4);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          z-index:1000;
+          padding:20px;
+        }
+        .listing-modal{
+          width:100%;
+          max-width:360px;
+          background:#fff;
+          border-radius:16px;
+          box-shadow:0 24px 48px rgba(14,27,69,0.3);
+          overflow:hidden;
+        }
+        .listing-modal-header{
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:16px 16px 14px;
+        }
+        .listing-modal-thumb{
+          width:40px; height:40px;
+          border-radius:10px;
+          overflow:hidden;
+          background:var(--grey-light);
+          flex-shrink:0;
+        }
+        .listing-modal-thumb img{ width:100%; height:100%; object-fit:cover; }
+        .listing-modal-title{
+          flex:1;
+          min-width:0;
+          font-size:14px;
+          font-weight:700;
+          color:var(--navy);
+          overflow:hidden;
+          text-overflow:ellipsis;
+          white-space:nowrap;
+        }
+        .listing-modal-close{
+          border:none;
+          background:transparent;
+          color:var(--grey-text);
+          font-size:15px;
+          cursor:pointer;
+          flex-shrink:0;
+        }
+        .listing-modal-divider{ height:1px; background:var(--grey-light); }
+        .listing-modal-body{ padding:16px; display:flex; flex-direction:column; gap:12px; }
+        .listing-price-row{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+        }
+        .listing-price-label{ font-size:13px; color:var(--navy); font-weight:600; }
+        .listing-price-value{ font-size:13.5px; font-weight:800; color:var(--red); }
+        .listing-modal-actions{
+          display:flex;
+          justify-content:flex-end;
+          gap:10px;
+          padding:14px 16px 18px;
+        }
+        .listing-cancel-btn{
+          border:1.4px solid var(--field-border);
+          background:#fff;
+          color:var(--navy);
+          font-size:13px;
+          font-weight:700;
+          padding:9px 16px;
+          border-radius:10px;
+          cursor:pointer;
+        }
+        .listing-cancel-btn:disabled,
+        .listing-confirm-btn:disabled{
+          opacity:0.6;
+          cursor:not-allowed;
+        }
+        .listing-confirm-btn{
+          border:none;
+          background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+          color:#fff;
+          font-size:13px;
+          font-weight:700;
+          padding:9px 16px;
+          border-radius:10px;
+          cursor:pointer;
+          box-shadow:0 8px 18px rgba(47,141,255,0.35);
         }
       `}</style>
     </>

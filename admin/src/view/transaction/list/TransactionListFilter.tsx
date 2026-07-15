@@ -36,14 +36,6 @@ const schema = yup.object().shape({
   ),
 });
 
-const emptyValues = {
-  user: null,
-  datetransaction: [],
-  amount: null,
-  type: null,
-  status: null,
-};
-
 const previewRenders = {
   user: {
     label: i18n('entities.transaction.fields.user'),
@@ -74,15 +66,28 @@ const previewRenders = {
 };
 
 function TransactionListFilter(props) {
-  const rawFilter = useSelector(selectors.selectRawFilter);
+  const fixedType = props.fixedType || null;
+
+  const emptyValues = {
+    user: null,
+    datetransaction: [],
+    amount: null,
+    type: fixedType,
+    status: null,
+  };
+
+  const pinType = (values) =>
+    fixedType ? { ...values, type: fixedType } : values;
+
+  const rawFilter = pinType(useSelector(selectors.selectRawFilter));
   const dispatch = useDispatch();
   const [expanded, setExpanded] = useState(false);
 
   const [initialValues] = useState(() => {
-    return {
+    return pinType({
       ...emptyValues,
       ...rawFilter,
-    };
+    });
   });
 
   const form = useForm({
@@ -94,7 +99,7 @@ function TransactionListFilter(props) {
   useEffect(() => {
     dispatch(
       actions.doFetch(
-        schema.cast(initialValues),
+        pinType(schema.cast(initialValues)),
         rawFilter,
       ),
     );
@@ -102,8 +107,8 @@ function TransactionListFilter(props) {
   }, [dispatch]);
 
   const onSubmit = (values) => {
-    const rawValues = form.getValues();
-    dispatch(actions.doFetch(values, rawValues));
+    const rawValues = pinType(form.getValues());
+    dispatch(actions.doFetch(pinType(values), rawValues));
     setExpanded(false);
   };
 
@@ -116,9 +121,20 @@ function TransactionListFilter(props) {
     Object.keys(emptyValues).forEach((key) => {
       form.setValue(key, emptyValues[key]);
     });
-    dispatch(actions.doReset());
+
+    if (fixedType) {
+      dispatch({ type: actions.RESETED });
+      dispatch(actions.doFetch(pinType(emptyValues), emptyValues));
+    } else {
+      dispatch(actions.doReset());
+    }
+
     setExpanded(false);
   };
+
+  const { type: omittedTypeRender, ...previewRendersWithoutType } =
+    previewRenders;
+  const { type: omittedTypeValue, ...rawFilterWithoutType } = rawFilter || {};
 
   return (
     <FilterWrapper>
@@ -126,8 +142,8 @@ function TransactionListFilter(props) {
         onClick={() => {
           setExpanded(!expanded);
         }}
-        renders={previewRenders}
-        values={rawFilter}
+        renders={fixedType ? previewRendersWithoutType : previewRenders}
+        values={fixedType ? rawFilterWithoutType : rawFilter}
         expanded={expanded}
         onRemove={onRemove}
       />
@@ -181,22 +197,24 @@ function TransactionListFilter(props) {
                   />
                 </div>
 
-                <div className="col-lg-6 col-12">
-                  <SelectFormItem
-                    name="type"
-                    label={i18n(
-                      'entities.transaction.fields.type',
-                    )}
-                    options={couponsEnumerators.type.map(
-                      (value) => ({
-                        value,
-                        label: i18n(
-                          `entities.transaction.enumerators.type.${value}`,
-                        ),
-                      }),
-                    )}
-                  />
-                </div>
+                {!fixedType && (
+                  <div className="col-lg-6 col-12">
+                    <SelectFormItem
+                      name="type"
+                      label={i18n(
+                        'entities.transaction.fields.type',
+                      )}
+                      options={couponsEnumerators.type.map(
+                        (value) => ({
+                          value,
+                          label: i18n(
+                            `entities.transaction.enumerators.type.${value}`,
+                          ),
+                        }),
+                      )}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="row">

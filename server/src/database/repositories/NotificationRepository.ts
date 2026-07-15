@@ -36,6 +36,28 @@ class NotificationRepository {
   }
 
 
+  static async markAllAsRead(options: IRepositoryOptions) {
+    const currentUser = MongooseRepository.getCurrentUser(options);
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+
+    await MongooseRepository.wrapWithSessionIfExists(
+      Notification(options.database).updateMany(
+        {
+          user: currentUser.id,
+          tenant: currentTenant.id,
+          status: "unread",
+        },
+        {
+          status: "read",
+          updatedBy: currentUser.id,
+        }
+      ),
+      options
+    );
+
+    return { success: true };
+  }
+
   static async markAsRead(id, options: IRepositoryOptions) {
     const currentUser = MongooseRepository.getCurrentUser(options);
     const currentTenant = MongooseRepository.getCurrentTenant(options);
@@ -136,6 +158,73 @@ class NotificationRepository {
       throw new Error404();
     }
     return this._fillFileDownloadUrls(record);
+  }
+
+  // Tenant-wide listing for admin notification management - unlike
+  // findAndCountAll (used by the platform's "my notifications" screen),
+  // this does NOT scope to the current (admin) user, since the admin
+  // needs to see/manage notifications addressed to every user.
+  static async findAndCountAllAdmin(
+    { filter, limit = 0, offset = 0, orderBy = "" },
+    options: IRepositoryOptions
+  ) {
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+
+    let criteriaAnd: any = [{ tenant: currentTenant.id }];
+
+    if (filter) {
+      if (filter.id) {
+        criteriaAnd.push({
+          ["_id"]: MongooseQueryUtils.uuid(filter.id),
+        });
+      }
+
+      if (filter.user) {
+        criteriaAnd.push({
+          user: filter.user,
+        });
+      }
+
+      if (filter.subject) {
+        criteriaAnd.push({
+          subject: {
+            $regex: MongooseQueryUtils.escapeRegExp(filter.subject),
+            $options: "i",
+          },
+        });
+      }
+
+      if (filter.type) {
+        criteriaAnd.push({
+          type: filter.type,
+        });
+      }
+
+      if (filter.status) {
+        criteriaAnd.push({
+          status: filter.status,
+        });
+      }
+    }
+
+    const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
+
+    const skip = Number(offset || 0) || undefined;
+    const limitEscaped = Number(limit || 0) || undefined;
+    const criteria = { $and: criteriaAnd };
+
+    let rows = await Notification(options.database)
+      .find(criteria)
+      .skip(skip)
+      .limit(limitEscaped)
+      .sort(sort)
+      .populate("user");
+
+    const count = await Notification(options.database).countDocuments(criteria);
+
+    rows = await Promise.all(rows.map(this._fillFileDownloadUrls));
+
+    return { rows, count };
   }
 
   static async findAndCountAll(

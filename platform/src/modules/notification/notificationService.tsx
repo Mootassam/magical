@@ -80,7 +80,17 @@ export default class notificationService {
       `/tenant/${tenantId}/makeAsRead`,
       body,
     );
-    
+
+    return response.data;
+  }
+
+  static async markAllAsRead() {
+    const tenantId = AuthCurrentTenant.get();
+    const response = await authAxios.post(
+      `/tenant/${tenantId}/makeAllAsRead`,
+      {},
+    );
+
     return response.data;
   }
 

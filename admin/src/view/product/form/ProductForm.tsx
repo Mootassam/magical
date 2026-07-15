@@ -8,38 +8,30 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import InputFormItem from 'src/view/shared/form/items/InputFormItem';
 import InputNumberFormItem from 'src/view/shared/form/items/InputNumberFormItem';
-import ImagesFormItem from 'src/view/shared/form/items/ImagesFormItem';
-import Storage from 'src/security/storage';
-import VipAutocompleteFormItem from 'src/view/vip/autocomplete/VipAutocompleteFormItem';
-import SwitchFormItem from 'src/view/shared/form/items/SwitchFormItem';
-import SelectFormItem from 'src/view/shared/form/items/SelectFormItem';
-import productEnumerators from 'src/modules/product/productEnumerators';
+import TextAreaFormItem from 'src/view/shared/form/items/TextAreaFormItem';
 
 const schema = yup.object().shape({
-  vip: yupFormSchemas.relationToOne(
-    i18n('entities.product.fields.vip'),
-    {
-      required: true,
-    },
-  ),
   title: yupFormSchemas.string(
     i18n('entities.product.fields.title'),
     {
       required: true,
     },
   ),
-  amount: yupFormSchemas.integer(
-    i18n('entities.product.fields.amount'),
+  price: yupFormSchemas.decimal(
+    i18n('entities.product.fields.price'),
+    {
+      required: true,
+      min: 0,
+    },
+  ),
+  image: yupFormSchemas.string(
+    i18n('entities.product.fields.image'),
     {
       required: true,
     },
   ),
-  commission: yupFormSchemas.string(
-    i18n('entities.product.fields.commission'),
-    { required: true, },
-  ),
-  photo: yupFormSchemas.images(
-    i18n('entities.product.fields.photo'),
+  description: yupFormSchemas.string(
+    i18n('entities.product.fields.description'),
     {},
   ),
 });
@@ -49,11 +41,9 @@ function ProductForm(props) {
     const record = props.record || {};
     return {
       title: record.title,
-      amount: record.amount,
-      commission: record.commission,
-      vip: record.vip || [],
-      photo: record.photo,
-      type: record.type,
+      price: record.price,
+      image: record.image,
+      description: record.description,
     };
   });
 
@@ -79,14 +69,6 @@ function ProductForm(props) {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="row">
             <div className="col-lg-7 col-md-8 col-12">
-              <VipAutocompleteFormItem
-                name="vip"
-                label={i18n('entities.product.fields.vip')}
-                required={true}
-                showCreate={!props.modal}
-              />
-            </div>
-            <div className="col-lg-7 col-md-8 col-12">
               <InputFormItem
                 name="title"
                 label={i18n(
@@ -99,52 +81,33 @@ function ProductForm(props) {
 
             <div className="col-lg-7 col-md-8 col-12">
               <InputNumberFormItem
-                name="amount"
-                label={i18n('entities.product.fields.amount')}
+                name="price"
+                label={i18n('entities.product.fields.price')}
                 required={true}
               />
             </div>
 
             <div className="col-lg-7 col-md-8 col-12">
-              <InputNumberFormItem
-                name="commission"
+              <InputFormItem
+                name="image"
                 label={i18n(
-                  'entities.product.fields.commission',
+                  'entities.product.fields.image',
                 )}
+                placeholder="https://..."
                 required={true}
               />
             </div>
+
             <div className="col-lg-7 col-md-8 col-12">
-              <ImagesFormItem
-                name="photo"
+              <TextAreaFormItem
+                name="description"
                 label={i18n(
-                  'entities.paymentsettings.fields.photo',
+                  'entities.product.fields.description',
                 )}
                 required={false}
-                storage={
-                  Storage.values.categoryPhoto
-                }
-                max={undefined}
-              />
-            </div>
-
-            <div className="col-lg-7 col-md-8 col-12">
-              <SelectFormItem
-                name="type"
-                label={i18n(
-                  'entities.product.fields.combo',
-                )}
-                 options={productEnumerators.type.map(
-                  (value) => ({
-                    value,
-                    label: i18n(`entities.product.enumerators.type.${value}`),
-                  }),
-                )}
               />
             </div>
           </div>
-
-
 
           <div className="form-buttons">
             <button

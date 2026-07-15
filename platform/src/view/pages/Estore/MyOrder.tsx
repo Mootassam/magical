@@ -1,7 +1,156 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import automatOrderActions from "src/modules/automatOrder/automatOrderActions";
+import automatOrderSelectors from "src/modules/automatOrder/automatOrderSelectors";
+import orderShipmentActions from "src/modules/orderShipment/orderShipmentActions";
+import orderShipmentSelectors from "src/modules/orderShipment/orderShipmentSelectors";
+
+const WHOLESALE_DISCOUNT = 0.2;
+
+function formatPrice(value) {
+  return `$${(Number(value) || 0).toFixed(2)}`;
+}
+
+// A pending automat order not yet sent for shipment: lump sum (sale price),
+// sales profit and wholesale price are derived from the product's price,
+// and the actual payment due is wholesale price x qty.
+function PendingOrderCard({ order, shipping, onShip }: { order: any; shipping: boolean; onShip: () => void }) {
+  const product = order.product || {};
+  const lumpSum = Number(product.price) || 0;
+  const salesProfit = lumpSum * WHOLESALE_DISCOUNT;
+  const wholesalePrice = lumpSum - salesProfit;
+  const qty = Number(order.quantity) || 1;
+  const actualPayment = wholesalePrice * qty;
+
+  return (
+    <div className="order-card">
+      <div className="order-top">
+        <div className="order-thumb">
+          {product.image && <img src={product.image} alt={product.title} />}
+        </div>
+        <div className="order-info">
+          <div className="order-name">{product.title}</div>
+          <div className="order-line">lump sum: {formatPrice(lumpSum)} x{qty}</div>
+          <div className="order-line">Sales Profit: {formatPrice(salesProfit)} x{qty}</div>
+          <div className="order-line">Wholesale Price: {formatPrice(wholesalePrice)} x{qty}</div>
+        </div>
+      </div>
+      <div className="order-bottom">
+        <div className="actual-payment">
+          Actual payment: <b>{formatPrice(actualPayment)}</b>
+        </div>
+        <button className="ship-btn" disabled={shipping} onClick={onShip}>
+          {shipping ? "Processing…" : "Go to Shipment"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// A shipment request already submitted - status-specific summary instead
+// of the action button (money has already moved server-side).
+function ShipmentCard({ shipment }: { shipment: any }) {
+  const product = shipment.product || {};
+  const qty = Number(shipment.quantity) || 1;
+
+  let statusLine: React.ReactNode;
+  if (shipment.status === "completed") {
+    statusLine = (
+      <span className="status-tag status-tag-success">
+        Profit credited: {formatPrice(shipment.profitAmount)}
+      </span>
+    );
+  } else if (shipment.status === "refunded") {
+    statusLine = (
+      <span className="status-tag status-tag-refund">
+        Refunded: {formatPrice(shipment.wholesaleAmount + shipment.profitAmount)}
+      </span>
+    );
+  } else {
+    statusLine = <span className="status-tag status-tag-pending">Awaiting review</span>;
+  }
+
+  return (
+    <div className="order-card">
+      <div className="order-top">
+        <div className="order-thumb">
+          {product.image && <img src={product.image} alt={product.title} />}
+        </div>
+        <div className="order-info">
+          <div className="order-name">{product.title}</div>
+          <div className="order-line">
+            Wholesale Price: {formatPrice(shipment.wholesaleAmount)} x{qty}
+          </div>
+        </div>
+      </div>
+      <div className="order-bottom">
+        <div className="actual-payment">
+          Paid: <b>{formatPrice(shipment.wholesaleAmount)}</b>
+        </div>
+        {statusLine}
+      </div>
+    </div>
+  );
+}
+
+function OrderCardSkeleton() {
+  return (
+    <div className="order-card">
+      <div className="order-top">
+        <div className="order-thumb skeleton-block" />
+        <div className="order-info">
+          <div className="skeleton-line skeleton-line-title" />
+          <div className="skeleton-line skeleton-line-sub" />
+        </div>
+      </div>
+      <div className="order-bottom">
+        <div className="skeleton-line skeleton-line-total" />
+      </div>
+    </div>
+  );
+}
+
+const TABS = [
+  "Waiting for\ndelivery",
+  "Waiting for\nreceipt",
+  "Completed",
+  "Refund /\nAfter-sales",
+];
 
 function MyOrder() {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState(0);
+
+  const automatOrders = useSelector(automatOrderSelectors.selectRows);
+  const automatOrdersLoading = useSelector(automatOrderSelectors.selectLoading);
+
+  const shipments = useSelector(orderShipmentSelectors.selectRows);
+  const shipmentsLoading = useSelector(orderShipmentSelectors.selectLoading);
+  const shippingId = useSelector(orderShipmentSelectors.selectShippingId);
+
+  useEffect(() => {
+    dispatch(automatOrderActions.doFetchMine());
+    dispatch(orderShipmentActions.doFetchMine());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
+
+  const shippedOrderIds = new Set(shipments.map((s: any) => s.automatOrder));
+
+  const pendingOrders = automatOrders.filter(
+    (order: any) => order.status === "pending" && !shippedOrderIds.has(order.id),
+  );
+  const waitingReceipt = shipments.filter((s: any) => s.status === "pending");
+  const completed = shipments.filter((s: any) => s.status === "completed");
+  const refunded = shipments.filter((s: any) => s.status === "refunded");
+
+  const tabData = [pendingOrders, waitingReceipt, completed, refunded];
+  const isInitialLoading =
+    (automatOrdersLoading && automatOrders.length === 0) ||
+    (shipmentsLoading && shipments.length === 0);
+
+  const doShip = (automatOrderId: string) => {
+    dispatch(orderShipmentActions.doShip(automatOrderId) as any);
+  };
 
   return (
     <>
@@ -13,67 +162,50 @@ function MyOrder() {
         </div>
 
         <div className="tabs">
-          <div className={`tab${activeTab === 0 ? " active" : ""}`} onClick={() => setActiveTab(0)}>Waiting for<br />delivery</div>
-          <div className={`tab${activeTab === 1 ? " active" : ""}`} onClick={() => setActiveTab(1)}>Waiting for<br />receipt</div>
-          <div className={`tab${activeTab === 2 ? " active" : ""}`} onClick={() => setActiveTab(2)}>Completed</div>
-          <div className={`tab${activeTab === 3 ? " active" : ""}`} onClick={() => setActiveTab(3)}>Refund /<br />After-sales</div>
+          {TABS.map((label, index) => (
+            <div
+              key={label}
+              className={`tab${activeTab === index ? " active" : ""}`}
+              onClick={() => setActiveTab(index)}
+            >
+              {label.split("\n").map((line, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </React.Fragment>
+              ))}
+            </div>
+          ))}
         </div>
 
         <div className="scroll-area">
 
-          <div className="order-card">
-            <div className="order-top">
-              <div className="order-thumb">
-                <img src="https://loremflickr.com/160/160/knitwear,top/all?lock=101" alt="Liu Jo Knitted Top" />
-              </div>
-              <div className="order-info">
-                <div className="order-name">Liu Jo Knitted Top</div>
-                <div className="order-line">lump sum: $333.14 x1</div>
-                <div className="order-line">Sales Profit: $66.63 x1</div>
-                <div className="order-line">Wholesale Price: $266.51 x1</div>
-              </div>
-            </div>
-            <div className="order-bottom">
-              <div className="actual-payment">Actual payment: <b>$266.51</b></div>
-              <button className="ship-btn">Go to Shipment</button>
-            </div>
-          </div>
+          {isInitialLoading && (
+            <>
+              <OrderCardSkeleton />
+              <OrderCardSkeleton />
+              <OrderCardSkeleton />
+            </>
+          )}
 
-          <div className="order-card">
-            <div className="order-top">
-              <div className="order-thumb">
-                <img src="https://loremflickr.com/160/160/blouse,fashion/all?lock=102" alt="Patou Scalloped Hem Blouse" />
-              </div>
-              <div className="order-info">
-                <div className="order-name">Patou Scalloped Hem Blouse</div>
-                <div className="order-line">lump sum: $505.89 x1</div>
-                <div className="order-line">Sales Profit: $101.18 x1</div>
-                <div className="order-line">Wholesale Price: $404.71 x1</div>
-              </div>
-            </div>
-            <div className="order-bottom">
-              <div className="actual-payment">Actual payment: <b>$404.71</b></div>
-              <button className="ship-btn">Go to Shipment</button>
-            </div>
-          </div>
+          {!isInitialLoading && tabData[activeTab].length === 0 && (
+            <div className="empty-state">Nothing here yet.</div>
+          )}
 
-          <div className="order-card">
-            <div className="order-top">
-              <div className="order-thumb">
-                <img src="https://loremflickr.com/160/160/jumper,sweater/all?lock=103" alt="Aspesi V-Neck Jumper" />
-              </div>
-              <div className="order-info">
-                <div className="order-name">Aspesi V-Neck Jumper</div>
-                <div className="order-line">lump sum: $359.80 x1</div>
-                <div className="order-line">Sales Profit: $71.96 x1</div>
-                <div className="order-line">Wholesale Price: $287.84 x1</div>
-              </div>
-            </div>
-            <div className="order-bottom">
-              <div className="actual-payment">Actual payment: <b>$287.84</b></div>
-              <button className="ship-btn">Go to Shipment</button>
-            </div>
-          </div>
+          {!isInitialLoading && activeTab === 0 &&
+            pendingOrders.map((order: any) => (
+              <PendingOrderCard
+                order={order}
+                shipping={shippingId === order.id}
+                onShip={() => doShip(order.id)}
+                key={order.id}
+              />
+            ))}
+
+          {!isInitialLoading && activeTab !== 0 &&
+            tabData[activeTab].map((shipment: any) => (
+              <ShipmentCard shipment={shipment} key={shipment.id} />
+            ))}
 
         </div>
 
@@ -91,6 +223,7 @@ function MyOrder() {
     --grey-text:#6b7590;
     --grey-light:#eef2fa;
     --red:#ff3b30;
+    --green:#1ba672;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -170,6 +303,13 @@ function MyOrder() {
   }
   .scroll-area::-webkit-scrollbar{ display:none; }
 
+  .empty-state{
+    text-align:center;
+    color:var(--grey-text);
+    font-size:13px;
+    padding:60px 20px;
+  }
+
   .order-card{
     background:var(--card-bg);
     border-radius:16px;
@@ -197,6 +337,11 @@ function MyOrder() {
     font-weight:700;
     color:var(--navy);
     margin-bottom:6px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
   }
   .order-line{
     font-size:11.5px;
@@ -235,6 +380,52 @@ function MyOrder() {
     box-shadow:0 8px 18px rgba(47,141,255,0.35);
     cursor:pointer;
   }
+  .ship-btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+
+  .status-tag{
+    font-size:11.5px;
+    font-weight:700;
+    padding:7px 14px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .status-tag-pending{
+    background:var(--grey-light);
+    color:var(--grey-text);
+  }
+  .status-tag-success{
+    background:rgba(27,166,114,0.12);
+    color:var(--green);
+  }
+  .status-tag-refund{
+    background:rgba(47,141,255,0.12);
+    color:var(--blue-deep);
+  }
+
+  /* ---------- Skeleton loading ---------- */
+  @keyframes shimmer{
+    0%{ background-position:100% 50%; }
+    100%{ background-position:0 50%; }
+  }
+  .skeleton-block{
+    background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+    background-size:400% 100%;
+    animation:shimmer 1.4s ease infinite;
+  }
+  .skeleton-line{
+    height:11px;
+    border-radius:6px;
+    background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+    background-size:400% 100%;
+    animation:shimmer 1.4s ease infinite;
+  }
+  .skeleton-line-title{ width:70%; height:13px; margin-bottom:10px; }
+  .skeleton-line-sub{ width:40%; }
+  .skeleton-line-total{ width:90px; height:13px; }
       `}</style>
     </>
   );

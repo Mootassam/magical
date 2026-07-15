@@ -760,6 +760,24 @@ static async calculeGrap(data, options) {
     await this._createAuditLog(AuditLogRepository.DELETE, id, record, options);
   }
 
+  static async destroyAllByProduct(productId, options: IRepositoryOptions) {
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+
+    const records = await MongooseRepository.wrapWithSessionIfExists(
+      Records(options.database).find({
+        product: productId,
+        tenant: currentTenant.id,
+      }),
+      options
+    );
+
+    for (const record of records) {
+      await Records(options.database).deleteOne({ _id: record.id }, options);
+
+      await this._createAuditLog(AuditLogRepository.DELETE, record.id, record, options);
+    }
+  }
+
   static async count(filter, options: IRepositoryOptions) {
     const currentTenant = MongooseRepository.getCurrentTenant(options);
 

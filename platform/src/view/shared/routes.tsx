@@ -28,6 +28,10 @@ const privateRoutes = [
     loader: () => import("src/view/pages/Estore/MyAccount"),
   },
   {
+    path: "/phone-number",
+    loader: () => import("src/view/pages/Estore/PhoneNumber"),
+  },
+  {
     path: "/my-order",
     loader: () => import("src/view/pages/Estore/MyOrder"),
   },
@@ -50,6 +54,10 @@ const privateRoutes = [
   {
     path: "/withdrawal-record",
     loader: () => import("src/view/pages/Estore/WithdrawalRecord"),
+  },
+  {
+    path: "/deposit-record",
+    loader: () => import("src/view/pages/Estore/DepositRecord"),
   },
   {
     path: "/apply-merchant",
@@ -274,8 +282,18 @@ const estoreRoutes = [
     exact: true,
   },
   {
+    path: "/checkout",
+    loader: () => import("src/view/pages/Estore/Checkout"),
+    exact: true,
+  },
+  {
     path: "/classification",
     loader: () => import("src/view/pages/Estore/Classification"),
+    exact: true,
+  },
+  {
+    path: "/product/:id",
+    loader: () => import("src/view/pages/Estore/ProductDetails"),
     exact: true,
   },
 

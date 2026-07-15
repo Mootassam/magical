@@ -16,6 +16,10 @@ const productDestroyActions = {
   DESTROY_ALL_SUCCESS: `${prefix}_DESTROY_ALL_SUCCESS`,
   DESTROY_ALL_ERROR: `${prefix}_DESTROY_ALL_ERROR`,
 
+  DESTROY_ALL_RECORDS_STARTED: `${prefix}_DESTROY_ALL_RECORDS_STARTED`,
+  DESTROY_ALL_RECORDS_SUCCESS: `${prefix}_DESTROY_ALL_RECORDS_SUCCESS`,
+  DESTROY_ALL_RECORDS_ERROR: `${prefix}_DESTROY_ALL_RECORDS_ERROR`,
+
   doDestroy: (id) => async (dispatch) => {
     try {
       dispatch({
@@ -75,6 +79,36 @@ const productDestroyActions = {
 
       dispatch({
         type: productDestroyActions.DESTROY_ALL_ERROR,
+      });
+    }
+  },
+  doDestroyAllRecords: () => async (dispatch) => {
+    try {
+      dispatch({
+        type: productDestroyActions.DESTROY_ALL_RECORDS_STARTED,
+      });
+
+      await ProductService.destroyAllRecords();
+
+      dispatch({
+        type: productDestroyActions.DESTROY_ALL_RECORDS_SUCCESS,
+      });
+
+      dispatch(listActions.doClearAllSelected());
+      dispatch(listActions.doFetchCurrentFilter());
+
+      Message.success(
+        i18n('entities.product.destroyAllRecords.success'),
+      );
+
+      getHistory().push('/product');
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch(listActions.doFetchCurrentFilter());
+
+      dispatch({
+        type: productDestroyActions.DESTROY_ALL_RECORDS_ERROR,
       });
     }
   },

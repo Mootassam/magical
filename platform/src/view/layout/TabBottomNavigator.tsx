@@ -1,15 +1,18 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import cartSelectors from "src/modules/cart/cartSelectors";
 
 const tabs = [
   { icon: "🏠", label: "Home", path: "/" },
   { icon: "🗂️", label: "Classification", path: "/classification" },
-  { icon: "🛒", label: "Cart", path: "/cart", badge: 3 },
+  { icon: "🛒", label: "Cart", path: "/cart" },
   { icon: "👤", label: "Mine", path: "/mine" },
 ];
 
 function TabBottomNavigator() {
   const location = useLocation();
+  const cartCount = useSelector(cartSelectors.selectCount);
 
   const isActive = (pathname) => location.pathname === pathname;
 
@@ -23,7 +26,9 @@ function TabBottomNavigator() {
             className={`nav-item${isActive(tab.path) ? " active" : ""}`}
           >
             <span className="icon">{tab.icon}</span>
-            {tab.badge ? <span className="cart-badge">{tab.badge}</span> : null}
+            {tab.path === "/cart" && cartCount > 0 ? (
+              <span className="cart-badge">{cartCount}</span>
+            ) : null}
             <span>{tab.label}</span>
           </Link>
         ))}

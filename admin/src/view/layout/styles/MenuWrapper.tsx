@@ -1,6 +1,12 @@
 import styled from 'styled-components';
 
 const MenuWrapper = styled.div`
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+
   .panel-body {
     padding: 5px;
     border-top: none;

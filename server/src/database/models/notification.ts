@@ -13,12 +13,13 @@ export default (database) => {
       type: {
         type: String,
         enum: [
-          "deposit_success", 
-          "deposit_canceled", 
-          "withdraw_success", 
-          "withdraw_canceled", 
-          "system", 
-          "alert"
+          "deposit_success",
+          "deposit_canceled",
+          "withdraw_success",
+          "withdraw_canceled",
+          "system",
+          "alert",
+          "admin",
         ],
         required: true,
       },
@@ -26,6 +27,12 @@ export default (database) => {
         type: String,
         enum: ["unread", "read"],
         default: "unread",
+      },
+      subject: {
+        type: String,
+      },
+      message: {
+        type: String,
       },
       user: {
         type: Schema.Types.ObjectId,
@@ -38,7 +45,6 @@ export default (database) => {
       },
       amount: {
         type: String,
-        required: true,
       },
       tenant: {
         type: Schema.Types.ObjectId,

@@ -146,8 +146,6 @@ function Signup() {
     password,
     phoneNumber,
     withdrawPassword,
-    invitationcode,
-    gender,
   }) => {
     const fullPhoneNumber = `${selectedCountry?.value || "+1"}${phoneNumber}`;
     dispatch(
@@ -155,9 +153,7 @@ function Signup() {
         email,
         password,
         fullPhoneNumber,
-        withdrawPassword,
-        invitationcode,
-        gender
+        withdrawPassword
       )
     );
   };

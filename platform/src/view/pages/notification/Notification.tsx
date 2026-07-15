@@ -17,6 +17,10 @@ function Notifications() {
     dispatch(actionsForm.doMarkAsRead(id));
   }
 
+  const markAllRead = () => {
+    dispatch(actions.doMarkAllAsRead());
+  }
+
   useEffect(() => {
     dispatch(actions.doFetch())
   }, [dispatch])
@@ -33,8 +37,12 @@ function Notifications() {
 
   // Get notification message based on type
   const getNotificationMessage = (notification) => {
+    if (notification.type === 'admin') {
+      return notification.message || '';
+    }
+
     const amount = notification.amount || '0';
-    
+
     switch (notification.type) {
       case "deposit_success":
         return i18n('pages.notifications.messages.deposit_success', amount);
@@ -54,8 +62,12 @@ function Notifications() {
   };
 
   // Get notification title based on type
-  const getNotificationTitle = (type) => {
-    switch (type) {
+  const getNotificationTitle = (notification) => {
+    if (notification.type === 'admin') {
+      return notification.subject || i18n('pages.notifications.types.default');
+    }
+
+    switch (notification.type) {
       case "deposit_success":
         return i18n('pages.notifications.types.deposit_success');
       case "deposit_canceled":
@@ -88,6 +100,8 @@ function Notifications() {
         return "fa-solid fa-gear";
       case "alert":
         return "fa-solid fa-triangle-exclamation";
+      case "admin":
+        return "fa-solid fa-envelope";
       default:
         return "fa-solid fa-bell";
     }
@@ -106,6 +120,8 @@ function Notifications() {
         return "#4299E1"; // Blue for system
       case "alert":
         return "#ED8936"; // Orange for alert
+      case "admin":
+        return "#4299E1"; // Blue for admin messages
       default:
         return "#A0AEC0"; // Gray for default
     }
@@ -157,6 +173,11 @@ function Notifications() {
         <span className="unread-count">
           {i18n('pages.notifications.unreadCount', rows.filter(n => n.status === 'unread').length)}
         </span>
+        {rows.some(n => n.status === 'unread') && (
+          <button className="mark-all-read-btn" onClick={markAllRead}>
+            {i18n('pages.notifications.markAllRead')}
+          </button>
+        )}
       </div>
 
       {/* Notifications List */}
@@ -198,7 +219,7 @@ function Notifications() {
                 <div className="notification-content">
                   <div className="notification-header">
                     <span className="notification-title">
-                      {getNotificationTitle(notification.type)}
+                      {getNotificationTitle(notification)}
                     </span>
                   </div>
 
@@ -207,10 +228,14 @@ function Notifications() {
                   </p>
 
                   <div className="notification-footer">
-                    <div className="notification-amount">
-                      <i className="fa-solid fa-coins"></i>
-                      <span>{notification.amount} USDT</span>
-                    </div>
+                    {notification.amount ? (
+                      <div className="notification-amount">
+                        <i className="fa-solid fa-coins"></i>
+                        <span>{notification.amount} USDT</span>
+                      </div>
+                    ) : (
+                      <span />
+                    )}
                     <div className="notification-full-date">
                       {formatDate(notification.createdAt)}
                     </div>
@@ -286,6 +311,24 @@ function Notifications() {
           padding: 8px 16px;
           background: #FFFFFF;
           border-bottom: 1px solid #E2E8F0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .mark-all-read-btn {
+          border: none;
+          background: transparent;
+          color: #4299E1;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 4px 0;
+        }
+
+        .mark-all-read-btn:hover {
+          text-decoration: underline;
         }
 
         .unread-count {

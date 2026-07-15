@@ -10,9 +10,7 @@ import selectors from "src/modules/auth/authSelectors";
 import yupFormSchemas from "src/modules/shared/yup/yupFormSchemas";
 import { i18n } from "../../../i18n";
 import InputFormItem from "src/shared/form/InputFormItem";
-import SelectFormItem from "src/shared/form/SelectFormItem";
 import ButtonIcon from "src/shared/ButtonIcon";
-import userEnumerators from "src/modules/user/userEnumerators";
 
 const schema = yup.object().shape({
   email: yupFormSchemas.string(i18n("user.fields.username"), {
@@ -33,9 +31,6 @@ const schema = yup.object().shape({
     i18n("user.fields.withdrawPassword"),
     { required: true }
   ),
-  invitationcode: yupFormSchemas.string(i18n("user.fields.invitationcode"), {
-    required: true,
-  }),
   rememberMe: yupFormSchemas.boolean(i18n("user.fields.rememberMe")),
 });
 
@@ -58,8 +53,6 @@ function Register() {
     password: "",
     phoneNumber: "",
     withdrawPassword: "",
-    invitationcode: "",
-    gender: "",
     rememberMe: true,
   });
 
@@ -148,8 +141,6 @@ function Register() {
     password,
     phoneNumber,
     withdrawPassword,
-    invitationcode,
-    gender,
   }) => {
     const fullPhoneNumber = `${selectedCountry?.value || "+1"}${phoneNumber}`;
     dispatch(
@@ -157,9 +148,7 @@ function Register() {
         email,
         password,
         fullPhoneNumber,
-        withdrawPassword,
-        invitationcode,
-        gender
+        withdrawPassword
       )
     );
   };
@@ -311,25 +300,6 @@ function Register() {
               />
               <button type="button" className="toggle-eye" onClick={toggleConfirmPassword}>👁</button>
             </div>
-
-            <label className="field-label">Gender</label>
-            <SelectFormItem
-              name="gender"
-              placeholder="Select gender"
-              options={userEnumerators.genre.map((value) => ({
-                value,
-                label: i18n(`user.enumerators.gender.${value}`),
-              }))}
-              required
-            />
-
-            <label className="field-label" htmlFor="invitationcode">Invitation Code</label>
-            <InputFormItem
-              type="text"
-              name="invitationcode"
-              placeholder="Enter invitation code"
-              externalErrorMessage={externalErrorMessage}
-            />
 
             <button className="register-btn" disabled={loading} type="submit">
               <ButtonIcon loading={loading} />

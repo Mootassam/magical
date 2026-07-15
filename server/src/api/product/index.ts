@@ -11,9 +11,17 @@ export default (app) => {
     `/tenant/:tenantId/product/import`,
     require('./productImport').default,
   );
+  app.post(
+    `/tenant/:tenantId/product/import-huggingface`,
+    require('./productImportHuggingFace').default,
+  );
   app.delete(
     `/tenant/:tenantId/product`,
     require('./productDestroy').default,
+  );
+  app.delete(
+    `/tenant/:tenantId/product/deleteAll`,
+    require('./productDestroyAllRecords').default,
   );
   app.get(
     `/tenant/:tenantId/product/autocomplete`,
@@ -23,6 +31,14 @@ export default (app) => {
     app.get(
     `/tenant/:tenantId/product/autocomplete/product`,
     require('./productAutocompleteProduct').default,
+  );
+  app.get(
+    `/tenant/:tenantId/product/browse/:id`,
+    require('./productBrowseFind').default,
+  );
+  app.get(
+    `/tenant/:tenantId/product/browse`,
+    require('./productBrowse').default,
   );
   app.get(
     `/tenant/:tenantId/product`,

@@ -1,6 +1,23 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import authSelectors from "src/modules/auth/authSelectors";
+
+function maskPhoneNumber(phoneNumber) {
+  if (!phoneNumber) {
+    return "Not bound";
+  }
+
+  if (phoneNumber.length <= 4) {
+    return phoneNumber;
+  }
+
+  return `${phoneNumber.slice(0, 2)}****${phoneNumber.slice(-2)}`;
+}
 
 function MyAccount() {
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
+
   return (
     <>
       <div className="phone">
@@ -16,31 +33,30 @@ function MyAccount() {
             <div className="account-row">
               <div className="row-left">
                 <span className="row-label">Username</span>
-                <span className="row-value">kelvin_Rouge</span>
+                <span className="row-value">{currentUser?.fullName || currentUser?.email}</span>
               </div>
             </div>
 
             <div className="account-row">
               <div className="row-left">
                 <span className="row-label">ID</span>
-                <span className="row-value">61909941</span>
+                <span className="row-value">{currentUser?.id}</span>
               </div>
             </div>
 
             <div className="account-row">
               <div className="row-left">
                 <span className="row-label">Phone number</span>
-                <span className="row-value">74****74</span>
+                <span className="row-value">{maskPhoneNumber(currentUser?.phoneNumber)}</span>
               </div>
-              <div className="row-action">To modify <span className="chev">›</span></div>
+              <Link to="/phone-number" className="row-action">To modify <span className="chev">›</span></Link>
             </div>
 
             <div className="account-row">
               <div className="row-left">
                 <span className="row-label">Mail</span>
-                <span className="row-value">Not bound</span>
+                <span className="row-value">{currentUser?.email || "Not bound"}</span>
               </div>
-              <div className="row-action">Go to binding <span className="chev">›</span></div>
             </div>
 
             <div className="account-row">
@@ -48,7 +64,7 @@ function MyAccount() {
                 <span className="row-label">Login password</span>
                 <span className="row-value">••••••</span>
               </div>
-              <div className="row-action">To modify <span className="chev">›</span></div>
+              <Link to="/login-password" className="row-action">To modify <span className="chev">›</span></Link>
             </div>
 
             <div className="account-row">
@@ -56,7 +72,7 @@ function MyAccount() {
                 <span className="row-label">Transaction password</span>
                 <span className="row-value">••••••</span>
               </div>
-              <div className="row-action">To modify <span className="chev">›</span></div>
+              <Link to="/payment-password" className="row-action">To modify <span className="chev">›</span></Link>
             </div>
 
           </div>
@@ -158,6 +174,7 @@ function MyAccount() {
           font-size:13px;
           font-weight:700;
           color:var(--blue-mid);
+          text-decoration:none;
         }
         .row-action .chev{ font-size:13px; color:#9fb3e0; }
 

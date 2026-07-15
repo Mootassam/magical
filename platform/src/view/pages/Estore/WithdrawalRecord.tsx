@@ -1,6 +1,74 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
+import transactionListActions from "src/modules/transaction/list/transactionListActions";
+import transactionListSelectors from "src/modules/transaction/list/transactionListSelectors";
+import Nodata from "src/view/shared/Nodata";
+import RecordListSkeleton, {
+  SummarySkeleton,
+} from "src/view/pages/Estore/shared/RecordListSkeleton";
+
+const WALLET_LABELS = {
+  eth: "ETH",
+  btc: "BTC",
+  usdt_trc20: "USDT-TRC20",
+  usdt_erc20: "USDT-ERC20",
+};
+
+const STATUS_CONFIG = {
+  success: { className: "completed", label: "Completed" },
+  pending: { className: "processing", label: "Processing" },
+  canceled: { className: "failed", label: "Canceled" },
+};
 
 function WithdrawalRecord() {
+  const dispatch = useDispatch();
+  const loading = useSelector(transactionListSelectors.selectLoading);
+  const rows = useSelector(transactionListSelectors.selectRows);
+  const count = useSelector(transactionListSelectors.selectCount);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      dispatch({
+        type: transactionListActions.PAGINATION_CHANGED,
+        payload: { current: 1, pageSize: 50 },
+      });
+      await dispatch(
+        transactionListActions.doFetchByUser(
+          { type: "withdraw" },
+          { type: "withdraw" },
+        ),
+      );
+      if (mounted) {
+        setInitialized(true);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [dispatch]);
+
+  const showSkeleton = !initialized || loading;
+
+  const totalWithdrawn = rows
+    .filter((row) => row.status === "success")
+    .reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+
+  const processingCount = rows.filter(
+    (row) => row.status === "pending",
+  ).length;
+
+  const groups = rows.reduce((acc, row) => {
+    const day = moment(row.createdAt).format("MMMM DD, YYYY");
+    acc[day] = acc[day] || [];
+    acc[day].push(row);
+    return acc;
+  }, {} as Record<string, any[]>);
+
   return (
     <>
       <div className="phone">
@@ -11,129 +79,70 @@ function WithdrawalRecord() {
         </div>
 
         <div className="summary-strip">
-          <div className="summary-item">
-            <div className="summary-value">$15,269.89</div>
-            <div className="summary-label">Total Withdrawn</div>
-          </div>
-          <div className="summary-item">
-            <div className="summary-value">6</div>
-            <div className="summary-label">Transactions</div>
-          </div>
-          <div className="summary-item">
-            <div className="summary-value">1</div>
-            <div className="summary-label">Processing</div>
-          </div>
+          {showSkeleton ? (
+            <SummarySkeleton />
+          ) : (
+            <>
+              <div className="summary-item">
+                <div className="summary-value">${totalWithdrawn.toFixed(2)}</div>
+                <div className="summary-label">Total Withdrawn</div>
+              </div>
+              <div className="summary-item">
+                <div className="summary-value">{count}</div>
+                <div className="summary-label">Transactions</div>
+              </div>
+              <div className="summary-item">
+                <div className="summary-value">{processingCount}</div>
+                <div className="summary-label">Processing</div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="scroll-area">
 
-          <div className="day-label">June 04, 2025</div>
+          {showSkeleton && <RecordListSkeleton />}
 
-          <div className="record-card">
-            <div className="record-top">
-              <div>
-                <div className="record-id">ID: 2025060321230500037</div>
-                <div className="record-time">Time: 2025-06-04 05:23:05</div>
-              </div>
-              <div className="record-right">
-                <div className="record-amount">-$12,997.42</div>
-                <div className="record-method">USDT-TRC20</div>
-              </div>
-            </div>
-            <div className="record-bottom">
-              <span className="status-pill processing">Processing</span>
-              <span className="fee-note">Fee: $2.58</span>
-            </div>
-          </div>
+          {!showSkeleton && rows.length === 0 && <Nodata />}
 
-          <div className="record-card">
-            <div className="record-top">
-              <div>
-                <div className="record-id">ID: 2025060218450000091</div>
-                <div className="record-time">Time: 2025-06-02 18:45:00</div>
-              </div>
-              <div className="record-right">
-                <div className="record-amount">-$3,150.00</div>
-                <div className="record-method">USDT-TRC20</div>
-              </div>
-            </div>
-            <div className="record-bottom">
-              <span className="status-pill completed">Completed</span>
-              <span className="fee-note">Fee: $1.00</span>
-            </div>
-          </div>
+          {!showSkeleton &&
+            Object.keys(groups).map((day) => (
+              <div key={day}>
+                <div className="day-label">{day}</div>
 
-          <div className="day-label">May 29, 2025</div>
+                {groups[day].map((row) => {
+                  const status =
+                    STATUS_CONFIG[row.status] || STATUS_CONFIG.pending;
 
-          <div className="record-card">
-            <div className="record-top">
-              <div>
-                <div className="record-id">ID: 2025052913200000074</div>
-                <div className="record-time">Time: 2025-05-29 13:20:00</div>
+                  return (
+                    <div className="record-card" key={row.id}>
+                      <div className="record-top">
+                        <div>
+                          <div className="record-id">ID: {row.id}</div>
+                          <div className="record-time">
+                            Time: {moment(row.createdAt).format("YYYY-MM-DD HH:mm:ss")}
+                          </div>
+                        </div>
+                        <div className="record-right">
+                          <div className="record-amount">-${Number(row.amount).toFixed(2)}</div>
+                          <div className="record-method">
+                            {WALLET_LABELS[row.wallet] || row.wallet || "-"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="record-bottom">
+                        <span className={`status-pill ${status.className}`}>
+                          {status.label}
+                        </span>
+                        {row.status === "canceled" && (
+                          <span className="fee-note">Refunded to balance</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="record-right">
-                <div className="record-amount">-$980.50</div>
-                <div className="record-method">USDT-TRC20</div>
-              </div>
-            </div>
-            <div className="record-bottom">
-              <span className="status-pill completed">Completed</span>
-              <span className="fee-note">Fee: $1.00</span>
-            </div>
-          </div>
-
-          <div className="record-card">
-            <div className="record-top">
-              <div>
-                <div className="record-id">ID: 2025052909100000063</div>
-                <div className="record-time">Time: 2025-05-29 09:10:00</div>
-              </div>
-              <div className="record-right">
-                <div className="record-amount">-$4,500.00</div>
-                <div className="record-method">USDT-TRC20</div>
-              </div>
-            </div>
-            <div className="record-bottom">
-              <span className="status-pill failed">Failed</span>
-              <span className="fee-note">Refunded to balance</span>
-            </div>
-          </div>
-
-          <div className="day-label">May 24, 2025</div>
-
-          <div className="record-card">
-            <div className="record-top">
-              <div>
-                <div className="record-id">ID: 2025052416400000048</div>
-                <div className="record-time">Time: 2025-05-24 16:40:00</div>
-              </div>
-              <div className="record-right">
-                <div className="record-amount">-$1,640.00</div>
-                <div className="record-method">USDT-TRC20</div>
-              </div>
-            </div>
-            <div className="record-bottom">
-              <span className="status-pill completed">Completed</span>
-              <span className="fee-note">Fee: $1.00</span>
-            </div>
-          </div>
-
-          <div className="record-card">
-            <div className="record-top">
-              <div>
-                <div className="record-id">ID: 2025052410050000031</div>
-                <div className="record-time">Time: 2025-05-24 10:05:00</div>
-              </div>
-              <div className="record-right">
-                <div className="record-amount">-$1,999.97</div>
-                <div className="record-method">USDT-TRC20</div>
-              </div>
-            </div>
-            <div className="record-bottom">
-              <span className="status-pill completed">Completed</span>
-              <span className="fee-note">Fee: $1.00</span>
-            </div>
-          </div>
+            ))}
 
         </div>
 
@@ -219,6 +228,13 @@ function WithdrawalRecord() {
         }
         .scroll-area::-webkit-scrollbar{ display:none; }
 
+        .loading-text{
+          text-align:center;
+          color:var(--grey-text);
+          font-size:12.5px;
+          padding:30px 0;
+        }
+
         .day-label{
           font-size:11.5px;
           font-weight:700;
@@ -241,10 +257,10 @@ function WithdrawalRecord() {
           justify-content:space-between;
           align-items:flex-start;
         }
-        .record-id{ font-size:11.5px; color:var(--grey-text); }
+        .record-id{ font-size:11.5px; color:var(--grey-text); word-break:break-all; max-width:180px; }
         .record-time{ font-size:11px; color:var(--grey-text); margin-top:3px; }
 
-        .record-right{ text-align:right; }
+        .record-right{ text-align:right; flex-shrink:0; }
         .record-amount{ font-size:15px; font-weight:800; color:var(--red); }
         .record-method{ font-size:10.5px; color:var(--grey-text); margin-top:3px; }
 

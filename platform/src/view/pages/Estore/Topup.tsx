@@ -1,93 +1,243 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { i18n } from "../../../i18n";
+import authSelectors from "src/modules/auth/authSelectors";
+import walletSettingsActions from "src/modules/walletSettings/walletSettingsActions";
+import walletSettingsSelectors from "src/modules/walletSettings/walletSettingsSelectors";
+import transactionFormActions from "src/modules/transaction/form/transactionFormActions";
+import transactionFormSelectors from "src/modules/transaction/form/transactionFormSelectors";
+import FileUploader from "src/modules/shared/fileUpload/fileUploader";
+import Storage from "src/security/storage";
+import Message from "src/view/shared/message";
+import Errors from "src/modules/shared/error/errors";
+
+const WALLET_TYPES = [
+  { key: "eth", addressField: "ethAddress", feeField: "ethFee" },
+  { key: "btc", addressField: "btcAddress", feeField: "btcFee" },
+  {
+    key: "usdt_trc20",
+    addressField: "usdtTrc20Address",
+    feeField: "usdtTrc20Fee",
+  },
+  {
+    key: "usdt_erc20",
+    addressField: "usdtErc20Address",
+    feeField: "usdtErc20Fee",
+  },
+];
+
+function qrCodeUrl(address) {
+  if (!address) {
+    return undefined;
+  }
+
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+    address,
+  )}`;
+}
 
 function Topup() {
+  const dispatch = useDispatch();
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
+  const walletSettings = useSelector(
+    walletSettingsSelectors.selectWalletSettings,
+  );
+  const initLoading = useSelector(
+    walletSettingsSelectors.selectInitLoading,
+  );
+  const saveLoading = useSelector(
+    transactionFormSelectors.selectSaveLoading,
+  );
+
+  const [selectedWallet, setSelectedWallet] = useState(WALLET_TYPES[0].key);
+  const [amount, setAmount] = useState("");
+  const [photo, setPhoto] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    dispatch(walletSettingsActions.doInit());
+  }, [dispatch]);
+
+  const currentWallet =
+    WALLET_TYPES.find((wallet) => wallet.key === selectedWallet) ||
+    WALLET_TYPES[0];
+
+  const address =
+    (walletSettings && walletSettings[currentWallet.addressField]) || "";
+  const fee = (walletSettings && walletSettings[currentWallet.feeField]) || 0;
+
+  const doCopyAddress = () => {
+    if (!address) {
+      return;
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(address)
+        .then(() => Message.success(i18n("pages.topup.addressCopied")))
+        .catch((error) => console.error("Error copying to clipboard:", error));
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = address;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      Message.success(i18n("pages.topup.addressCopied"));
+    }
+  };
+
+  const doUploadPhoto = async (event) => {
+    try {
+      const files = event.target.files;
+
+      if (!files || !files.length) {
+        return;
+      }
+
+      const file = files[0];
+
+      setUploading(true);
+
+      const uploaded = await FileUploader.upload(file, {
+        storage: Storage.values.transactionPhoto,
+        image: true,
+      });
+
+      setPhoto(uploaded);
+      setUploading(false);
+    } catch (error) {
+      setUploading(false);
+      Errors.showMessage(error);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const doSubmit = async () => {
+    if (!address) {
+      Message.error(i18n("pages.topup.noWalletSelected"));
+      return;
+    }
+
+    if (!amount || Number(amount) <= 0) {
+      Message.error(i18n("pages.topup.missingAmount"));
+      return;
+    }
+
+    if (!photo) {
+      Message.error(i18n("pages.topup.missingPhoto"));
+      return;
+    }
+
+    const values = {
+      status: "pending",
+      datetransaction: new Date(),
+      user: currentUser ? currentUser.id : null,
+      type: "deposit",
+      wallet: selectedWallet,
+      amount: amount,
+      photo: [photo],
+    };
+
+    await dispatch(transactionFormActions.doCreateTopup(values));
+  };
+
   return (
     <>
       <div className="phone">
 
         <div className="page-header">
           <button className="back-btn" onClick={() => window.history.back()}>←</button>
-          <span className="page-title">Top Up</span>
+          <span className="page-title">{i18n("pages.topup.title")}</span>
         </div>
 
         <div className="scroll-area">
           <div className="form-card">
 
-            <span className="field-label">Recharge Methods</span>
+            <span className="field-label">{i18n("pages.topup.rechargeMethods")}</span>
             <div className="select-box">
-              <span>USDT</span>
-              <span className="chev">⌄</span>
-            </div>
-
-            <span className="field-label sp">Please select the recharge network</span>
-            <div className="select-box">
-              <span>TRC-20</span>
-              <span className="chev">⌄</span>
+              <select
+                value={selectedWallet}
+                onChange={(event) => setSelectedWallet(event.target.value)}
+                className="wallet-select"
+                disabled={initLoading}
+              >
+                {WALLET_TYPES.map((wallet) => (
+                  <option key={wallet.key} value={wallet.key}>
+                    {i18n(`pages.topup.wallets.${wallet.key}`)}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="qr-block">
               <div className="qr-code">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="100" height="100" fill="#fff" />
-                  <g fill="#0e1b45">
-                    <rect x="6" y="6" width="24" height="24" />
-                    <rect x="12" y="12" width="12" height="12" fill="#fff" />
-                    <rect x="70" y="6" width="24" height="24" />
-                    <rect x="76" y="12" width="12" height="12" fill="#fff" />
-                    <rect x="6" y="70" width="24" height="24" />
-                    <rect x="12" y="76" width="12" height="12" fill="#fff" />
-                    <rect x="38" y="6" width="6" height="6" />
-                    <rect x="50" y="6" width="6" height="6" />
-                    <rect x="60" y="14" width="6" height="6" />
-                    <rect x="38" y="20" width="6" height="6" />
-                    <rect x="46" y="30" width="6" height="6" />
-                    <rect x="58" y="30" width="6" height="6" />
-                    <rect x="70" y="38" width="6" height="6" />
-                    <rect x="82" y="38" width="6" height="6" />
-                    <rect x="38" y="40" width="6" height="6" />
-                    <rect x="6" y="40" width="6" height="6" />
-                    <rect x="18" y="46" width="6" height="6" />
-                    <rect x="30" y="50" width="6" height="6" />
-                    <rect x="50" y="50" width="6" height="6" />
-                    <rect x="62" y="52" width="6" height="6" />
-                    <rect x="74" y="56" width="6" height="6" />
-                    <rect x="86" y="50" width="6" height="6" />
-                    <rect x="38" y="60" width="6" height="6" />
-                    <rect x="46" y="66" width="6" height="6" />
-                    <rect x="58" y="66" width="6" height="6" />
-                    <rect x="70" y="70" width="6" height="6" />
-                    <rect x="82" y="70" width="6" height="6" />
-                    <rect x="38" y="78" width="6" height="6" />
-                    <rect x="50" y="80" width="6" height="6" />
-                    <rect x="62" y="86" width="6" height="6" />
-                    <rect x="74" y="82" width="6" height="6" />
-                    <rect x="86" y="88" width="6" height="6" />
-                    <rect x="46" y="88" width="6" height="6" />
-                  </g>
-                </svg>
+                {address ? (
+                  <img src={qrCodeUrl(address)} alt="QR code" />
+                ) : (
+                  <div className="qr-placeholder" />
+                )}
               </div>
               <div className="qr-text">
-                <div className="qr-hint">Scan the QR code to recharge</div>
-                <div className="qr-address">TR4x6A1h4uHGkDQdT44BnZbrsjmVaXp4bY</div>
-                <div className="copy-link">📋 Copy deposit address</div>
+                <div className="qr-hint">{i18n("pages.topup.scanHint")}</div>
+                <div className="qr-address">
+                  {address || (initLoading ? "..." : "-")}
+                </div>
+                <div className="fee-hint">
+                  {i18n("pages.topup.fee")}: {fee}
+                </div>
+                <div className="copy-link" onClick={doCopyAddress}>
+                  📋 {i18n("pages.topup.copyAddress")}
+                </div>
               </div>
             </div>
 
-            <span className="field-label sp">Recharge amount (USDT)</span>
-            <input type="text" className="text-input" placeholder="Please enter the recharge amount (USDT)" />
+            <span className="field-label sp">{i18n("pages.topup.amount")}</span>
+            <input
+              type="number"
+              className="text-input"
+              placeholder={i18n("pages.topup.amountPlaceholder")}
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+            />
 
-            <span className="field-label sp">Amount received (USDT)</span>
-            <div className="readonly-box">0.00</div>
-
-            <span className="field-label sp">Upload recharge voucher</span>
+            <span className="field-label sp">{i18n("pages.topup.uploadVoucher")}</span>
             <div className="upload-wrap">
-              <div className="upload-box">
-                <span className="plus">+</span>
-                <span className="lbl">Upload<br />Credentials</span>
-              </div>
+              <label className="upload-box">
+                {photo ? (
+                  <img
+                    src={photo.downloadUrl}
+                    alt={photo.name}
+                    className="upload-preview"
+                  />
+                ) : (
+                  <>
+                    <span className="plus">{uploading ? "…" : "+"}</span>
+                    <span className="lbl">{i18n("pages.topup.uploadLabel")}</span>
+                  </>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={doUploadPhoto}
+                  disabled={uploading}
+                />
+              </label>
             </div>
 
-            <button className="submit-btn">Submit Recharge</button>
+            <button
+              className="submit-btn"
+              disabled={saveLoading || uploading}
+              onClick={doSubmit}
+            >
+              {i18n("pages.topup.submit")}
+            </button>
 
           </div>
         </div>
@@ -182,12 +332,21 @@ function Topup() {
     background:#fff;
     border:1.5px solid var(--field-border);
     border-radius:12px;
-    padding:12px 14px;
+    padding:4px 6px;
     font-size:13.5px;
     color:var(--navy);
     font-weight:600;
   }
-  .select-box .chev{ color:var(--grey-text); font-size:12px; }
+  .wallet-select{
+    width:100%;
+    border:none;
+    outline:none;
+    background:transparent;
+    padding:9px 8px;
+    font-size:13.5px;
+    color:var(--navy);
+    font-weight:600;
+  }
 
   /* ---------- QR block ---------- */
   .qr-block{
@@ -207,7 +366,8 @@ function Topup() {
     background:#fff;
     border:1px solid var(--field-border);
   }
-  .qr-code svg{ width:100%; height:100%; display:block; }
+  .qr-code img{ width:100%; height:100%; display:block; object-fit:contain; }
+  .qr-placeholder{ width:100%; height:100%; background:var(--grey-light); }
 
   .qr-text{ flex:1; min-width:0; }
   .qr-hint{ font-size:11px; color:var(--grey-text); margin-bottom:6px; }
@@ -217,6 +377,11 @@ function Topup() {
     color:var(--navy);
     word-break:break-all;
     line-height:1.4;
+  }
+  .fee-hint{
+    font-size:11px;
+    color:var(--grey-text);
+    margin-top:6px;
   }
   .copy-link{
     display:inline-flex;
@@ -241,15 +406,6 @@ function Topup() {
   }
   .text-input::placeholder{ color:#a9b3cf; }
 
-  .readonly-box{
-    background:var(--grey-light);
-    border:1.5px solid var(--field-border);
-    border-radius:12px;
-    padding:13px 14px;
-    font-size:13.5px;
-    color:#a6afc8;
-  }
-
   /* ---------- Upload box ---------- */
   .upload-wrap{
     display:flex;
@@ -267,9 +423,12 @@ function Topup() {
     gap:8px;
     color:var(--grey-text);
     background:#fbfcff;
+    cursor:pointer;
+    overflow:hidden;
   }
   .upload-box .plus{ font-size:28px; color:#c3cbe0; }
   .upload-box .lbl{ font-size:12px; font-weight:600; text-align:center; color:var(--navy); }
+  .upload-preview{ width:100%; height:100%; object-fit:cover; }
 
   .submit-btn{
     width:100%;
@@ -284,6 +443,10 @@ function Topup() {
     letter-spacing:0.3px;
     cursor:pointer;
     box-shadow:0 10px 22px rgba(47,141,255,0.4);
+  }
+  .submit-btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
   }
       `}</style>
     </>

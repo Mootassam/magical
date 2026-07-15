@@ -1,6 +1,127 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import listActions from "src/modules/notification/list/notificationListActions";
+import listSelectors from "src/modules/notification/list/notificationListSelectors";
+import formActions from "src/modules/notification/form/notificationFormActions";
+
+const ICONS = {
+  deposit_success: { icon: "💰", bg: "#eafaf1" },
+  deposit_canceled: { icon: "⚠️", bg: "#fff3e6" },
+  withdraw_success: { icon: "💸", bg: "#eafaf1" },
+  withdraw_canceled: { icon: "⚠️", bg: "#fff3e6" },
+  system: { icon: "⚙️", bg: "#e8f1ff" },
+  alert: { icon: "🔔", bg: "#fdeef4" },
+  admin: { icon: "📣", bg: "#e8f1ff" },
+};
+
+function getIcon(type) {
+  return ICONS[type] || { icon: "🔔", bg: "#f1edfd" };
+}
+
+function getTitle(notification) {
+  if (notification.subject) {
+    return notification.subject;
+  }
+
+  switch (notification.type) {
+    case "deposit_success":
+      return "Deposit successful";
+    case "deposit_canceled":
+      return "Deposit canceled";
+    case "withdraw_success":
+      return "Withdrawal successful";
+    case "withdraw_canceled":
+      return "Withdrawal canceled";
+    case "system":
+      return "System notice";
+    case "alert":
+      return "Alert";
+    default:
+      return "Notification";
+  }
+}
+
+function getText(notification) {
+  if (notification.message) {
+    return notification.message;
+  }
+
+  if (notification.amount) {
+    return `Amount: $${notification.amount}`;
+  }
+
+  return "";
+}
+
+function isToday(dateString) {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
+function formatTime(dateString) {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 function SiteMessage() {
+  const dispatch = useDispatch();
+  const rows = useSelector(listSelectors.selectRows);
+  const loading = useSelector(listSelectors.selectLoading);
+
+  useEffect(() => {
+    dispatch(listActions.doFetch());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
+
+  const hasUnread = rows.some((row: any) => row.status === "unread");
+
+  const doMarkOneRead = (notification) => {
+    if (notification.status === "unread") {
+      dispatch(formActions.doMarkAsRead(notification.id));
+    }
+  };
+
+  const doMarkAllRead = () => {
+    dispatch(listActions.doMarkAllAsRead());
+  };
+
+  const todayRows = rows.filter((row: any) => isToday(row.createdAt));
+  const earlierRows = rows.filter((row: any) => !isToday(row.createdAt));
+
+  const renderCard = (notification: any) => {
+    const { icon, bg } = getIcon(notification.type);
+    const isUnread = notification.status === "unread";
+
+    return (
+      <div
+        className="msg-card"
+        key={notification.id}
+        onClick={() => doMarkOneRead(notification)}
+      >
+        <div className="msg-icon" style={{ background: bg }}>
+          {icon}
+        </div>
+        <div className="msg-body">
+          <div className="msg-top">
+            <span className="msg-title">{getTitle(notification)}</span>
+            <span className="msg-time">{formatTime(notification.createdAt)}</span>
+          </div>
+          <div className="msg-text">{getText(notification)}</div>
+        </div>
+        {isUnread && <span className="unread-dot"></span>}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="phone">
@@ -10,71 +131,34 @@ function SiteMessage() {
             <button className="back-btn" onClick={() => window.history.back()}>←</button>
             <span className="page-title">Site Message</span>
           </div>
-          <span className="mark-read">Mark all read</span>
+          {hasUnread && (
+            <span className="mark-read" onClick={doMarkAllRead}>Mark all read</span>
+          )}
         </div>
 
         <div className="scroll-area">
 
-          <div className="day-label">Today</div>
+          {loading && rows.length === 0 && (
+            <div className="empty-state">Loading...</div>
+          )}
 
-          <div className="msg-card">
-            <div className="msg-icon" style={{ background: '#e8f1ff' }}>🎉</div>
-            <div className="msg-body">
-              <div className="msg-top">
-                <span className="msg-title">Weekend Sale is live!</span>
-                <span className="msg-time">10:24 AM</span>
-              </div>
-              <div className="msg-text">Enjoy up to 70% off across Fashion, Beauty and Electronics — today only.</div>
-            </div>
-            <span className="unread-dot"></span>
-          </div>
+          {!loading && rows.length === 0 && (
+            <div className="empty-state">No messages yet.</div>
+          )}
 
-          <div className="msg-card">
-            <div className="msg-icon" style={{ background: '#eafaf1' }}>📦</div>
-            <div className="msg-body">
-              <div className="msg-top">
-                <span className="msg-title">Your order has shipped</span>
-                <span className="msg-time">9:02 AM</span>
-              </div>
-              <div className="msg-text">Order #ES20458213 is on its way. Estimated delivery in 3–5 days.</div>
-            </div>
-            <span className="unread-dot"></span>
-          </div>
+          {todayRows.length > 0 && (
+            <>
+              <div className="day-label">Today</div>
+              {todayRows.map(renderCard)}
+            </>
+          )}
 
-          <div className="day-label">Yesterday</div>
-
-          <div className="msg-card">
-            <div className="msg-icon" style={{ background: '#fff3e6' }}>💰</div>
-            <div className="msg-body">
-              <div className="msg-top">
-                <span className="msg-title">Top up successful</span>
-                <span className="msg-time">6:48 PM</span>
-              </div>
-              <div className="msg-text">$50.00 USDT has been credited to your account balance.</div>
-            </div>
-          </div>
-
-          <div className="msg-card">
-            <div className="msg-icon" style={{ background: '#f1edfd' }}>🏷️</div>
-            <div className="msg-body">
-              <div className="msg-top">
-                <span className="msg-title">New voucher added</span>
-                <span className="msg-time">2:15 PM</span>
-              </div>
-              <div className="msg-text">A $10 store voucher has been added to your account. Valid for 7 days.</div>
-            </div>
-          </div>
-
-          <div className="msg-card">
-            <div className="msg-icon" style={{ background: '#fdeef4' }}>⭐</div>
-            <div className="msg-body">
-              <div className="msg-top">
-                <span className="msg-title">Leave a review</span>
-                <span className="msg-time">11:30 AM</span>
-              </div>
-              <div className="msg-text">How was your Runner Sneakers? Share a quick review and earn 20 points.</div>
-            </div>
-          </div>
+          {earlierRows.length > 0 && (
+            <>
+              <div className="day-label">Earlier</div>
+              {earlierRows.map(renderCard)}
+            </>
+          )}
 
         </div>
 
@@ -136,7 +220,7 @@ function SiteMessage() {
     color:#fff;
   }
   .page-title{ font-size:17px; font-weight:800; }
-  .mark-read{ font-size:12.5px; font-weight:600; opacity:0.9; }
+  .mark-read{ font-size:12.5px; font-weight:600; opacity:0.9; cursor:pointer; }
 
   /* ---------- Scroll body ---------- */
   .scroll-area{
@@ -147,6 +231,13 @@ function SiteMessage() {
   }
   .scroll-area::-webkit-scrollbar{ display:none; }
 
+  .empty-state{
+    text-align:center;
+    color:var(--grey-text);
+    font-size:13px;
+    padding:60px 20px;
+  }
+
   .msg-card{
     display:flex;
     gap:12px;
@@ -156,6 +247,7 @@ function SiteMessage() {
     padding:14px;
     margin-bottom:12px;
     position:relative;
+    cursor:pointer;
   }
 
   .msg-icon{

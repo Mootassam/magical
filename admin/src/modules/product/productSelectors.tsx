@@ -58,12 +58,24 @@ const selectPermissionToDestroy = createSelector(
     ),
 );
 
+const selectPermissionToImportHuggingFace = createSelector(
+  [
+    authSelectors.selectCurrentTenant,
+    authSelectors.selectCurrentUser,
+  ],
+  (currentTenant, currentUser) =>
+    new PermissionChecker(currentTenant, currentUser).match(
+      Permissions.values.productImportHuggingFace,
+    ),
+);
+
 const couponsSelectors = {
   selectPermissionToRead,
   selectPermissionToEdit,
   selectPermissionToCreate,
   selectPermissionToDestroy,
   selectPermissionToImport,
+  selectPermissionToImportHuggingFace,
 };
 
 export default couponsSelectors;

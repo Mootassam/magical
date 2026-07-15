@@ -27,6 +27,10 @@ const authActions = {
   PASSWORD_CHANGE_SUCCESS: `${prefix}_PASSWORD_CHANGE_SUCCESS`,
   PASSWORD_CHANGE_ERROR: `${prefix}_PASSWORD_CHANGE_ERROR`,
 
+  WITHDRAW_PASSWORD_CHANGE_START: `${prefix}_WITHDRAW_PASSWORD_CHANGE_START`,
+  WITHDRAW_PASSWORD_CHANGE_SUCCESS: `${prefix}_WITHDRAW_PASSWORD_CHANGE_SUCCESS`,
+  WITHDRAW_PASSWORD_CHANGE_ERROR: `${prefix}_WITHDRAW_PASSWORD_CHANGE_ERROR`,
+
   CURRENT_USER_REFRESH_START: `${prefix}_CURRENT_USER_REFRESH_START`,
   CURRENT_USER_REFRESH_SUCCESS: `${prefix}_CURRENT_USER_REFRESH_SUCCESS`,
   CURRENT_USER_REFRESH_ERROR: `${prefix}_CURRENT_USER_REFRESH_ERROR`,
@@ -61,15 +65,13 @@ const authActions = {
     password,
 
     phoneNumber,
-    withdrawPassword,
-    invitationcode, gender) => async (dispatch) => {
+    withdrawPassword) => async (dispatch) => {
       try {
         dispatch({ type: authActions.AUTH_START });
 
         const token = await service.registerWithEmailAndPassword(email, password,
           phoneNumber,
-          withdrawPassword,
-          invitationcode, gender);
+          withdrawPassword);
         AuthToken.set(token, true);
         const currentUser = await service.fetchMe();
 
@@ -290,6 +292,51 @@ const authActions = {
 
       dispatch({
         type: authActions.PASSWORD_CHANGE_ERROR,
+      });
+    }
+  },
+
+  doUpdatePhoneNumber: (phoneNumber, withdrawPassword) => async (dispatch) => {
+    try {
+      dispatch({
+        type: authActions.UPDATE_PROFILE_START,
+      });
+
+      await service.updateProfile({ phoneNumber, withdrawPassword });
+
+      dispatch({
+        type: authActions.UPDATE_PROFILE_SUCCESS,
+      });
+      await dispatch(authActions.doRefreshCurrentUser());
+      Message.success(i18n("auth.profile.phoneNumber"));
+      getHistory().push("/my-account");
+    } catch (error) {
+      Errors.handle(error);
+      dispatch({
+        type: authActions.UPDATE_PROFILE_ERROR,
+      });
+    }
+  },
+
+  doChangeWithdrawPassword: (oldWithdrawPassword, newWithdrawPassword) => async (dispatch) => {
+    try {
+      dispatch({
+        type: authActions.WITHDRAW_PASSWORD_CHANGE_START,
+      });
+
+      await service.changeWithdrawPassword(oldWithdrawPassword, newWithdrawPassword);
+
+      dispatch({
+        type: authActions.WITHDRAW_PASSWORD_CHANGE_SUCCESS,
+      });
+      await dispatch(authActions.doRefreshCurrentUser());
+      Message.success(i18n("auth.withdrawPasswordChange.success"));
+      getHistory().push("/my-account");
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: authActions.WITHDRAW_PASSWORD_CHANGE_ERROR,
       });
     }
   },

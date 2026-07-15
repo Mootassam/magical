@@ -23,6 +23,7 @@ const en = {
     areYouSure: 'Are you sure?',
     view: 'View',
     destroy: 'Delete',
+    deleteAll: 'Delete All',
     mustSelectARow: 'Must select a row',
     start: 'Start',
     end: 'End',
@@ -1716,6 +1717,10 @@ const en = {
       destroyAll: {
         success: 'Product(s) successfully deleted',
       },
+      destroyAllRecords: {
+        success: 'All products successfully deleted',
+        confirm: 'Are you sure you want to delete ALL products? This action cannot be undone.',
+      },
       edit: {
         title: 'Edit Product',
       },
@@ -1724,6 +1729,9 @@ const en = {
         vip: 'vip',
         title: 'Product Name',
         amount: 'Product Price',
+        price: 'Price',
+        image: 'Image URL',
+        description: 'Description',
         commission: 'Product Commission',
         id: 'Id',
         name: 'Name',
@@ -1803,6 +1811,155 @@ const en = {
         title: 'Import Products',
         fileName: 'product_import_template',
         hint: 'Files/Images columns must be the URLs of the files separated by space.',
+      },
+      importHuggingFace: {
+        button: 'Import Sample Products',
+        confirm: 'This will fetch product data from several public product datasets (Hugging Face, DummyJSON, Fake Store API) and create new categories and products in your store. Continue?',
+        success: 'Import complete: {0} new categories and {1} new products added.',
+      },
+    },
+
+    productCategory: {
+      name: 'productCategory',
+      label: 'Product Categories',
+      menu: 'Categories',
+      list: {
+        menu: 'Categories',
+        title: 'Product Categories',
+      },
+      fields: {
+        name: 'Name',
+        createdAt: 'Created at',
+      },
+      destroy: {
+        success: 'Category successfully deleted',
+      },
+      destroyAllRecords: {
+        success: 'All categories successfully deleted',
+        confirm: 'Are you sure you want to delete ALL categories? This action cannot be undone.',
+      },
+    },
+
+    notification: {
+      name: 'notification',
+      label: 'Notifications',
+      menu: 'Notifications',
+      send: 'Send',
+      list: {
+        menu: 'Notifications',
+        title: 'Notifications',
+      },
+      new: {
+        title: 'Send Notification',
+      },
+      create: {
+        success: 'Notification successfully sent',
+      },
+      destroy: {
+        success: 'Notification successfully deleted',
+      },
+      destroyAll: {
+        success: 'Notification(s) successfully deleted',
+      },
+      fields: {
+        user: 'Recipient',
+        subject: 'Subject',
+        message: 'Message',
+        status: 'Status',
+        createdAt: 'Sent at',
+      },
+    },
+
+    storeListing: {
+      name: 'storeListing',
+      label: 'Product Management',
+      menu: 'Product Management',
+      viewProducts: 'View Products',
+      searchByStore: 'Search by store name...',
+      list: {
+        title: 'Stores',
+      },
+      products: {
+        title: 'Store Products',
+      },
+      fields: {
+        storeName: 'Store',
+        merchant: 'Merchant',
+        mainBusiness: 'Main Business',
+        productCount: 'Products',
+        product: 'Product',
+        salesPrice: 'Sales Price',
+        wholesalePrice: 'Wholesale Price',
+        createdAt: 'Added at',
+      },
+    },
+
+    automatOrder: {
+      name: 'automatOrder',
+      label: 'Automat Order Management',
+      menu: 'Automat Order Management',
+      order: 'Order',
+      addRow: 'Add another order',
+      generate: 'Generate',
+      selectStore: 'Select a store',
+      selectStoreFirst: 'Select a store first',
+      selectProduct: 'Select a product',
+      loadingStores: 'Loading stores...',
+      loadingProducts: 'Loading products...',
+      noProductsInStore: 'This store has no listed products',
+      customerNamePlaceholder: 'Enter or generate a customer name',
+      list: {
+        title: 'Automat Order Management',
+      },
+      new: {
+        title: 'Add Orders',
+        button: 'New',
+      },
+      create: {
+        success: 'Order(s) successfully created',
+      },
+      errors: {
+        incompleteRows: 'Please complete store, customer name, product, quantity and start time for every row',
+      },
+      fields: {
+        storeName: 'Store Name',
+        storeId: 'Store ID',
+        customerName: 'Customer Name',
+        product: 'Product',
+        quantity: 'Quantity',
+        startTime: 'Start Time',
+        status: 'Status',
+        createdAt: 'Created At',
+        updatedAt: 'Updated At',
+      },
+    },
+
+    orderShipment: {
+      name: 'orderShipment',
+      label: 'Order Shipments',
+      menu: 'Order Shipments',
+      list: {
+        title: 'Order Shipments',
+      },
+      complete: {
+        success: 'Order marked as completed and profit credited to the seller',
+      },
+      refund: {
+        success: 'Order refunded to the seller',
+      },
+      actions: {
+        complete: 'Completed',
+        refund: 'Refund',
+      },
+      fields: {
+        storeName: 'Store',
+        product: 'Product',
+        customerName: 'Customer Name',
+        quantity: 'Quantity',
+        wholesaleAmount: 'Wholesale Paid',
+        profitAmount: 'Profit',
+        status: 'Status',
+        createdAt: 'Created At',
       },
     },
 
@@ -2134,6 +2291,83 @@ const en = {
         title: 'Import Transactions',
         fileName: 'transaction_import_template',
         hint: 'Files/Images columns must be the URLs of the files separated by space.',
+      },
+      deposit: {
+        menu: 'Deposits',
+        title: 'Deposits',
+      },
+      withdraw: {
+        menu: 'Withdrawals',
+        title: 'Withdrawals',
+      },
+    },
+
+    store: {
+      name: 'store',
+      label: 'Store Applications',
+      menu: 'Store',
+      exporterFileName: 'store_export',
+      list: {
+        menu: 'Store',
+        title: 'Store Applications',
+      },
+      update: {
+        success: 'Store application status successfully updated',
+      },
+      fields: {
+        user: 'Applicant',
+        storeName: 'Store Name',
+        contact: 'Contact',
+        idNumber: 'ID Number',
+        mainBusiness: 'Main Business',
+        address: 'Address',
+        storePhoto: 'Store Photo',
+        idCardFront: 'ID Card Front',
+        idCardBack: 'ID Card Back',
+        status: 'Status',
+        createdAt: 'Submitted',
+      },
+      enumerators: {
+        status: {
+          pending: 'Pending',
+          rejected: 'Rejected',
+          success: 'Approved',
+        },
+        mainBusiness: {
+          fashion_clothing: 'Fashion & Clothing',
+          electronics: 'Electronics',
+          beauty_cosmetics: 'Beauty & Cosmetics',
+          home_living: 'Home & Living',
+          sports_outdoors: 'Sports & Outdoors',
+          toys_hobbies: 'Toys & Hobbies',
+          food_beverages: 'Food & Beverages',
+          other: 'Other',
+        },
+      },
+      actions: {
+        accept: 'Accept',
+        reject: 'Reject',
+      },
+      filters: {
+        allStatuses: 'All statuses',
+      },
+    },
+
+    deliveryAddress: {
+      name: 'deliveryAddress',
+      label: 'Delivery Addresses',
+      menu: 'Delivery Address',
+      exporterFileName: 'delivery_address_export',
+      list: {
+        menu: 'Delivery Address',
+        title: 'Delivery Addresses',
+      },
+      fields: {
+        user: 'Customer',
+        address: 'Address',
+        contact: 'Contact',
+        contactNumber: 'Contact Number',
+        createdAt: 'Submitted',
       },
     },
 
@@ -2926,6 +3160,24 @@ const en = {
       yellow: 'Yellow',
     },
   },
+  walletSettings: {
+    title: 'Wallet Settings',
+    menu: 'Wallet Settings',
+    save: {
+      success: 'Wallet settings successfully saved.',
+    },
+    fields: {
+      address: 'Wallet Address',
+      addressPlaceholder: 'Enter the wallet address',
+      fee: 'Fee',
+    },
+    wallets: {
+      eth: 'ETH',
+      btc: 'BTC',
+      usdtTrc20: 'USDT (TRC20)',
+      usdtErc20: 'USDT (ERC20)',
+    },
+  },
   dashboard: {
     valider: 'validate',
     file: 'No file selected',
@@ -2937,7 +3189,15 @@ const en = {
     company: 'Company',
     record: 'record',
     product: 'Product',
+    productCategory: 'Categories',
     worker: 'Workers',
+    walletSettings: 'Wallet Settings',
+    store: 'Store',
+    deliveryAddress: 'Delivery Address',
+    notification: 'Notifications',
+    productManagement: 'Product Management',
+    automatOrder: 'Automat Order Management',
+    orderShipment: 'Order Shipments',
     transaction: 'transaction',
     online: 'Online',
     Level: 'Level',

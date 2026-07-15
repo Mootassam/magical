@@ -140,6 +140,38 @@ static async updateUser(
   }
 
 
+  static async updateWithdrawPassword(
+    id,
+    withdrawPassword,
+    options: IRepositoryOptions
+  ) {
+    await User(options.database).updateOne(
+      { _id: id },
+      { $set: { withdrawPassword, updatedBy: id } },
+      MongooseRepository.getSession(options)
+        ? { session: MongooseRepository.getSession(options) }
+        : {}
+    );
+
+    await AuditLogRepository.log(
+      {
+        entityName: "user",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: {
+          id,
+          withdrawPassword: "secret",
+        },
+      },
+      options
+    );
+
+    return this.findById(id, {
+      ...options,
+      bypassPermissionValidation: true,
+    });
+  }
+
   static async generateCouponCode() {
     const randomNumber = Math.floor(Math.random() * 10000000);
     const randomNumberPadded = randomNumber.toString().padStart(7, "0");
@@ -1482,6 +1514,7 @@ static async updateUser(
       })),
       grab: user.grab,
       withdraw: user.withdraw,
+      store: user.store,
       freezeblance: user.freezeblance,
       minbalance: user.minbalance,
       score: user.score,
@@ -1545,6 +1578,7 @@ static async updateUser(
       })),
       grab: user.grab,
       withdraw: user.withdraw,
+      store: user.store,
       freezeblance: user.freezeblance,
       minbalance: user.minbalance,
       score: user.score,

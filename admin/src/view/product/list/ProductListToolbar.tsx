@@ -19,6 +19,16 @@ function CouponsToolbar(props) {
     setDestroyAllConfirmVisible,
   ] = useState(false);
 
+  const [
+    destroyAllRecordsConfirmVisible,
+    setDestroyAllRecordsConfirmVisible,
+  ] = useState(false);
+
+  const [
+    huggingFaceConfirmVisible,
+    setHuggingFaceConfirmVisible,
+  ] = useState(false);
+
   const dispatch = useDispatch();
 
   const selectedKeys = useSelector(
@@ -44,6 +54,12 @@ function CouponsToolbar(props) {
   const hasPermissionToImport = useSelector(
     couponsSelectors.selectPermissionToImport,
   );
+  const hasPermissionToImportHuggingFace = useSelector(
+    couponsSelectors.selectPermissionToImportHuggingFace,
+  );
+  const huggingFaceImportLoading = useSelector(
+    selectors.selectHuggingFaceImportLoading,
+  );
 
   const doOpenDestroyAllConfirmModal = () => {
     setDestroyAllConfirmVisible(true);
@@ -61,6 +77,17 @@ function CouponsToolbar(props) {
     doCloseDestroyAllConfirmModal();
 
     dispatch(destroyActions.doDestroyAll(selectedKeys));
+  };
+
+  const doDestroyAllRecords = () => {
+    setDestroyAllRecordsConfirmVisible(false);
+
+    dispatch(destroyActions.doDestroyAllRecords());
+  };
+
+  const doImportFromHuggingFace = () => {
+    setHuggingFaceConfirmVisible(false);
+    dispatch(actions.doImportFromHuggingFace());
   };
 
   const renderExportButton = () => {
@@ -139,6 +166,44 @@ function CouponsToolbar(props) {
     return button;
   };
 
+  const renderDestroyAllRecordsButton = () => {
+    if (!hasPermissionToDestroy) {
+      return null;
+    }
+
+    const disabled = !hasRows || loading;
+
+    const button = (
+      <button
+        disabled={disabled}
+        className="btn btn-danger"
+        type="button"
+        onClick={() => setDestroyAllRecordsConfirmVisible(true)}
+      >
+        <ButtonIcon
+          loading={destroyLoading}
+          iconClass="far fa-trash-alt"
+        />
+        &nbsp;{i18n('common.deleteAll')}
+      </button>
+    );
+
+    if (disabled) {
+      return (
+        <span
+          data-tip={i18n('common.noDataToExport')}
+          data-tip-disable={!disabled}
+          data-for="product-list-toolbar-destroy-all-records-tooltip"
+        >
+          {button}
+          <ReactTooltip id="product-list-toolbar-destroy-all-records-tooltip" />
+        </span>
+      );
+    }
+
+    return button;
+  };
+
   return (
     <Toolbar>
       {hasPermissionToCreate && (
@@ -157,7 +222,7 @@ function CouponsToolbar(props) {
           </span>
         </Link>
       )}
-{/* 
+{/*
       {hasPermissionToImport && (
         <Link to="/product/importer">
           <span
@@ -175,8 +240,24 @@ function CouponsToolbar(props) {
         </Link>
       )} */}
 
+      {hasPermissionToImportHuggingFace && (
+        <button
+          className="btn btn-primary"
+          type="button"
+          disabled={huggingFaceImportLoading}
+          onClick={() => setHuggingFaceConfirmVisible(true)}
+        >
+          <ButtonIcon
+            loading={huggingFaceImportLoading}
+            iconClass="fas fa-cloud-download-alt"
+          />
+          &nbsp;{i18n('entities.product.importHuggingFace.button')}
+        </button>
+      )}
+
       {renderDestroyButton()}
-{/* 
+      {renderDestroyAllRecordsButton()}
+{/*
       {hasPermissionToAuditLogs && (
         <Link to="/audit-logs?entityNames=coupons">
           <span
@@ -201,6 +282,26 @@ function CouponsToolbar(props) {
           title={i18n('common.areYouSure')}
           onConfirm={() => doDestroyAllSelected()}
           onClose={() => doCloseDestroyAllConfirmModal()}
+          okText={i18n('common.yes')}
+          cancelText={i18n('common.no')}
+        />
+      )}
+
+      {destroyAllRecordsConfirmVisible && (
+        <ConfirmModal
+          title={i18n('entities.product.destroyAllRecords.confirm')}
+          onConfirm={() => doDestroyAllRecords()}
+          onClose={() => setDestroyAllRecordsConfirmVisible(false)}
+          okText={i18n('common.yes')}
+          cancelText={i18n('common.no')}
+        />
+      )}
+
+      {huggingFaceConfirmVisible && (
+        <ConfirmModal
+          title={i18n('entities.product.importHuggingFace.confirm')}
+          onConfirm={() => doImportFromHuggingFace()}
+          onClose={() => setHuggingFaceConfirmVisible(false)}
           okText={i18n('common.yes')}
           cancelText={i18n('common.no')}
         />

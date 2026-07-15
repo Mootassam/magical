@@ -14,8 +14,14 @@ export default (database) => {
       title: {
         type: String,
       },
+      description: {
+        type: String,
+      },
       amount: {
         type: String,
+      },
+      price: {
+        type: Number,
       },
       commission: {
         type: String,
@@ -29,10 +35,14 @@ export default (database) => {
         default: "normal",
       },
 
+      category: {
+        type: Schema.Types.ObjectId,
+        ref: "productCategory",
+      },
+
       vip: {
         type: Schema.Types.ObjectId,
         ref: "vip",
-        required: true,
       },
       tenant: {
         type: Schema.Types.ObjectId,

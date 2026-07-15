@@ -8,8 +8,7 @@ export default class AuthService {
     email,
     password,
     phoneNumber,
-    withdrawPassword,
-    invitationcode, gender
+    withdrawPassword
   ) {
     const invitationToken = AuthInvitationToken.get();
 
@@ -20,9 +19,7 @@ export default class AuthService {
       password,
       phoneNumber,
       withdrawPassword,
-      invitationcode,
       invitationToken,
-      gender,
       tenantId: AuthCurrentTenant.get(),
     });
 
@@ -93,6 +90,17 @@ export default class AuthService {
     };
 
     const response = await authAxios.put("/auth/change-password", body);
+
+    return response.data;
+  }
+
+  static async changeWithdrawPassword(oldWithdrawPassword, newWithdrawPassword) {
+    const body = {
+      oldWithdrawPassword,
+      newWithdrawPassword,
+    };
+
+    const response = await authAxios.put("/auth/change-withdraw-password", body);
 
     return response.data;
   }

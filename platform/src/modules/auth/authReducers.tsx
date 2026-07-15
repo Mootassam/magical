@@ -8,6 +8,7 @@ const initialData = {
   loadingEmailConfirmation: false,
   loadingPasswordResetEmail: false,
   loadingPasswordChange: false,
+  loadingWithdrawPasswordChange: false,
   loadingVerifyEmail: false,
   loadingPasswordReset: false,
   loadingUpdateProfile: false,
@@ -155,6 +156,27 @@ export default (state = initialData, { type, payload }) => {
     return {
       ...state,
       loadingPasswordChange: false,
+    };
+  }
+
+  if (type === actions.WITHDRAW_PASSWORD_CHANGE_START) {
+    return {
+      ...state,
+      loadingWithdrawPasswordChange: true,
+    };
+  }
+
+  if (type === actions.WITHDRAW_PASSWORD_CHANGE_SUCCESS) {
+    return {
+      ...state,
+      loadingWithdrawPasswordChange: false,
+    };
+  }
+
+  if (type === actions.WITHDRAW_PASSWORD_CHANGE_ERROR) {
+    return {
+      ...state,
+      loadingWithdrawPasswordChange: false,
     };
   }
 

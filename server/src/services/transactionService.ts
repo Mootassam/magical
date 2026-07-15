@@ -3,6 +3,7 @@ import MongooseRepository from "../database/repositories/mongooseRepository";
 import { IServiceOptions } from "./IServiceOptions";
 import TransactionRepository from "../database/repositories/TransactionRepository";
 import Notification from "../database/models/notification";
+import AdminPendingCountsService from "./adminPendingCountsService";
 
 export default class TransactionService {
   options: IServiceOptions;
@@ -27,6 +28,8 @@ export default class TransactionService {
         type: data.type,
         amount: data.amount,
         photo: data.photo,
+        wallet: data.wallet || null,
+        walletAddress: data.walletAddress || null,
       };
 
       const record = await TransactionRepository.create(values, {
@@ -55,6 +58,8 @@ export default class TransactionService {
 
       await MongooseRepository.commitTransaction(session);
 
+      this._notifyPendingCountsChanged();
+
       return record;
     } catch (error) {
       await MongooseRepository.abortTransaction(session);
@@ -67,6 +72,17 @@ export default class TransactionService {
 
       throw error;
     }
+  }
+
+  // Fire-and-forget - the header badge counts are a nice-to-have real-time
+  // signal, not something worth delaying the API response for.
+  _notifyPendingCountsChanged() {
+    const currentTenant = MongooseRepository.getCurrentTenant(this.options);
+
+    AdminPendingCountsService.computeAndEmit(
+      currentTenant.id,
+      this.options.database
+    ).catch(() => {});
   }
 
   async updateUserBalance(userId, amount, session, operation = 'inc') {
@@ -104,9 +120,7 @@ export default class TransactionService {
 
     if (type === "withdraw") {
 
-
-
-      if (!currentUser.trc20) {
+      if (!data.wallet || !data.walletAddress) {
 
         throw new Error400(options.language, "validation.missingWalletAddress");
 
@@ -214,6 +228,9 @@ export default class TransactionService {
       }
 
       await MongooseRepository.commitTransaction(session);
+
+      this._notifyPendingCountsChanged();
+
       return updatedTransaction;
 
     } catch (error) {
@@ -244,6 +261,8 @@ export default class TransactionService {
       });
 
       await MongooseRepository.commitTransaction(session);
+
+      this._notifyPendingCountsChanged();
 
       return record;
     } catch (error) {

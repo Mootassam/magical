@@ -74,6 +74,58 @@ const transactionFormActions = {
     }
   },
 
+  doCreateTopup: (values) => async (dispatch) => {
+    try {
+      dispatch({
+        type: transactionFormActions.CREATE_STARTED,
+      });
+
+      await TransactionService.create(values);
+
+      dispatch({
+        type: transactionFormActions.CREATE_SUCCESS,
+      });
+
+      Message.success(
+        i18n('entities.transaction.create.success'),
+      );
+
+      getHistory().push('/balance');
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: transactionFormActions.CREATE_ERROR,
+      });
+    }
+  },
+
+  doCreateWithdrawal: (values) => async (dispatch) => {
+    try {
+      dispatch({
+        type: transactionFormActions.CREATE_STARTED,
+      });
+
+      await TransactionService.create(values);
+
+      dispatch({
+        type: transactionFormActions.CREATE_SUCCESS,
+      });
+
+      Message.success(
+        i18n('entities.transaction.create.success'),
+      );
+
+      getHistory().push('/balance');
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: transactionFormActions.CREATE_ERROR,
+      });
+    }
+  },
+
   doUpdate: (id, values) => async (dispatch, getState) => {
     try {
       dispatch({

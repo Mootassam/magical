@@ -239,6 +239,8 @@ class ProductRepository {
     await Product(options.database).deleteOne({ _id: id }, options);
 
     await this._createAuditLog(AuditLogRepository.DELETE, id, record, options);
+
+    return record;
   }
 
   static async count(filter, options: IRepositoryOptions) {
@@ -257,7 +259,10 @@ class ProductRepository {
     const currentTenant = MongooseRepository.getCurrentTenant(options);
 
     let record = await MongooseRepository.wrapWithSessionIfExists(
-      Product(options.database).findById(id).populate("vip"),
+      Product(options.database)
+        .findById(id)
+        .populate("vip")
+        .populate("category"),
       options
     );
 
@@ -309,6 +314,28 @@ class ProductRepository {
           vip: filter.vip,
         });
       }
+
+      if (filter.category) {
+        criteriaAnd.push({
+          category: filter.category,
+        });
+      }
+
+      if (filter.priceMin !== undefined || filter.priceMax !== undefined) {
+        const priceFilter: any = {};
+
+        if (filter.priceMin !== undefined && filter.priceMin !== "") {
+          priceFilter.$gte = Number(filter.priceMin);
+        }
+
+        if (filter.priceMax !== undefined && filter.priceMax !== "") {
+          priceFilter.$lte = Number(filter.priceMax);
+        }
+
+        if (Object.keys(priceFilter).length) {
+          criteriaAnd.push({ price: priceFilter });
+        }
+      }
     }
 
     const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
@@ -322,6 +349,7 @@ class ProductRepository {
       .skip(skip)
       .limit(limitEscaped)
       .populate("vip")
+      .populate("category")
       .sort(sort);
 
     const count = await Product(options.database).countDocuments(criteria);

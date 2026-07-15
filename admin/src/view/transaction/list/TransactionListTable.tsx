@@ -15,6 +15,8 @@ import actionsForm from 'src/modules/transaction/form/transactionFormActions';
 import UserListItem from 'src/view/user/list/UserListItem';
 
 function TransactionListTable(props) {
+  const fixedType = props.fixedType || null;
+  const columnCount = fixedType ? 6 : 7;
   const [recordIdToDestroy, setRecordIdToDestroy] = useState(null);
   const dispatch = useDispatch();
 
@@ -130,18 +132,20 @@ function TransactionListTable(props) {
                     </span>
                   )}
                 </th>
-                <th 
-                  className="sortable-header" 
-                  onClick={() => doChangeSort('type')}
-                >
-                  {i18n('entities.transaction.fields.type')}
-                  {sorter.field === 'type' && (
-                    <span className="sort-icon">
-                      {sorter.order === 'ascend' ? '↑' : '↓'}
-                    </span>
-                  )}
-                </th>
-                <th 
+                {!fixedType && (
+                  <th
+                    className="sortable-header"
+                    onClick={() => doChangeSort('type')}
+                  >
+                    {i18n('entities.transaction.fields.type')}
+                    {sorter.field === 'type' && (
+                      <span className="sort-icon">
+                        {sorter.order === 'ascend' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </th>
+                )}
+                <th
                   className="sortable-header text-right" 
                   onClick={() => doChangeSort('amount')}
                 >
@@ -152,8 +156,13 @@ function TransactionListTable(props) {
                     </span>
                   )}
                 </th>
-                <th 
-                  className="sortable-header" 
+                <th className="sortable-header">
+                  {fixedType === 'withdraw'
+                    ? 'Withdrawal Method / Address'
+                    : 'Wallet / Proof'}
+                </th>
+                <th
+                  className="sortable-header"
                   onClick={() => doChangeSort('status')}
                 >
                   {i18n('entities.transaction.fields.status')}
@@ -182,7 +191,7 @@ function TransactionListTable(props) {
             <tbody className="table-body">
               {loading && (
                 <tr>
-                  <td colSpan={6} className="loading-cell">
+                  <td colSpan={columnCount} className="loading-cell">
                     <div className="loading-container">
                       <Spinner />
                       <span className="loading-text">
@@ -194,7 +203,7 @@ function TransactionListTable(props) {
               )}
               {!loading && !hasRows && (
                 <tr>
-                  <td colSpan={6} className="no-data-cell">
+                  <td colSpan={columnCount} className="no-data-cell">
                     <div className="no-data-content">
                       <i className="fas fa-database no-data-icon"></i>
                       <p>{i18n('table.noData')}</p>
@@ -221,17 +230,19 @@ function TransactionListTable(props) {
                         )}
                       </div>
                     </td>
-                    <td className="table-cell">
-                      <div className={`transaction-type-badge ${getTypeClass(row.type)}`}>
-                        <i className={`transaction-type-icon ${getTypeIcon(row.type)}`}></i>
-                        <span className="transaction-type-text">
-                          {row.type === 'deposit' ? 'Deposit' : row.type === 'withdraw' ? 'Withdraw' : row.type}
-                        </span>
-                      </div>
-                      {row.method && (
-                        <div className="transaction-method">{row.method}</div>
-                      )}
-                    </td>
+                    {!fixedType && (
+                      <td className="table-cell">
+                        <div className={`transaction-type-badge ${getTypeClass(row.type)}`}>
+                          <i className={`transaction-type-icon ${getTypeIcon(row.type)}`}></i>
+                          <span className="transaction-type-text">
+                            {row.type === 'deposit' ? 'Deposit' : row.type === 'withdraw' ? 'Withdraw' : row.type}
+                          </span>
+                        </div>
+                        {row.method && (
+                          <div className="transaction-method">{row.method}</div>
+                        )}
+                      </td>
+                    )}
                     <td className="table-cell text-right">
                       <div className={`transaction-amount ${getTypeClass(row.type)}`}>
                         <span className="amount-symbol">
@@ -246,6 +257,40 @@ function TransactionListTable(props) {
                         <div className="transaction-fee">
                           Fee: ${row.fee}
                         </div>
+                      )}
+                    </td>
+                    <td className="table-cell">
+                      {row.wallet && (
+                        <div className="transaction-wallet-badge">
+                          {row.wallet.toUpperCase()}
+                        </div>
+                      )}
+                      {row.type === 'withdraw' ? (
+                        row.walletAddress ? (
+                          <div
+                            className="transaction-wallet-address"
+                            title={row.walletAddress}
+                          >
+                            {row.walletAddress}
+                          </div>
+                        ) : (
+                          <span className="no-user">No address</span>
+                        )
+                      ) : row.photo && row.photo.length > 0 ? (
+                        <a
+                          className="transaction-proof-link"
+                          href={row.photo[0].downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            className="transaction-proof-thumb"
+                            src={row.photo[0].downloadUrl}
+                            alt="proof"
+                          />
+                        </a>
+                      ) : (
+                        <span className="no-user">No proof</span>
                       )}
                     </td>
                     <td className="table-cell">
@@ -501,6 +546,40 @@ function TransactionListTable(props) {
           color: #94a3b8;
           margin-top: 2px;
           text-align: right;
+        }
+
+        .transaction-wallet-badge {
+          display: inline-block;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.03em;
+          background: #eef2fa;
+          color: #334155;
+          margin-bottom: 6px;
+        }
+
+        .transaction-proof-link {
+          display: inline-block;
+        }
+
+        .transaction-proof-thumb {
+          width: 40px;
+          height: 40px;
+          object-fit: cover;
+          border-radius: 6px;
+          border: 1px solid #e2e8f0;
+        }
+
+        .transaction-wallet-address {
+          font-size: 11px;
+          font-family: monospace;
+          color: #334155;
+          max-width: 160px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .transaction-status-buttons {

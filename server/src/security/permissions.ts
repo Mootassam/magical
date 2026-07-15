@@ -80,6 +80,56 @@ class Permissions {
           storage.settingsLogos,
         ],
       },
+      walletSettingsEdit: {
+        id: "walletSettingsEdit",
+        allowedRoles: [roles.admin],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      notificationSend: {
+        id: "notificationSend",
+        allowedRoles: [roles.admin, roles.supervisor],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      storeListingRead: {
+        id: "storeListingRead",
+        allowedRoles: [roles.admin, roles.supervisor],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      automatOrderManage: {
+        id: "automatOrderManage",
+        allowedRoles: [roles.admin, roles.supervisor],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      orderShipmentManage: {
+        id: "orderShipmentManage",
+        allowedRoles: [roles.admin, roles.supervisor],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      storeRead: {
+        id: "storeRead",
+        allowedRoles: [roles.admin],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      storeEdit: {
+        id: "storeEdit",
+        allowedRoles: [roles.admin],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      deliveryAddressRead: {
+        id: "deliveryAddressRead",
+        allowedRoles: [roles.admin],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      productImportHuggingFace: {
+        id: "productImportHuggingFace",
+        allowedRoles: [roles.admin],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
+      productCategoryRead: {
+        id: "productCategoryRead",
+        allowedRoles: [roles.admin, roles.member, roles.agent, roles.supervisor],
+        allowedPlans: [plans.free, plans.growth, plans.enterprise],
+      },
       categoryImport: {
         id: "categoryImport",
         allowedRoles: [roles.admin, roles.agent],

@@ -21,7 +21,11 @@ const en = {
     requiredSubscription: 'Please select a subscription plan',
     moretasks: 'This is your limit. Please contact customer support for more tasks',
     deposit:"Insufficient balance please contact the customer support",
-    submitPendingProducts:"Please, submit the pending products "
+    submitPendingProducts:"Please, submit the pending products ",
+    emptyCart: "Your cart is empty",
+    missingDeliveryAddress: "Please provide a delivery address",
+    notificationUser: "Please select a recipient",
+    notificationContent: "Please write a subject and a message",
   },
 
 
@@ -45,6 +49,47 @@ const en = {
     },
     passwordChange: {
       invalidPassword: 'The old password is invalid',
+    },
+  },
+
+  store: {
+    errors: {
+      alreadySubmitted: 'You already have a store application pending review or already approved',
+      notFound: 'Store application not found',
+    },
+  },
+
+  storeListing: {
+    errors: {
+      noApprovedStore: 'You need an approved store to list products. Please apply and wait for approval first.',
+    },
+  },
+
+  automatOrder: {
+    errors: {
+      emptyRows: 'Please add at least one order row',
+      missingFields: 'Please fill in store, customer name, product, quantity and start time for every row',
+      invalidStore: 'One of the selected stores could not be found',
+      invalidProduct: 'One of the selected products could not be found',
+      productNotInStore: 'The selected product is not listed in the selected store',
+    },
+  },
+
+  orderShipment: {
+    errors: {
+      noApprovedStore: 'You need an approved store to process shipments',
+      notYourOrder: 'This order does not belong to your store',
+      notPending: 'This order is no longer waiting for delivery',
+      alreadyShipped: 'This order has already been sent for shipment',
+      insufficientBalance: 'You do not have enough balance to process this request',
+      invalidStatus: 'Invalid shipment status',
+      alreadyResolved: 'This shipment has already been resolved',
+    },
+  },
+
+  product: {
+    errors: {
+      noVipForImport: 'Please create at least one VIP level before importing products, so imported products can be assigned to a level.',
     },
   },
 

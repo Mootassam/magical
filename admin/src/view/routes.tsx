@@ -234,6 +234,24 @@ const privateRoutes = [
     exact: true,
   },
   {
+    path: '/transaction/deposit',
+    loader: () =>
+      import(
+        'src/view/transaction/list/DepositListPage'
+      ),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/transaction/withdraw',
+    loader: () =>
+      import(
+        'src/view/transaction/list/WithdrawListPage'
+      ),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
     path: '/transaction/:id/edit',
     loader: () =>
       import(
@@ -415,6 +433,90 @@ const privateRoutes = [
     loader: () =>
       import('src/view/settings/SettingsFormPage'),
     permissionRequired: permissions.settingsEdit,
+  },
+
+  {
+    path: '/wallet-settings',
+    loader: () =>
+      import('src/view/walletSettings/WalletSettingsFormPage'),
+    permissionRequired: permissions.walletSettingsEdit,
+  },
+
+  {
+    path: '/store',
+    loader: () =>
+      import('src/view/store/list/StoreListPage'),
+    permissionRequired: permissions.storeRead,
+    exact: true,
+  },
+
+  {
+    path: '/delivery-address',
+    loader: () =>
+      import('src/view/deliveryAddress/list/DeliveryAddressListPage'),
+    permissionRequired: permissions.deliveryAddressRead,
+    exact: true,
+  },
+
+  {
+    path: '/product-category',
+    loader: () =>
+      import('src/view/productCategory/list/ProductCategoryListPage'),
+    permissionRequired: permissions.productCategoryRead,
+    exact: true,
+  },
+
+  {
+    path: '/notification',
+    loader: () =>
+      import('src/view/notification/list/NotificationListPage'),
+    permissionRequired: permissions.notificationSend,
+    exact: true,
+  },
+  {
+    path: '/notification/new',
+    loader: () =>
+      import('src/view/notification/form/NotificationFormPage'),
+    permissionRequired: permissions.notificationSend,
+    exact: true,
+  },
+
+  {
+    path: '/product-management',
+    loader: () =>
+      import('src/view/storeListing/stores/StoreListingStoresPage'),
+    permissionRequired: permissions.storeListingRead,
+    exact: true,
+  },
+  {
+    path: '/product-management/:storeId',
+    loader: () =>
+      import('src/view/storeListing/products/StoreListingProductsPage'),
+    permissionRequired: permissions.storeListingRead,
+    exact: true,
+  },
+
+  {
+    path: '/automat-order',
+    loader: () =>
+      import('src/view/automatOrder/list/AutomatOrderListPage'),
+    permissionRequired: permissions.automatOrderManage,
+    exact: true,
+  },
+  {
+    path: '/automat-order/new',
+    loader: () =>
+      import('src/view/automatOrder/form/AutomatOrderForm'),
+    permissionRequired: permissions.automatOrderManage,
+    exact: true,
+  },
+
+  {
+    path: '/order-shipment',
+    loader: () =>
+      import('src/view/orderShipment/list/OrderShipmentListPage'),
+    permissionRequired: permissions.orderShipmentManage,
+    exact: true,
   },
 
   {

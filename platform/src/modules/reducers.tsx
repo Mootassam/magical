@@ -10,6 +10,16 @@ import record from 'src/modules/record/recordReducers'
 import product from 'src/modules/product/list/productListReducers'
 import transaction from 'src/modules/transaction/transactionReducers'
 import notification from 'src/modules/notification/notificationReducers'
+import walletSettings from 'src/modules/walletSettings/walletSettingsReducers'
+import store from 'src/modules/store/storeReducers'
+import deliveryAddress from 'src/modules/deliveryAddress/deliveryAddressReducers'
+import shopCategory from 'src/modules/shop/shopCategoryReducers'
+import shopProduct from 'src/modules/shop/shopProductReducers'
+import cart from 'src/modules/cart/cartReducers'
+import order from 'src/modules/order/orderReducers'
+import storeListing from 'src/modules/storeListing/storeListingReducers'
+import automatOrder from 'src/modules/automatOrder/automatOrderReducers'
+import orderShipment from 'src/modules/orderShipment/orderShipmentReducers'
 import { combineReducers } from "redux";
 
 export default (history) =>
@@ -25,4 +35,14 @@ export default (history) =>
     tenant,
     user,
      notification,
+    walletSettings,
+    store,
+    deliveryAddress,
+    shopCategory,
+    shopProduct,
+    cart,
+    order,
+    storeListing,
+    automatOrder,
+    orderShipment,
   });

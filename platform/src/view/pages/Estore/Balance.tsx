@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import authSelectors from "src/modules/auth/authSelectors";
 
 function Balance() {
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
+  const [hidden, setHidden] = useState(false);
+
+  const totalBalance = currentUser?.balance || 0;
+  const frozenBalance = currentUser?.freezeblance || 0;
+  const availableBalance = totalBalance - frozenBalance;
+
+  const format = (value) => (hidden ? "••••••" : `$${value.toFixed(2)}`);
+
   return (
     <>
       <div className="phone">
@@ -16,17 +27,22 @@ function Balance() {
           <div className="balance-card">
             <div className="card-title-row">
               <span className="card-title">Total Balance</span>
-              <span className="eye-toggle">👁</span>
+              <span
+                className="eye-toggle"
+                onClick={() => setHidden(!hidden)}
+              >
+                {hidden ? "🙈" : "👁"}
+              </span>
             </div>
 
             <div className="balance-split">
               <div className="balance-block">
                 <div className="lbl">Account Balance</div>
-                <div className="val">$0.00</div>
+                <div className="val">{format(totalBalance)}</div>
               </div>
               <div className="balance-block">
                 <div className="lbl">Available balance</div>
-                <div className="val">$0.00</div>
+                <div className="val">{format(availableBalance)}</div>
               </div>
             </div>
 

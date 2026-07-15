@@ -103,6 +103,19 @@ const notificationListActions = {
 
 
 
+  doMarkAllAsRead:
+    () =>
+      async (dispatch) => {
+        try {
+          await NotificationService.markAllAsRead();
+
+          dispatch(notificationListActions.doFetch());
+          dispatch(notificationListActions.fetchUnreadNotifications());
+        } catch (error) {
+          Errors.handle(error);
+        }
+      },
+
   fetchUnreadNotifications:
     () =>
       async (dispatch, getState) => {

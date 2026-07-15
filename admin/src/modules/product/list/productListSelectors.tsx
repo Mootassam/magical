@@ -12,6 +12,11 @@ const selectExportLoading = createSelector(
   (raw) => raw.exportLoading,
 );
 
+const selectHuggingFaceImportLoading = createSelector(
+  [selectRaw],
+  (raw) => Boolean(raw.huggingFaceImportLoading),
+);
+
 const selectRows = createSelector(
   [selectRaw],
   (raw) => raw.rows,
@@ -123,6 +128,7 @@ const couponsListSelectors = {
   selectSelectedRows,
   selectHasRows,
   selectExportLoading,
+  selectHuggingFaceImportLoading,
   selectRawFilter,
   selectIsAllSelected,
   selectSorter,

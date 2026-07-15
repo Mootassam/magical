@@ -1,10 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
+import authSelectors from "src/modules/auth/authSelectors";
 
 function Mine() {
   const dispatch = useDispatch();
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
+  const avatar = useSelector(authSelectors.selectCurrentUserAvatar);
 
   const doSignout = () => {
     dispatch(authActions.doSignout());
@@ -23,21 +26,28 @@ function Mine() {
 
         <div className="scroll-area">
 
-          <div className="approved-banner">
-            <span className="approved-icon">✅</span>
-            <div className="approved-text">
-              <div className="approved-title">Store Application Approved!</div>
-              <div className="approved-sub">Your seller account is active.</div>
+          {currentUser?.store && (
+            <div className="approved-banner">
+              <span className="approved-icon">✅</span>
+              <div className="approved-text">
+                <div className="approved-title">Store Application Approved!</div>
+                <div className="approved-sub">Your seller account is active.</div>
+              </div>
+              <Link to="/mine-seller" className="approved-link">Go to Seller Dashboard</Link>
             </div>
-            <Link to="/mine-seller" className="approved-link">Go to Seller Dashboard</Link>
-          </div>
+          )}
 
           <Link to="/my-account" className="profile-card">
-            <div className="avatar"><img src="https://loremflickr.com/140/140/portrait,person/all?lock=501" alt="Mike01 avatar" /></div>
+            <div className="avatar">
+              <img
+                src={avatar || "https://loremflickr.com/140/140/portrait,person/all?lock=501"}
+                alt={`${currentUser?.fullName || "User"} avatar`}
+              />
+            </div>
             <div className="profile-info">
-              <div className="profile-name">Mike01</div>
-              <div className="profile-email">mike100@gmail.com</div>
-              <div className="profile-id">ID: 451505</div>
+              <div className="profile-name">{currentUser?.fullName || currentUser?.email}</div>
+              <div className="profile-email">{currentUser?.email}</div>
+              <div className="profile-id">ID: {currentUser?.id}</div>
             </div>
             <span className="profile-arrow">›</span>
           </Link>
@@ -56,7 +66,7 @@ function Mine() {
               <div className="stat-label">My Browse</div>
             </Link>
             <Link to="/balance" className="stat-item">
-              <div className="stat-value">$20,000.00</div>
+              <div className="stat-value">${currentUser?.balance?.toFixed(2) || "0.00"}</div>
               <div className="stat-label">Account Balance</div>
             </Link>
           </div>
@@ -99,16 +109,26 @@ function Mine() {
               <div className="ic">⬇️</div>
               <div className="lbl">Withdrawal</div>
             </Link>
-            <Link to="/mine-seller" className="quick-btn">
+            <Link
+              to={currentUser?.store ? "/mine-seller" : "/apply-merchant"}
+              className="quick-btn"
+            >
               <div className="ic">🏪</div>
-              <div className="lbl">Seller Dashboard</div>
+              <div className="lbl">
+                {currentUser?.store ? "Seller Dashboard" : "Apply Merchant"}
+              </div>
             </Link>
           </div>
 
           <div className="menu-card">
+            <Link to="/deposit-record" className="menu-item">
+              <div className="menu-icon" style={{ background: '#eafaf1' }}>🧾</div>
+              <div className="menu-text">Deposit records</div>
+              <span className="menu-arrow">›</span>
+            </Link>
             <Link to="/withdrawal-record" className="menu-item">
-              <div className="menu-icon" style={{ background: '#e8f1ff' }}>🧾</div>
-              <div className="menu-text">Billing records</div>
+              <div className="menu-icon" style={{ background: '#e8f1ff' }}>📤</div>
+              <div className="menu-text">Withdrawal records</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/delivery-address" className="menu-item">

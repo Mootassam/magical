@@ -1,6 +1,11 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import authSelectors from "src/modules/auth/authSelectors";
 
 function MineBuyer() {
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
+  const avatar = useSelector(authSelectors.selectCurrentUserAvatar);
+
   return (
     <>
       <div className="phone">
@@ -24,11 +29,16 @@ function MineBuyer() {
           </div>
 
           <div className="profile-card">
-            <div className="avatar"><img src="https://loremflickr.com/140/140/portrait,person/all?lock=501" alt="Mike01 avatar" /></div>
+            <div className="avatar">
+              <img
+                src={avatar || "https://loremflickr.com/140/140/portrait,person/all?lock=501"}
+                alt={`${currentUser?.fullName || "User"} avatar`}
+              />
+            </div>
             <div className="profile-info">
-              <div className="profile-name">Mike01</div>
-              <div className="profile-email">mike100@gmail.com</div>
-              <div className="profile-id">ID: 451505</div>
+              <div className="profile-name">{currentUser?.fullName || currentUser?.email}</div>
+              <div className="profile-email">{currentUser?.email}</div>
+              <div className="profile-id">ID: {currentUser?.id}</div>
             </div>
             <span className="profile-arrow">›</span>
           </div>
@@ -47,7 +57,7 @@ function MineBuyer() {
               <div className="stat-label">My Browse</div>
             </div>
             <div className="stat-item">
-              <div className="stat-value">$20,000.00</div>
+              <div className="stat-value">${currentUser?.balance?.toFixed(2) || "0.00"}</div>
               <div className="stat-label">Account Balance</div>
             </div>
           </div>

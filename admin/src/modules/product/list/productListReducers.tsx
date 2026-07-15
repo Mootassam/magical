@@ -6,6 +6,7 @@ const initialData = {
   rows: [] as Array<any>,
   count: 0,
   loading: false,
+  huggingFaceImportLoading: false,
   filter: {},
   rawFilter: {},
   pagination: {
@@ -132,6 +133,27 @@ rawFilter: payload ? payload.rawFilter : {},
     return {
       ...state,
       exportLoading: false,
+    };
+  }
+
+  if (type === actions.HUGGINGFACE_IMPORT_STARTED) {
+    return {
+      ...state,
+      huggingFaceImportLoading: true,
+    };
+  }
+
+  if (type === actions.HUGGINGFACE_IMPORT_SUCCESS) {
+    return {
+      ...state,
+      huggingFaceImportLoading: false,
+    };
+  }
+
+  if (type === actions.HUGGINGFACE_IMPORT_ERROR) {
+    return {
+      ...state,
+      huggingFaceImportLoading: false,
     };
   }
 

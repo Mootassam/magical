@@ -14,6 +14,14 @@ export default class NotificationService {
   }
 
   async create(data) {
+    if (!data.user) {
+      throw new Error400(this.options.language, "validation.notificationUser");
+    }
+
+    if (!data.subject || !data.message) {
+      throw new Error400(this.options.language, "validation.notificationContent");
+    }
+
     const session = await MongooseRepository.createSession(
       this.options.database
     );
@@ -24,8 +32,10 @@ export default class NotificationService {
         status: data.status,
         datetransaction: data.datetransaction,
         user: data.user,
-        type: data.type,
-        amount: data.amount,
+        type: data.type || "admin",
+        subject: data.subject,
+        message: data.message,
+        amount: data.amount || "",
         photo: data.photo,
       };
 
@@ -59,6 +69,14 @@ export default class NotificationService {
 
   async countUnreadByUser(options) {
     return NotificationRepository.countUnread(options);
+  }
+
+  async findAndCountAllAdmin(args) {
+    return NotificationRepository.findAndCountAllAdmin(args, this.options);
+  }
+
+  async markAllAsRead() {
+    return NotificationRepository.markAllAsRead(this.options);
   }
 
 

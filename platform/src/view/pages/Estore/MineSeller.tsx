@@ -1,10 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
+import authSelectors from "src/modules/auth/authSelectors";
 
 function MineSeller() {
   const dispatch = useDispatch();
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
 
   const doSignout = () => {
     dispatch(authActions.doSignout());
@@ -39,8 +41,8 @@ function MineSeller() {
                 <span className="profile-name">Universal Store</span>
                 <span className="level-badge">🏅 Gold</span>
               </div>
-              <div className="profile-email">mike100@gmail.com</div>
-              <div className="profile-id">ID: 451505</div>
+              <div className="profile-email">{currentUser?.email}</div>
+              <div className="profile-id">ID: {currentUser?.id}</div>
             </div>
             <span className="profile-arrow">›</span>
           </Link>
@@ -59,7 +61,7 @@ function MineSeller() {
               <div className="stat-label">My Browse</div>
             </Link>
             <Link to="/balance" className="stat-item">
-              <div className="stat-value">$20,000.00</div>
+              <div className="stat-value">${currentUser?.balance?.toFixed(2) || "0.00"}</div>
               <div className="stat-label">Account Balance</div>
             </Link>
           </div>

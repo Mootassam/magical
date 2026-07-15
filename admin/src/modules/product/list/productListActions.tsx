@@ -4,6 +4,7 @@ import exporterFields from 'src/modules/product/list/productListExporterFields';
 import Errors from 'src/modules/shared/error/errors';
 import Exporter from 'src/modules/shared/exporter/exporter';
 import ProductService from 'src/modules/product/productService';
+import Message from 'src/view/shared/message';
 
 const prefix = 'PRODUCT_LIST';
 
@@ -23,6 +24,10 @@ const productListActions = {
   EXPORT_STARTED: `${prefix}_EXPORT_STARTED`,
   EXPORT_SUCCESS: `${prefix}_EXPORT_SUCCESS`,
   EXPORT_ERROR: `${prefix}_EXPORT_ERROR`,
+
+  HUGGINGFACE_IMPORT_STARTED: `${prefix}_HUGGINGFACE_IMPORT_STARTED`,
+  HUGGINGFACE_IMPORT_SUCCESS: `${prefix}_HUGGINGFACE_IMPORT_SUCCESS`,
+  HUGGINGFACE_IMPORT_ERROR: `${prefix}_HUGGINGFACE_IMPORT_ERROR`,
 
   doClearAllSelected() {
     return {
@@ -147,6 +152,50 @@ const productListActions = {
         });
       }
     },
+
+  doImportFromHuggingFace: () => async (dispatch) => {
+    try {
+      dispatch({
+        type: productListActions.HUGGINGFACE_IMPORT_STARTED,
+      });
+
+      const result = await ProductService.importFromHuggingFace();
+
+      dispatch({
+        type: productListActions.HUGGINGFACE_IMPORT_SUCCESS,
+      });
+
+      const failedDatasets = (result.datasets || []).filter(
+        (dataset) => dataset.error,
+      );
+      const hasImports =
+        result.categoriesCreated > 0 || result.productsCreated > 0;
+
+      if (!hasImports && failedDatasets.length > 0) {
+        Message.error(
+          `Import failed: ${failedDatasets
+            .map((dataset) => `${dataset.dataset} (${dataset.error})`)
+            .join('; ')}`,
+        );
+      } else {
+        Message.success(
+          i18n(
+            'entities.product.importHuggingFace.success',
+            result.categoriesCreated,
+            result.productsCreated,
+          ),
+        );
+      }
+
+      dispatch(productListActions.doFetch());
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: productListActions.HUGGINGFACE_IMPORT_ERROR,
+      });
+    }
+  },
 };
 
 export default productListActions;

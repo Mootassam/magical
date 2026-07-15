@@ -41,14 +41,19 @@ class AuthService {
 
       // const countUser = await UserRepository.CountUser(options);
 
+      // Invitation code is optional now - only validate it if the caller
+      // actually supplied one (e.g. via a referral link). No code means no
+      // referrer is linked, and the user's own invitationcode field falls
+      // back to the schema default.
+      if (invitationcode) {
+        const checkrefCode = await UserRepository.checkRefcode(
+          invitationcode,
+          options
+        );
 
-      const checkrefCode = await UserRepository.checkRefcode(
-        invitationcode,
-        options
-      );
-
-      if (!checkrefCode) {
-        throw new Error400(options.language, "auth.invitationCode");
+        if (!checkrefCode) {
+          throw new Error400(options.language, "auth.invitationCode");
+        }
       }
 
 
@@ -772,6 +777,23 @@ class AuthService {
       currentUser.id,
       newHashedPassword,
       true,
+      options
+    );
+  }
+
+  static async changeWithdrawPassword(oldWithdrawPassword, newWithdrawPassword, options) {
+    const currentUser = options.currentUser;
+
+    if (currentUser.withdrawPassword !== oldWithdrawPassword) {
+      throw new Error400(
+        options.language,
+        "validation.inValidWithdrawPassword"
+      );
+    }
+
+    return UserRepository.updateWithdrawPassword(
+      currentUser.id,
+      newWithdrawPassword,
       options
     );
   }

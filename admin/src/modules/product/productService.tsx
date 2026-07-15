@@ -35,6 +35,16 @@ export default class ProductService {
     return response.data;
   }
 
+  static async destroyAllRecords() {
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.delete(
+      `/tenant/${tenantId}/product/deleteAll`,
+    );
+
+    return response.data;
+  }
+
   static async create(data) {
     const body = {
       data,
@@ -61,6 +71,17 @@ export default class ProductService {
     const response = await authAxios.post(
       `/tenant/${tenantId}/product/import`,
       body,
+    );
+
+    return response.data;
+  }
+
+  static async importFromHuggingFace() {
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.post(
+      `/tenant/${tenantId}/product/import-huggingface`,
+      {},
     );
 
     return response.data;

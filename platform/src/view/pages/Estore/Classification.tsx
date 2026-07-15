@@ -1,6 +1,53 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import shopCategoryActions from "src/modules/shop/shopCategoryActions";
+import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
+import shopProductActions from "src/modules/shop/shopProductActions";
+import shopProductSelectors from "src/modules/shop/shopProductSelectors";
+import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
 
 function Classification() {
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const categories = useSelector(shopCategorySelectors.selectRows);
+  const categoriesLoading = useSelector(shopCategorySelectors.selectLoading);
+  const products = useSelector(shopProductSelectors.selectRows);
+  const productsLoading = useSelector(shopProductSelectors.selectLoading);
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    dispatch(shopCategoryActions.doFetch());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!selectedCategoryId && categories.length > 0) {
+      setSelectedCategoryId(categories[0].id);
+    }
+  }, [categories, selectedCategoryId]);
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      dispatch(shopProductActions.doFetch(selectedCategoryId));
+    }
+  }, [dispatch, selectedCategoryId]);
+
+  const selectedCategory = categories.find(
+    (category: any) => category.id === selectedCategoryId,
+  );
+
+  const visibleProducts = products.filter((product: any) =>
+    !search.trim() ||
+    (product.title || "").toLowerCase().includes(search.trim().toLowerCase()),
+  );
+
+  const goToProduct = (id: string) => {
+    history.push(`/product/${id}`);
+  };
+
   return (
     <>
       <div className="phone">
@@ -9,134 +56,92 @@ function Classification() {
           <div className="page-title">Categories</div>
           <div className="search-row">
             <span className="search-icon">🔍</span>
-            <input type="text" placeholder="Search in categories" />
+            <input
+              type="text"
+              placeholder="Search in categories"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
           </div>
         </div>
 
         <div className="body-split">
 
           <div className="sidebar">
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/clothing,fashion/all?lock=61" alt="Fashion" /></div>
-              <span>Fashion</span>
-            </div>
-            <div className="side-item active">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/sneakers,shoes/all?lock=62" alt="Shoes" /></div>
-              <span>Shoes</span>
-            </div>
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/handbag,purse/all?lock=63" alt="Bags" /></div>
-              <span>Bags</span>
-            </div>
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/cosmetics,beauty/all?lock=64" alt="Beauty" /></div>
-              <span>Beauty</span>
-            </div>
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/headphones,electronics/all?lock=65" alt="Electronics" /></div>
-              <span>Electronics</span>
-            </div>
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/livingroom,home/all?lock=66" alt="Home" /></div>
-              <span>Home</span>
-            </div>
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/kids,toys/all?lock=67" alt="Kids" /></div>
-              <span>Kids</span>
-            </div>
-            <div className="side-item">
-              <div className="thumb"><img src="https://loremflickr.com/100/100/sports,fitness/all?lock=68" alt="Sports" /></div>
-              <span>Sports</span>
-            </div>
+            {categoriesLoading && (
+              <div className="sidebar-loading">Loading...</div>
+            )}
+
+            {!categoriesLoading && categories.length === 0 && (
+              <div className="sidebar-loading">No categories</div>
+            )}
+
+            {!categoriesLoading &&
+              categories.map((category: any) => (
+                <div
+                  key={category.id}
+                  className={`side-item${category.id === selectedCategoryId ? " active" : ""}`}
+                  onClick={() => setSelectedCategoryId(category.id)}
+                >
+                  <div className="thumb icon-thumb">
+                    <span>{categoryIcon(category.name)}</span>
+                  </div>
+                  <span>{category.name}</span>
+                </div>
+              ))}
           </div>
 
           <div className="content-panel">
 
-            <div className="cat-banner">
-              <img src="https://loremflickr.com/700/300/sneakers,shoes/all?lock=70" alt="Shoes banner" />
-              <div className="overlay"></div>
-              <div className="txt">
-                <div className="eyebrow">Category Spotlight</div>
-                <div className="name">Shoes</div>
-                <div className="off">Up to 50% off</div>
+            {selectedCategory && (
+              <div className="cat-banner icon-banner">
+                <div className="txt">
+                  <div className="eyebrow">Category</div>
+                  <div className="name">
+                    {categoryIcon(selectedCategory.name)} {selectedCategory.name}
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="subcat-row">
-              <div className="chip active">All</div>
-              <div className="chip">Sneakers</div>
-              <div className="chip">Sandals</div>
-              <div className="chip">Boots</div>
-              <div className="chip">Heels</div>
-              <div className="chip">Sports</div>
-            </div>
+            {productsLoading && <div className="state-text">Loading products...</div>}
 
-            <div className="grid">
-              <div className="prod-card">
-                <div className="prod-thumb">
-                  <img src="https://loremflickr.com/300/300/sneakers,shoes/all?lock=71" alt="Runner sneakers" />
-                  <span className="off-tag">-40%</span>
-                </div>
-                <div className="prod-info">
-                  <div className="prod-name">Runner Sneakers</div>
-                  <div className="prod-meta">⭐ 4.8 · 1.2k sold</div>
-                  <div className="prod-price-row"><span className="prod-price">$48</span><button className="add-btn">+</button></div>
-                </div>
+            {!productsLoading && visibleProducts.length === 0 && (
+              <div className="state-text">No products found in this category.</div>
+            )}
+
+            {!productsLoading && visibleProducts.length > 0 && (
+              <div className="grid">
+                {visibleProducts.map((product: any) => (
+                  <div
+                    className="prod-card"
+                    key={product.id}
+                    onClick={() => goToProduct(product.id)}
+                  >
+                    <div className="prod-thumb">
+                      {product.image && <img src={product.image} alt={product.title} />}
+                    </div>
+                    <div className="prod-info">
+                      <div className="prod-name">{product.title}</div>
+                      <div className="prod-price-row">
+                        <span className="prod-price">
+                          ${typeof product.price === "number" ? product.price.toFixed(2) : product.price}
+                        </span>
+                        <button
+                          className="add-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            goToProduct(product.id);
+                          }}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="prod-card">
-                <div className="prod-thumb">
-                  <img src="https://loremflickr.com/300/300/sandals,footwear/all?lock=72" alt="Summer sandals" />
-                  <span className="badge">NEW</span>
-                </div>
-                <div className="prod-info">
-                  <div className="prod-name">Summer Sandals</div>
-                  <div className="prod-meta">⭐ 4.6 · 430 sold</div>
-                  <div className="prod-price-row"><span className="prod-price">$22</span><button className="add-btn">+</button></div>
-                </div>
-              </div>
-              <div className="prod-card">
-                <div className="prod-thumb">
-                  <img src="https://loremflickr.com/300/300/boots,leather/all?lock=73" alt="Leather boots" />
-                </div>
-                <div className="prod-info">
-                  <div className="prod-name">Leather Boots</div>
-                  <div className="prod-meta">⭐ 4.9 · 980 sold</div>
-                  <div className="prod-price-row"><span className="prod-price">$74</span><button className="add-btn">+</button></div>
-                </div>
-              </div>
-              <div className="prod-card">
-                <div className="prod-thumb">
-                  <img src="https://loremflickr.com/300/300/heels,shoes/all?lock=74" alt="Heels" />
-                  <span className="off-tag">-25%</span>
-                </div>
-                <div className="prod-info">
-                  <div className="prod-name">Classic Heels</div>
-                  <div className="prod-meta">⭐ 4.5 · 210 sold</div>
-                  <div className="prod-price-row"><span className="prod-price">$39</span><button className="add-btn">+</button></div>
-                </div>
-              </div>
-              <div className="prod-card">
-                <div className="prod-thumb">
-                  <img src="https://loremflickr.com/300/300/running,shoes/all?lock=75" alt="Sport trainers" />
-                </div>
-                <div className="prod-info">
-                  <div className="prod-name">Sport Trainers</div>
-                  <div className="prod-meta">⭐ 4.7 · 1.5k sold</div>
-                  <div className="prod-price-row"><span className="prod-price">$56</span><button className="add-btn">+</button></div>
-                </div>
-              </div>
-              <div className="prod-card">
-                <div className="prod-thumb">
-                  <img src="https://loremflickr.com/300/300/slippers/all?lock=76" alt="Cozy slippers" />
-                  <span className="badge">HOT</span>
-                </div>
-                <div className="prod-info">
-                  <div className="prod-name">Cozy Slippers</div>
-                  <div className="prod-meta">⭐ 4.4 · 640 sold</div>
-                  <div className="prod-price-row"><span className="prod-price">$16</span><button className="add-btn">+</button></div>
-                </div>
-              </div>
-            </div>
+            )}
 
           </div>
 
@@ -219,6 +224,13 @@ function Classification() {
         }
         .sidebar::-webkit-scrollbar{ display:none; }
 
+        .sidebar-loading{
+          padding:20px 10px;
+          font-size:11px;
+          color:var(--grey-text);
+          text-align:center;
+        }
+
         .side-item{
           display:flex;
           flex-direction:column;
@@ -239,6 +251,13 @@ function Classification() {
           border:2px solid transparent;
         }
         .side-item .thumb img{ width:100%; height:100%; object-fit:cover; }
+        .icon-thumb{
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#fff;
+          font-size:20px;
+        }
 
         .side-item.active{
           background:var(--page-bg);
@@ -266,53 +285,21 @@ function Classification() {
           position:relative;
           border-radius:18px;
           overflow:hidden;
-          height:100px;
           margin-bottom:16px;
           color:#fff;
         }
-        .cat-banner img{
-          position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-        }
-        .cat-banner .overlay{
-          position:absolute; inset:0;
-          background:linear-gradient(120deg, rgba(11,26,74,0.85), rgba(47,141,255,0.35));
-        }
-        .cat-banner .txt{
-          position:relative;
-          padding:14px 16px;
+        .icon-banner{
+          background:linear-gradient(120deg, var(--blue-deep), var(--blue-bright));
+          padding:18px 16px;
         }
         .cat-banner .eyebrow{ font-size:9px; letter-spacing:2px; text-transform:uppercase; opacity:0.85; }
         .cat-banner .name{ font-size:19px; font-weight:800; margin-top:2px; }
-        .cat-banner .off{
-          display:inline-block; margin-top:6px;
-          background:var(--gold); color:var(--navy);
-          font-size:10px; font-weight:800;
-          padding:3px 9px; border-radius:8px;
-        }
 
-        .subcat-row{
-          display:flex;
-          gap:8px;
-          overflow-x:auto;
-          scrollbar-width:none;
-          margin-bottom:16px;
-        }
-        .subcat-row::-webkit-scrollbar{ display:none; }
-        .chip{
-          flex:0 0 auto;
-          font-size:12px;
-          font-weight:600;
-          padding:8px 14px;
-          border-radius:20px;
-          background:#fff;
-          color:var(--navy);
-          box-shadow:0 4px 12px rgba(20,40,100,0.08);
-          white-space:nowrap;
-        }
-        .chip.active{
-          background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
-          color:#fff;
-          box-shadow:0 6px 16px rgba(47,141,255,0.4);
+        .state-text{
+          text-align:center;
+          color:var(--grey-text);
+          font-size:12.5px;
+          padding:30px 0;
         }
 
         .grid{
@@ -325,22 +312,16 @@ function Classification() {
           border-radius:16px;
           overflow:hidden;
           box-shadow:0 8px 20px rgba(20,40,100,0.08);
+          cursor:pointer;
         }
-        .prod-thumb{ width:100%; height:120px; position:relative; }
+        .prod-thumb{ width:100%; height:120px; position:relative; background:var(--sidebar-bg); }
         .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
-        .prod-thumb .badge{
-          position:absolute; top:7px; left:7px;
-          background:rgba(14,27,69,0.75); color:#fff; font-size:9px; font-weight:700;
-          padding:3px 7px; border-radius:6px;
-        }
-        .prod-thumb .off-tag{
-          position:absolute; top:7px; right:7px;
-          background:#ff5470; color:#fff; font-size:9px; font-weight:800;
-          padding:3px 6px; border-radius:6px;
-        }
         .prod-info{ padding:9px 11px 11px; }
-        .prod-name{ font-size:12.5px; font-weight:700; color:var(--navy); line-height:1.3; }
-        .prod-meta{ font-size:10.5px; color:var(--grey-text); margin-top:3px; }
+        .prod-name{
+          font-size:12.5px; font-weight:700; color:var(--navy); line-height:1.3;
+          overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
+          -webkit-line-clamp:2; -webkit-box-orient:vertical;
+        }
         .prod-price-row{ display:flex; justify-content:space-between; align-items:center; margin-top:7px; }
         .prod-price{ font-size:13.5px; font-weight:800; color:var(--blue-deep); }
         .add-btn{
@@ -352,7 +333,6 @@ function Classification() {
           box-shadow:0 6px 14px rgba(47,141,255,0.4);
         }
 
-      
       `}</style>
     </>
   );

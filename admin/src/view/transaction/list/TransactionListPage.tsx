@@ -19,12 +19,12 @@ function TransactionListPage(props) {
       /> */}
 
       <ContentWrapper>
-          
+
       <Container fluid={true}>
           <Row>
             <Col xs={9}>
         <PageTitle>
-          {i18n('entities.transaction.list.title')}
+          {props.title || i18n('entities.transaction.list.title')}
         </PageTitle>
         </Col>
             <Col md="auto">
@@ -32,8 +32,8 @@ function TransactionListPage(props) {
         </Col>
           </Row>
         </Container>
-        <CouponsListFilter />
-        <CouponsListTable />
+        <CouponsListFilter fixedType={props.fixedType} />
+        <CouponsListTable fixedType={props.fixedType} />
       </ContentWrapper>
     </>
   );
