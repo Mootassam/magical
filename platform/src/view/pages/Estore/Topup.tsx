@@ -6,25 +6,41 @@ import walletSettingsActions from "src/modules/walletSettings/walletSettingsActi
 import walletSettingsSelectors from "src/modules/walletSettings/walletSettingsSelectors";
 import transactionFormActions from "src/modules/transaction/form/transactionFormActions";
 import transactionFormSelectors from "src/modules/transaction/form/transactionFormSelectors";
+import CryptoRatesService from "src/modules/cryptoRates/cryptoRatesService";
 import FileUploader from "src/modules/shared/fileUpload/fileUploader";
 import Storage from "src/security/storage";
 import Message from "src/view/shared/message";
 import Errors from "src/modules/shared/error/errors";
 
 const WALLET_TYPES = [
-  { key: "eth", addressField: "ethAddress", feeField: "ethFee" },
-  { key: "btc", addressField: "btcAddress", feeField: "btcFee" },
+  { key: "eth", addressField: "ethAddress", feeField: "ethFee", symbol: "ETH" },
+  { key: "btc", addressField: "btcAddress", feeField: "btcFee", symbol: "BTC" },
   {
     key: "usdt_trc20",
     addressField: "usdtTrc20Address",
     feeField: "usdtTrc20Fee",
+    symbol: "USDT",
   },
   {
     key: "usdt_erc20",
     addressField: "usdtErc20Address",
     feeField: "usdtErc20Fee",
+    symbol: "USDT",
   },
 ];
+
+// USDT wallets are pegged 1:1 to USD, so only ETH/BTC need a live rate.
+function rateForWallet(walletKey, rates) {
+  if (walletKey === "eth") {
+    return rates?.eth;
+  }
+
+  if (walletKey === "btc") {
+    return rates?.btc;
+  }
+
+  return 1;
+}
 
 function qrCodeUrl(address) {
   if (!address) {
@@ -53,11 +69,39 @@ function Topup() {
   const [amount, setAmount] = useState("");
   const [photo, setPhoto] = useState<any>(null);
   const [uploading, setUploading] = useState(false);
+  const [rates, setRates] = useState<{ btc: number; eth: number } | null>(null);
+  const [ratesLoading, setRatesLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     dispatch(walletSettingsActions.doInit());
   }, [dispatch]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        setRatesLoading(true);
+        const data = await CryptoRatesService.find();
+
+        if (mounted) {
+          setRates(data);
+        }
+      } catch (error) {
+        // The conversion is a convenience preview - a failed rate fetch
+        // shouldn't block the rest of the deposit form.
+      } finally {
+        if (mounted) {
+          setRatesLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const currentWallet =
     WALLET_TYPES.find((wallet) => wallet.key === selectedWallet) ||
@@ -66,6 +110,13 @@ function Topup() {
   const address =
     (walletSettings && walletSettings[currentWallet.addressField]) || "";
   const fee = (walletSettings && walletSettings[currentWallet.feeField]) || 0;
+  const isCrypto = currentWallet.key === "eth" || currentWallet.key === "btc";
+  const rate = rateForWallet(currentWallet.key, rates);
+  const amountUsdt =
+    isCrypto && rate && amount && Number(amount) > 0
+      ? Number(amount) * rate
+      : null;
+  const feeUsdt = isCrypto && rate ? Number(fee) * rate : null;
 
   const doCopyAddress = () => {
     if (!address) {
@@ -188,7 +239,10 @@ function Topup() {
                   {address || (initLoading ? "..." : "-")}
                 </div>
                 <div className="fee-hint">
-                  {i18n("pages.topup.fee")}: {fee}
+                  {i18n("pages.topup.fee")}: {fee} {currentWallet.symbol}
+                  {feeUsdt !== null && (
+                    <span className="fee-usdt"> (≈ ${feeUsdt.toFixed(2)} USDT)</span>
+                  )}
                 </div>
                 <div className="copy-link" onClick={doCopyAddress}>
                   📋 {i18n("pages.topup.copyAddress")}
@@ -196,7 +250,9 @@ function Topup() {
               </div>
             </div>
 
-            <span className="field-label sp">{i18n("pages.topup.amount")}</span>
+            <span className="field-label sp">
+              {i18n("pages.topup.amount")} <span className="unit-tag">({currentWallet.symbol})</span>
+            </span>
             <input
               type="number"
               className="text-input"
@@ -204,6 +260,18 @@ function Topup() {
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
             />
+
+            {isCrypto && (
+              <div className="conversion-hint">
+                {ratesLoading && !rates
+                  ? i18n("pages.topup.fetchingRate")
+                  : amountUsdt !== null
+                  ? `≈ $${amountUsdt.toFixed(2)} USDT`
+                  : !rates
+                  ? i18n("pages.topup.rateUnavailable")
+                  : i18n("pages.topup.enterAmountForValue")}
+              </div>
+            )}
 
             <span className="field-label sp">{i18n("pages.topup.uploadVoucher")}</span>
             <div className="upload-wrap">
@@ -382,6 +450,19 @@ function Topup() {
     font-size:11px;
     color:var(--grey-text);
     margin-top:6px;
+  }
+  .fee-usdt{
+    color:#9aa4c0;
+  }
+  .unit-tag{
+    color:var(--grey-text);
+    font-weight:600;
+  }
+  .conversion-hint{
+    margin-top:8px;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--blue-mid);
   }
   .copy-link{
     display:inline-flex;

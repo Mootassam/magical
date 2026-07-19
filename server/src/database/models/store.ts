@@ -12,6 +12,7 @@ export default (database) => {
   const StoreSchema = new Schema(
     {
       storeName: { type: String, required: true },
+      description: { type: String },
       contact: { type: String },
       idNumber: { type: String },
       mainBusiness: {
@@ -29,12 +30,27 @@ export default (database) => {
       },
       address: { type: String },
       storePhoto: [FileSchema],
+      storeBanner: [FileSchema],
       idCardFront: [FileSchema],
       idCardBack: [FileSchema],
       status: {
         type: String,
         enum: ["pending", "rejected", "success"],
         default: "pending",
+      },
+      storeRating: {
+        type: Number,
+        default: 5,
+        min: 0,
+        max: 5,
+      },
+      creditScore: {
+        type: Number,
+        default: 100,
+      },
+      numberOfFollowers: {
+        type: Number,
+        default: 0,
       },
       user: {
         type: Schema.Types.ObjectId,

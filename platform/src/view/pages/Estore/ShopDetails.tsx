@@ -1,6 +1,34 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+import storeActions from "src/modules/store/storeActions";
+import storeSelectors from "src/modules/store/storeSelectors";
+
+function formatPrice(value) {
+  return `$${(Number(value) || 0).toFixed(2)}`;
+}
+
+function renderStars(rating) {
+  const rounded = Math.round(Number(rating) || 0);
+  return "★★★★★".slice(0, rounded) + "☆☆☆☆☆".slice(0, 5 - rounded);
+}
 
 function ShopDetails() {
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const dashboard = useSelector(storeSelectors.selectDashboard);
+  const loading = useSelector(storeSelectors.selectDashboardLoading);
+
+  useEffect(() => {
+    dispatch(storeActions.doFetchDashboard());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
+
+  const store = dashboard?.store;
+  const isInitialLoading = loading && !dashboard;
+  const photo = store?.storePhoto && store.storePhoto[0];
+
   return (
     <>
       <div className="phone">
@@ -14,72 +42,95 @@ function ShopDetails() {
 
         <div className="scroll-area">
 
-          <div className="profile-card">
-            <div className="shop-avatar">
-              <img src="https://loremflickr.com/140/140/portrait,person/all?lock=201" alt="Shop owner avatar" />
+          {isInitialLoading && (
+            <div className="empty-state">Loading shop details…</div>
+          )}
+
+          {!isInitialLoading && !store && (
+            <div className="empty-state">
+              <div className="empty-title">You don't have a store yet</div>
+              <div className="empty-text">Apply to become a merchant to see your shop details here.</div>
+              <button className="empty-cta" onClick={() => history.push("/apply-merchant")}>
+                Apply Now
+              </button>
             </div>
-            <div className="shop-info">
-              <div className="shop-name-row">
-                <span className="shop-name">Kelvin's Store</span>
-                <span className="level-badge">🏅 Ordinary</span>
+          )}
+
+          {!isInitialLoading && store && (
+            <>
+              <div className="profile-card">
+                <div className="shop-avatar">
+                  {photo?.downloadUrl ? (
+                    <img src={photo.downloadUrl} alt={store.storeName} />
+                  ) : (
+                    <div className="shop-avatar-fallback">
+                      {(store.storeName || "?").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="shop-info">
+                  <div className="shop-name-row">
+                    <span className="shop-name">{store.storeName}</span>
+                  </div>
+                  <div className="shop-meta">
+                    Account Balance: <b>{formatPrice(dashboard.accountBalance)}</b><br />
+                    Store Rating: <span className="stars">{renderStars(store.storeRating)}</span> <b>{(Number(store.storeRating) || 0).toFixed(1)}</b><br />
+                    Quantity of products: <b>{dashboard.cumulativeOrderQty}</b>
+                  </div>
+                </div>
               </div>
-              <div className="shop-meta">
-                Account Balance: <b>$22,568.47</b><br />
-                Store Rating: <span className="stars">★★★★★</span> <b>5.0</b><br />
-                Quantity of products: <b>554</b>
+
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-icon">🛡️</div>
+                  <div className="stat-value">{store.creditScore}</div>
+                  <div className="stat-label">Credit score</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">🧾</div>
+                  <div className="stat-value">{dashboard.waitingForDeliveryCount}</div>
+                  <div className="stat-label">Today's Order</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">📦</div>
+                  <div className="stat-value">{dashboard.cumulativeOrderQty}</div>
+                  <div className="stat-label">Cumulative order qty</div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon">💵</div>
+                  <div className="stat-value">{formatPrice(dashboard.todayTotalSales)}</div>
+                  <div className="stat-label">Today's total sales</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">📊</div>
+                  <div className="stat-value accent">{formatPrice(dashboard.totalSales)}</div>
+                  <div className="stat-label">Total sales</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">📈</div>
+                  <div className="stat-value">{formatPrice(dashboard.todaySalesProfit)}</div>
+                  <div className="stat-label">Today's sales profit</div>
+                </div>
+
+                <div className="stat-card">
+                  <div className="stat-icon">💰</div>
+                  <div className="stat-value green">{formatPrice(dashboard.salesProfit)}</div>
+                  <div className="stat-label">Sales Profit</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">👥</div>
+                  <div className="stat-value">{store.numberOfFollowers}</div>
+                  <div className="stat-label">Number of followers</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-icon">🏦</div>
+                  <div className="stat-value accent">{formatPrice(dashboard.accountBalance)}</div>
+                  <div className="stat-label">Account Balance</div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon">🛡️</div>
-              <div className="stat-value">100</div>
-              <div className="stat-label">Credit score</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">🧾</div>
-              <div className="stat-value">0</div>
-              <div className="stat-label">Today's Order</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">📦</div>
-              <div className="stat-value">81</div>
-              <div className="stat-label">Cumulative order qty</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">💵</div>
-              <div className="stat-value">$0.00</div>
-              <div className="stat-label">Today's total sales</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">📊</div>
-              <div className="stat-value accent">$22,034.36</div>
-              <div className="stat-label">Total sales</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">📈</div>
-              <div className="stat-value">$0</div>
-              <div className="stat-label">Today's sales profit</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">💰</div>
-              <div className="stat-value green">$4,406.96</div>
-              <div className="stat-label">Sales Profit</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">👥</div>
-              <div className="stat-value">242</div>
-              <div className="stat-label">Number of followers</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">🏦</div>
-              <div className="stat-value accent">$22,568.47</div>
-              <div className="stat-label">Account Balance</div>
-            </div>
-          </div>
+            </>
+          )}
 
         </div>
 
@@ -171,6 +222,14 @@ function ShopDetails() {
     border:3px solid #eef2fa;
   }
   .shop-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .shop-avatar-fallback{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    font-size:24px;
+    font-weight:800;
+  }
 
   .shop-info{ flex:1; min-width:0; }
   .shop-name-row{
@@ -218,6 +277,28 @@ function ShopDetails() {
   .stat-value.accent{ color:var(--blue-deep); }
   .stat-value.green{ color:var(--green); }
   .stat-label{ font-size:9.5px; color:var(--grey-text); margin-top:4px; line-height:1.3; }
+
+  /* ---------- Empty state ---------- */
+  .empty-state{
+    text-align:center;
+    padding:60px 24px;
+    color:var(--grey-text);
+    font-size:13px;
+  }
+  .empty-title{ font-size:14px; font-weight:700; color:var(--navy); }
+  .empty-text{ font-size:12.5px; margin-top:6px; line-height:1.5; }
+  .empty-cta{
+    margin-top:16px;
+    border:none;
+    border-radius:12px;
+    padding:11px 20px;
+    background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 8px 18px rgba(47,141,255,0.35);
+  }
 
   /* ---------- Highlight balance strip ---------- */
   .balance-strip{

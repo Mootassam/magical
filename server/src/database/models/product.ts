@@ -72,6 +72,13 @@ export default (database) => {
     }
   );
 
+  // Supports the storefront's paginated category browse (filter by
+  // tenant+category, sorted newest first) without a full collection scan.
+  ProductSchema.index({ tenant: 1, category: 1, createdAt: -1 });
+  // Supports paginated browsing/listing across a whole tenant (no category
+  // filter), e.g. wholesale management's "All" view.
+  ProductSchema.index({ tenant: 1, createdAt: -1 });
+
   ProductSchema.virtual("id").get(function () {
     // @ts-ignore
     return this._id.toHexString();

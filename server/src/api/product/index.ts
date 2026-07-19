@@ -1,4 +1,15 @@
 export default (app) => {
+  // Public browse endpoints: no :tenantId param and no auth required, so
+  // these must be registered without the /tenant/:tenantId prefix used by
+  // the rest of this router (that prefix is what triggers tenantMiddleware).
+  app.get(
+    `/product/browse-public/:id`,
+    require('./productBrowseFindPublic').default,
+  );
+  app.get(
+    `/product/browse-public`,
+    require('./productBrowsePublic').default,
+  );
   app.post(
     `/tenant/:tenantId/product`,
     require('./productCreate').default,

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import shopCategoryActions from "src/modules/shop/shopCategoryActions";
 import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
@@ -7,20 +7,33 @@ import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 function Classification() {
   const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation<{ categoryId?: string; search?: string }>();
 
   const categories = useSelector(shopCategorySelectors.selectRows);
   const categoriesLoading = useSelector(shopCategorySelectors.selectLoading);
   const products = useSelector(shopProductSelectors.selectRows);
   const productsLoading = useSelector(shopProductSelectors.selectLoading);
+  const loadingMore = useSelector(shopProductSelectors.selectLoadingMore);
+  const hasMore = useSelector(shopProductSelectors.selectHasMore);
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  // Home can deep-link here with a category/search already chosen (e.g.
+  // tapping a category chip or submitting the home search box).
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    location.state?.categoryId || null,
+  );
+  const [searchInput, setSearchInput] = useState(location.state?.search || "");
+  const [search, setSearch] = useState(location.state?.search || "");
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    dispatch(shopCategoryActions.doFetch());
+    dispatch(shopCategoryActions.doFetch(true));
   }, [dispatch]);
 
   useEffect(() => {
@@ -29,19 +42,52 @@ function Classification() {
     }
   }, [categories, selectedCategoryId]);
 
+  // Debounce the search box so we're not firing a request on every
+  // keystroke - the actual filtering happens server-side (paginated), not
+  // against whatever page of products happens to already be loaded.
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setSearch(searchInput.trim());
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(handle);
+  }, [searchInput]);
+
   useEffect(() => {
     if (selectedCategoryId) {
-      dispatch(shopProductActions.doFetch(selectedCategoryId));
+      dispatch(
+        shopProductActions.doFetch(selectedCategoryId, undefined, undefined, search || undefined, true),
+      );
     }
-  }, [dispatch, selectedCategoryId]);
+  }, [dispatch, selectedCategoryId, search]);
+
+  // Infinite scroll: load the next page of products (10 at a time) once the
+  // sentinel at the bottom of the grid scrolls into view, instead of ever
+  // fetching the whole category up front.
+  useEffect(() => {
+    const root = scrollRef.current;
+    const target = sentinelRef.current;
+
+    if (!root || !target) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          dispatch(shopProductActions.doFetchMore());
+        }
+      },
+      { root, rootMargin: "150px" },
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, [dispatch, selectedCategoryId, search]);
 
   const selectedCategory = categories.find(
     (category: any) => category.id === selectedCategoryId,
-  );
-
-  const visibleProducts = products.filter((product: any) =>
-    !search.trim() ||
-    (product.title || "").toLowerCase().includes(search.trim().toLowerCase()),
   );
 
   const goToProduct = (id: string) => {
@@ -59,8 +105,8 @@ function Classification() {
             <input
               type="text"
               placeholder="Search in categories"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
             />
           </div>
         </div>
@@ -91,7 +137,7 @@ function Classification() {
               ))}
           </div>
 
-          <div className="content-panel">
+          <div className="content-panel" ref={scrollRef}>
 
             {selectedCategory && (
               <div className="cat-banner icon-banner">
@@ -104,22 +150,34 @@ function Classification() {
               </div>
             )}
 
-            {productsLoading && <div className="state-text">Loading products...</div>}
+            {productsLoading && (
+              <div className="grid">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div className="prod-card skeleton-card" key={index}>
+                    <div className="prod-thumb skeleton-block" />
+                    <div className="prod-info">
+                      <div className="skeleton-line skeleton-line-title" />
+                      <div className="skeleton-line skeleton-line-price" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {!productsLoading && visibleProducts.length === 0 && (
+            {!productsLoading && products.length === 0 && (
               <div className="state-text">No products found in this category.</div>
             )}
 
-            {!productsLoading && visibleProducts.length > 0 && (
+            {!productsLoading && products.length > 0 && (
               <div className="grid">
-                {visibleProducts.map((product: any) => (
+                {products.map((product: any) => (
                   <div
                     className="prod-card"
                     key={product.id}
                     onClick={() => goToProduct(product.id)}
                   >
                     <div className="prod-thumb">
-                      {product.image && <img src={product.image} alt={product.title} />}
+                      {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
                     </div>
                     <div className="prod-info">
                       <div className="prod-name">{product.title}</div>
@@ -142,6 +200,15 @@ function Classification() {
                 ))}
               </div>
             )}
+
+            <div className="load-more-sentinel" ref={sentinelRef}>
+              {!productsLoading && loadingMore && (
+                <div className="state-text">Loading more...</div>
+              )}
+              {!productsLoading && !loadingMore && !hasMore && products.length > 0 && (
+                <div className="state-text">You've reached the end.</div>
+              )}
+            </div>
 
           </div>
 
@@ -331,6 +398,29 @@ function Classification() {
           display:flex; align-items:center; justify-content:center;
           cursor:pointer;
           box-shadow:0 6px 14px rgba(47,141,255,0.4);
+        }
+
+        .load-more-sentinel{
+          height:30px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        }
+
+        .skeleton-card{ pointer-events:none; }
+        .skeleton-block, .skeleton-line{
+          background:linear-gradient(90deg, #e7ecf8 25%, #f2f5fc 37%, #e7ecf8 63%);
+          background-size:400% 100%;
+          animation:skeleton-pulse 1.4s ease infinite;
+          border-radius:6px;
+        }
+        .skeleton-line{ height:10px; margin-top:8px; }
+        .skeleton-line-title{ width:85%; }
+        .skeleton-line-price{ width:45%; }
+
+        @keyframes skeleton-pulse{
+          0%{ background-position:100% 50%; }
+          100%{ background-position:0 50%; }
         }
 
       `}</style>

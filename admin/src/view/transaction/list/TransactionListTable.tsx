@@ -114,6 +114,20 @@ function TransactionListTable(props) {
     }
   };
 
+  const getWalletSymbol = (wallet) => {
+    switch (wallet) {
+      case 'eth':
+        return 'ETH';
+      case 'btc':
+        return 'BTC';
+      case 'usdt_trc20':
+      case 'usdt_erc20':
+        return 'USDT';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="transaction-list-container">
       <TableWrapper>
@@ -249,15 +263,34 @@ function TransactionListTable(props) {
                           {row.type === 'deposit' ? '+' : '-'}
                         </span>
                         <span className="amount-value">${row.amount}</span>
+                        {(row.type === 'deposit' || row.type === 'withdraw') && row.wallet && (
+                          <span className="amount-currency">USDT</span>
+                        )}
                         {row.currency && (
                           <span className="amount-currency">{row.currency}</span>
                         )}
                       </div>
-                      {row.fee && (
+                      {row.coinAmount && (
+                        <div className="transaction-coin-amount">
+                          {row.type === 'withdraw' ? 'Net: ' : ''}
+                          {row.coinAmount} {getWalletSymbol(row.wallet)}
+                          {row.exchangeRate && (
+                            <span className="transaction-rate">
+                              {' '}
+                              @ ${row.exchangeRate.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {row.feeAmount ? (
+                        <div className="transaction-fee">
+                          Fee: ${row.feeAmount}
+                        </div>
+                      ) : row.fee ? (
                         <div className="transaction-fee">
                           Fee: ${row.fee}
                         </div>
-                      )}
+                      ) : null}
                     </td>
                     <td className="table-cell">
                       {row.wallet && (
@@ -475,25 +508,29 @@ function TransactionListTable(props) {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 6px 12px;
-          border-radius: 20px;
+          padding: 5px 10px;
+          border-radius: 6px;
           font-size: 12px;
-          font-weight: 500;
+          font-weight: 600;
+          border: 1px solid transparent;
         }
 
-        .type-deposit {
-          background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-          color: white;
+        .transaction-type-badge.type-deposit {
+          background: #ecfdf3;
+          color: #15803d;
+          border-color: #bbf7d0;
         }
 
-        .type-withdraw {
-          background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-          color: white;
+        .transaction-type-badge.type-withdraw {
+          background: #fef2f2;
+          color: #b91c1c;
+          border-color: #fecaca;
         }
 
-        .type-other {
-          background: #e2e8f0;
+        .transaction-type-badge.type-other {
+          background: #f1f5f9;
           color: #475569;
+          border-color: #e2e8f0;
         }
 
         .transaction-type-icon {
@@ -508,7 +545,7 @@ function TransactionListTable(props) {
 
         .transaction-amount {
           font-weight: 700;
-          font-size: 16px;
+          font-size: 15px;
           display: flex;
           align-items: baseline;
           justify-content: flex-end;
@@ -516,19 +553,19 @@ function TransactionListTable(props) {
         }
 
         .transaction-amount.type-deposit {
-          color: #fff;
+          color: #15803d;
         }
 
         .transaction-amount.type-withdraw {
-          color: #fff;
+          color: #b91c1c;
         }
 
         .transaction-amount.type-other {
-          color: #475569;
+          color: #334155;
         }
 
         .amount-symbol {
-          font-size: 14px;
+          font-size: 13px;
         }
 
         .amount-value {
@@ -536,9 +573,24 @@ function TransactionListTable(props) {
         }
 
         .amount-currency {
-          font-size: 12px;
-          color: #64748b;
+          font-size: 11px;
+          font-weight: 500;
+          color: #94a3b8;
           margin-left: 2px;
+        }
+
+        .transaction-coin-amount {
+          font-size: 11.5px;
+          font-weight: 500;
+          color: #64748b;
+          margin-top: 3px;
+          text-align: right;
+        }
+
+        .transaction-rate {
+          font-size: 11px;
+          font-weight: 400;
+          color: #94a3b8;
         }
 
         .transaction-fee {
@@ -550,13 +602,14 @@ function TransactionListTable(props) {
 
         .transaction-wallet-badge {
           display: inline-block;
-          padding: 4px 10px;
-          border-radius: 12px;
-          font-size: 11px;
+          padding: 3px 9px;
+          border-radius: 6px;
+          font-size: 10.5px;
           font-weight: 700;
           letter-spacing: 0.03em;
-          background: #eef2fa;
-          color: #334155;
+          background: #f1f5f9;
+          color: #475569;
+          border: 1px solid #e2e8f0;
           margin-bottom: 6px;
         }
 
@@ -594,26 +647,28 @@ function TransactionListTable(props) {
           justify-content: center;
           gap: 4px;
           padding: 6px 12px;
-          border: none;
+          border: 1px solid transparent;
           border-radius: 6px;
           font-size: 11px;
-          font-weight: 500;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
         }
 
         .status-btn:hover {
-          transform: translateY(-1px);
+          filter: brightness(0.97);
         }
 
         .status-btn.success {
-          background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-          color: white;
+          background: #ecfdf3;
+          color: #15803d;
+          border-color: #bbf7d0;
         }
 
         .status-btn.danger {
-          background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-          color: white;
+          background: #fef2f2;
+          color: #b91c1c;
+          border-color: #fecaca;
         }
 
         .status-btn-icon {
@@ -624,30 +679,35 @@ function TransactionListTable(props) {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 6px 12px;
-          border-radius: 20px;
+          padding: 5px 10px;
+          border-radius: 6px;
           font-size: 12px;
-          font-weight: 500;
+          font-weight: 600;
+          border: 1px solid transparent;
         }
 
         .status-success {
-          background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-          color: white;
+          background: #ecfdf3;
+          color: #15803d;
+          border-color: #bbf7d0;
         }
 
         .status-pending {
-          background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
-          color: white;
+          background: #fffbeb;
+          color: #b45309;
+          border-color: #fde68a;
         }
 
         .status-canceled {
-          background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-          color: white;
+          background: #fef2f2;
+          color: #b91c1c;
+          border-color: #fecaca;
         }
 
         .status-unknown {
-          background: #e2e8f0;
+          background: #f1f5f9;
           color: #475569;
+          border-color: #e2e8f0;
         }
 
         .status-icon {
@@ -746,48 +806,51 @@ function TransactionListTable(props) {
           align-items: center;
           justify-content: center;
           padding: 6px 10px;
-          border: none;
-          border-radius: 8px;
+          border: 1px solid transparent;
+          border-radius: 6px;
           font-size: 11px;
-          font-weight: 500;
+          font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.15s ease;
           text-decoration: none;
           min-width: auto;
           white-space: nowrap;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        
+
         .transaction-table-action-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+          filter: brightness(0.97);
         }
-        
+
         .transaction-table-action-btn.primary {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
+          background: #f5f3ff;
+          color: #6d28d9;
+          border-color: #ddd6fe;
         }
-        
+
         .transaction-table-action-btn.success {
-          background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-          color: white;
+          background: #ecfdf3;
+          color: #15803d;
+          border-color: #bbf7d0;
         }
-        
+
         .transaction-table-action-btn.warning {
-          background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-          color: white;
+          background: #fff7ed;
+          color: #c2410c;
+          border-color: #fed7aa;
         }
-        
+
         .transaction-table-action-btn.danger {
-          background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-          color: white;
+          background: #fef2f2;
+          color: #b91c1c;
+          border-color: #fecaca;
         }
-        
+
         .transaction-table-action-btn.info {
-          background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-          color: white;
+          background: #eff6ff;
+          color: #1d4ed8;
+          border-color: #bfdbfe;
         }
-        
+
         .transaction-table-action-icon {
           margin-right: 4px;
           font-size: 10px;

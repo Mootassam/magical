@@ -7,12 +7,6 @@ import { Link } from 'react-router-dom';
 function Company() {
   const menuItems = [
     {
-      path: '/logo',
-      icon: 'fa-solid fa-cog',
-      title: 'Settings',
-      color: '#3B82F6'
-    },
-    {
       path: '/companydetail',
       icon: 'fa-solid fa-circle-exclamation',
       title: 'About',

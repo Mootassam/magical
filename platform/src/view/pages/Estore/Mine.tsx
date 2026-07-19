@@ -1,13 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
+import storeActions from "src/modules/store/storeActions";
+import storeSelectors from "src/modules/store/storeSelectors";
 
 function Mine() {
   const dispatch = useDispatch();
   const currentUser = useSelector(authSelectors.selectCurrentUser);
   const avatar = useSelector(authSelectors.selectCurrentUserAvatar);
+  const store = useSelector(storeSelectors.selectStore);
+
+  useEffect(() => {
+    if (currentUser?.store) {
+      dispatch(storeActions.doInit());
+    }
+  }, [dispatch, currentUser?.store]);
+
+  const storePhoto = store?.storePhoto?.[0]?.downloadUrl;
 
   const doSignout = () => {
     dispatch(authActions.doSignout());
@@ -20,7 +31,7 @@ function Mine() {
         <div className="page-header">
           <div className="header-top">
             <span className="header-title">My Account</span>
-            <span className="settings-icon">⚙️</span>
+            <Link to="/set-up" className="settings-icon">⚙️</Link>
           </div>
         </div>
 
@@ -40,8 +51,8 @@ function Mine() {
           <Link to="/my-account" className="profile-card">
             <div className="avatar">
               <img
-                src={avatar || "https://loremflickr.com/140/140/portrait,person/all?lock=501"}
-                alt={`${currentUser?.fullName || "User"} avatar`}
+                src={storePhoto || avatar || "https://loremflickr.com/140/140/portrait,person/all?lock=501"}
+                alt={storePhoto ? "Store photo" : `${currentUser?.fullName || "User"} avatar`}
               />
             </div>
             <div className="profile-info">
@@ -227,7 +238,7 @@ function Mine() {
           align-items:center;
         }
         .header-title{ font-size:17px; font-weight:800; }
-        .settings-icon{ font-size:18px; opacity:0.9; }
+        .settings-icon{ font-size:18px; opacity:0.9; text-decoration:none; }
 
         /* ---------- Scroll body ---------- */
         .scroll-area{

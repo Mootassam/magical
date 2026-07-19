@@ -32,4 +32,15 @@ export default class StoreService {
 
     return response.data;
   }
+
+  static async updateDetails(id, data) {
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.put(
+      `/tenant/${tenantId}/store/${id}/details`,
+      { data },
+    );
+
+    return response.data;
+  }
 }

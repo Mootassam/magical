@@ -68,6 +68,11 @@ export default (app) => {
     require('./authUpdateProfileMobile').default,
   );
 
+  app.put(
+    `/auth/profile`,
+    require('./authUpdateProfile').default,
+  );
+
 
   app.put(
     `/auth/change-password`,

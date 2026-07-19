@@ -20,6 +20,10 @@ const storeListActions = {
   STATUS_UPDATE_SUCCESS: `${prefix}_STATUS_UPDATE_SUCCESS`,
   STATUS_UPDATE_ERROR: `${prefix}_STATUS_UPDATE_ERROR`,
 
+  DETAILS_UPDATE_STARTED: `${prefix}_DETAILS_UPDATE_STARTED`,
+  DETAILS_UPDATE_SUCCESS: `${prefix}_DETAILS_UPDATE_SUCCESS`,
+  DETAILS_UPDATE_ERROR: `${prefix}_DETAILS_UPDATE_ERROR`,
+
   doReset: () => async (dispatch) => {
     dispatch({
       type: storeListActions.RESETED,
@@ -111,6 +115,34 @@ const storeListActions = {
       dispatch({
         type: storeListActions.STATUS_UPDATE_ERROR,
       });
+    }
+  },
+
+  doUpdateDetails: (id, data) => async (dispatch) => {
+    try {
+      dispatch({
+        type: storeListActions.DETAILS_UPDATE_STARTED,
+      });
+
+      await StoreService.updateDetails(id, data);
+
+      dispatch({
+        type: storeListActions.DETAILS_UPDATE_SUCCESS,
+      });
+
+      Message.success(i18n('entities.store.update.success'));
+
+      dispatch(storeListActions.doFetchCurrentFilter());
+
+      return true;
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: storeListActions.DETAILS_UPDATE_ERROR,
+      });
+
+      return false;
     }
   },
 };

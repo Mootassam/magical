@@ -124,6 +124,14 @@ export default class ProductServices {
     return ProductRepository.findAndCountAll(args, this.options);
   }
 
+  async findAndCountAllPublic(args) {
+    return ProductRepository.findAndCountAllPublic(args, this.options);
+  }
+
+  async findByIdPublic(id) {
+    return ProductRepository.findByIdPublic(id, this.options);
+  }
+
   async checkpermission(options) {
     const currentUser = MongooseRepository.getCurrentUser(options);
     if (currentUser.grab) return

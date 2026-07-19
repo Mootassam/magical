@@ -7,6 +7,7 @@ const initialData = {
   count: 0,
   loading: false,
   statusUpdateLoading: false,
+  detailsUpdateLoading: false,
   filter: {},
   rawFilter: {},
   pagination: {
@@ -92,6 +93,27 @@ export default (state = initialData, { type, payload }) => {
     return {
       ...state,
       statusUpdateLoading: false,
+    };
+  }
+
+  if (type === actions.DETAILS_UPDATE_STARTED) {
+    return {
+      ...state,
+      detailsUpdateLoading: true,
+    };
+  }
+
+  if (type === actions.DETAILS_UPDATE_SUCCESS) {
+    return {
+      ...state,
+      detailsUpdateLoading: false,
+    };
+  }
+
+  if (type === actions.DETAILS_UPDATE_ERROR) {
+    return {
+      ...state,
+      detailsUpdateLoading: false,
     };
   }
 

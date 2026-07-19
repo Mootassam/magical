@@ -4,6 +4,21 @@ import { IServiceOptions } from "./IServiceOptions";
 import TransactionRepository from "../database/repositories/TransactionRepository";
 import Notification from "../database/models/notification";
 import AdminPendingCountsService from "./adminPendingCountsService";
+import CryptoPriceService from "./cryptoPriceService";
+import WalletSettingsService from "./walletSettingsService";
+
+const CRYPTO_WALLETS = ["eth", "btc", "usdt_trc20", "usdt_erc20"];
+
+const WALLET_FEE_FIELDS = {
+  eth: "ethFee",
+  btc: "btcFee",
+  usdt_trc20: "usdtTrc20Fee",
+  usdt_erc20: "usdtErc20Fee",
+};
+
+function round2(value) {
+  return Math.round((Number(value) || 0) * 100) / 100;
+}
 
 export default class TransactionService {
   options: IServiceOptions;
@@ -19,14 +34,66 @@ export default class TransactionService {
     );
 
     try {
-      await this.checkSolde(data, { ...this.options });
+      // The form always collects the raw amount in whatever coin the user
+      // selected (matching the fee, which is always shown/configured in
+      // that same coin) - never USD directly. Convert it to its USDT/USD
+      // equivalent here, server-side, using a freshly fetched rate, before
+      // any balance check/mutation - never trust a client-supplied rate for
+      // something that moves balance.
+      let amount = data.amount;
+      let coinAmount = null;
+      let exchangeRate = null;
+      let feeAmount = null;
+
+      if (data.type === "deposit" && CRYPTO_WALLETS.includes(data.wallet)) {
+        coinAmount = data.amount;
+        exchangeRate = await CryptoPriceService.getRateForWallet(data.wallet);
+        amount = String(round2(Number(data.amount) * exchangeRate));
+      }
+
+      // For withdrawals, `data.amount` is the coin quantity the customer
+      // wants to withdraw. The network fee - fetched fresh from the
+      // tenant's own wallet settings, never trusted from the client - is in
+      // that same coin, so it's subtracted directly (no rate needed for
+      // that part) to get `coinAmount`, the net amount actually sent. The
+      // full requested coin amount is then converted to its USD-equivalent
+      // to become `amount`, which is what's deducted from balance below -
+      // i.e. the fee comes out of what's sent, not on top of what's charged.
+      if (data.type === "withdraw" && CRYPTO_WALLETS.includes(data.wallet)) {
+        exchangeRate = await CryptoPriceService.getRateForWallet(data.wallet);
+
+        const walletSettings = await WalletSettingsService.findOrCreateDefault(
+          { ...this.options, session }
+        );
+        const feeCoin =
+          Number(walletSettings?.[WALLET_FEE_FIELDS[data.wallet]]) || 0;
+
+        const requestedCoin = Number(data.amount) || 0;
+        const netCoin = round2(requestedCoin - feeCoin);
+
+        if (netCoin <= 0) {
+          throw new Error400(
+            this.options.language,
+            "validation.withdrawalBelowFee"
+          );
+        }
+
+        feeAmount = round2(feeCoin * exchangeRate);
+        coinAmount = String(netCoin);
+        amount = String(round2(requestedCoin * exchangeRate));
+      }
+
+      await this.checkSolde({ ...data, amount }, { ...this.options });
 
       const values = {
         status: data.status,
         datetransaction: data.datetransaction,
         user: data.user,
         type: data.type,
-        amount: data.amount,
+        amount,
+        coinAmount,
+        exchangeRate,
+        feeAmount,
         photo: data.photo,
         wallet: data.wallet || null,
         walletAddress: data.walletAddress || null,
@@ -39,20 +106,20 @@ export default class TransactionService {
 
       // For deposit transactions, create deposit_success notification
       if (data.type === 'deposit') {
-        await this.updateUserBalance(data.user, data.amount, session, 'inc');
+        await this.updateUserBalance(data.user, amount, session, 'inc');
 
         await this.createNotification(
           data.user,
           record._id,
           'deposit_success', // Changed to deposit_success
-          data.amount,
+          amount,
           { ...this.options, session }
         );
       }
 
       // For withdrawal transactions, deduct balance but DON'T create notification
       if (data.type === 'withdraw') {
-        await this.updateUserBalance(data.user, data.amount, session, 'dec');
+        await this.updateUserBalance(data.user, amount, session, 'dec');
         // No notification created for withdrawal on creation
       }
 

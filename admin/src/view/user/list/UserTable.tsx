@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import userSelectors from 'src/modules/user/userSelectors';
 import selectors from 'src/modules/user/list/userListSelectors';
@@ -13,8 +13,6 @@ import Roles from 'src/security/roles';
 import UserStatusView from 'src/view/user/view/UserStatusView';
 import Avatar from 'src/view/shared/Avatar';
 import TableWrapper from 'src/view/shared/styles/TableWrapper';
-import recordListActions from 'src/modules/record/list/recordListActions';
-import selectorTaskdone from 'src/modules/record/list/recordListSelectors';
 import UserService from 'src/modules/user/userService';
 import Message from 'src/view/shared/message';
 
@@ -29,14 +27,10 @@ function UserTable() {
   const dispatch = useDispatch();
   const [recordIdToDestroy, setRecordIdToDestroy] = useState<string | null>(null);
   const [recordIdToTotalDestroy, setRecordIdToTotalDestroy] = useState<string | null>(null);
-  const [totalTask, setTotalTasks] = useState<string>('');
-  const tasksdone = useSelector(selectorTaskdone.selectCountRecord);
-  const LoadingTasksDone = useSelector(selectorTaskdone.selectLoading);
   const loading = useSelector(selectors.selectLoading);
   const rows = useSelector(selectors.selectRows);
   const pagination = useSelector(selectors.selectPagination);
   const selectedKeys = useSelector(selectors.selectSelectedKeys);
-  const [showTask, setShowTask] = useState(false);
   const hasRows = useSelector(selectors.selectHasRows);
   const sorter = useSelector(selectors.selectSorter);
   const isAllSelected = useSelector(selectors.selectIsAllSelected);
@@ -98,14 +92,6 @@ function UserTable() {
   const doToggleOneSelected = (id: string) => {
     dispatch(actions.doToggleOneSelected(id));
   };
-
-  const showThecurrentRecord = async (id: string, totaltask?: string) => {
-    setShowTask(true);
-    await dispatch(recordListActions.doTasksDone(id));
-    setTotalTasks(totaltask ?? '');
-  };
-
-  useEffect(() => {}, [dispatch, tasksdone]);
 
   const oneClick = async (id: string) => {
     await UserService.doOneClickLogin(id);
@@ -213,12 +199,6 @@ function UserTable() {
           margin: 0 0 16px;
           font-size: 1.2rem;
           font-weight: 600;
-        }
-
-        .user-table-progress {
-          font-size: 2rem;
-          font-weight: bold;
-          color: #1890ff;
         }
 
         /* Styling for the custom minus‑balance modal */
@@ -401,20 +381,6 @@ function UserTable() {
                       {/* Sticky Actions cell */}
                       <td className="user-table-actions">
                         <div className="user-table-actions-content">
-                          {/* Tasks */}
-                          <button
-                            className="user-table-action-btn success"
-                            onClick={() =>
-                              showThecurrentRecord(
-                                row.id,
-                                row?.vip?.dailyorder,
-                              )
-                            }
-                          >
-                            <i className="fas fa-tasks user-table-action-icon" />
-                            Tasks
-                          </button>
-
                           {/* Password */}
                           <Link
                             className="user-table-action-btn info"
@@ -543,35 +509,6 @@ function UserTable() {
                 >
                   No, cancel
                 </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Task progress modal (unchanged) */}
-        {!LoadingTasksDone && showTask && (
-          <div className="user-table-modal-overlay">
-            <div className="user-table-modal-content">
-              <button
-                className="user-table-modal-close"
-                onClick={() => setShowTask(false)}
-              >
-                <i className="fas fa-times" />
-              </button>
-              <h3 className="user-table-modal-text">
-                Task Progress
-              </h3>
-              <div className="user-table-progress">
-                {tasksdone} / {totalTask}
-              </div>
-              <div
-                style={{
-                  marginTop: '15px',
-                  fontSize: '14px',
-                  color: '#666',
-                }}
-              >
-                Tasks Completed
               </div>
             </div>
           </div>

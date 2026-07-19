@@ -8,13 +8,15 @@ const shopCategoryActions = {
   FETCH_SUCCESS: `${prefix}_FETCH_SUCCESS`,
   FETCH_ERROR: `${prefix}_FETCH_ERROR`,
 
-  doFetch: () => async (dispatch) => {
+  doFetch: (usePublic?: boolean) => async (dispatch) => {
     try {
       dispatch({
         type: shopCategoryActions.FETCH_STARTED,
       });
 
-      const response = await ShopCategoryService.list();
+      const response = usePublic
+        ? await ShopCategoryService.listPublic()
+        : await ShopCategoryService.list();
 
       dispatch({
         type: shopCategoryActions.FETCH_SUCCESS,

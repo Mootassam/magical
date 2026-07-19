@@ -15,6 +15,14 @@ const storeActions = {
   SUBMIT_SUCCESS: `${prefix}_SUBMIT_SUCCESS`,
   SUBMIT_ERROR: `${prefix}_SUBMIT_ERROR`,
 
+  DASHBOARD_STARTED: `${prefix}_DASHBOARD_STARTED`,
+  DASHBOARD_SUCCESS: `${prefix}_DASHBOARD_SUCCESS`,
+  DASHBOARD_ERROR: `${prefix}_DASHBOARD_ERROR`,
+
+  UPDATE_OWN_STARTED: `${prefix}_UPDATE_OWN_STARTED`,
+  UPDATE_OWN_SUCCESS: `${prefix}_UPDATE_OWN_SUCCESS`,
+  UPDATE_OWN_ERROR: `${prefix}_UPDATE_OWN_ERROR`,
+
   doInit: () => async (dispatch) => {
     try {
       dispatch({
@@ -58,6 +66,54 @@ const storeActions = {
       dispatch({
         type: storeActions.SUBMIT_ERROR,
       });
+    }
+  },
+
+  doFetchDashboard: () => async (dispatch) => {
+    try {
+      dispatch({
+        type: storeActions.DASHBOARD_STARTED,
+      });
+
+      const dashboard = await StoreService.getDashboard();
+
+      dispatch({
+        type: storeActions.DASHBOARD_SUCCESS,
+        payload: dashboard,
+      });
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: storeActions.DASHBOARD_ERROR,
+      });
+    }
+  },
+
+  doUpdateOwn: (data) => async (dispatch) => {
+    try {
+      dispatch({
+        type: storeActions.UPDATE_OWN_STARTED,
+      });
+
+      const store = await StoreService.updateOwn(data);
+
+      dispatch({
+        type: storeActions.UPDATE_OWN_SUCCESS,
+        payload: store,
+      });
+
+      Message.success('Store settings saved successfully.');
+
+      return true;
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: storeActions.UPDATE_OWN_ERROR,
+      });
+
+      return false;
     }
   },
 };

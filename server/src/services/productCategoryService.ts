@@ -12,6 +12,10 @@ class ProductCategoryService {
     return ProductCategoryRepository.findAndCountAll(args, options);
   }
 
+  static async findAndCountAllPublic(args, options) {
+    return ProductCategoryRepository.findAndCountAllPublic(args, options);
+  }
+
   async destroyAll(ids) {
     const session = await MongooseRepository.createSession(
       this.options.database

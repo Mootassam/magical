@@ -1,12 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
+import storeActions from "src/modules/store/storeActions";
+import storeSelectors from "src/modules/store/storeSelectors";
 
 function MineSeller() {
   const dispatch = useDispatch();
   const currentUser = useSelector(authSelectors.selectCurrentUser);
+  const store = useSelector(storeSelectors.selectStore);
+
+  useEffect(() => {
+    dispatch(storeActions.doInit());
+  }, [dispatch]);
+
+  const storePhoto = store?.storePhoto?.[0]?.downloadUrl;
 
   const doSignout = () => {
     dispatch(authActions.doSignout());
@@ -19,7 +28,7 @@ function MineSeller() {
         <div className="page-header">
           <div className="header-top">
             <span className="header-title">My Shop</span>
-            <span className="settings-icon">⚙️</span>
+            <Link to="/seller/set-up" className="settings-icon">⚙️</Link>
           </div>
         </div>
 
@@ -35,11 +44,16 @@ function MineSeller() {
           </Link>
 
           <Link to="/shop-details" className="profile-card">
-            <div className="avatar"><img src="https://loremflickr.com/140/140/logo,shop/all?lock=601" alt="Universal Store logo" /></div>
+            <div className="avatar">
+              {storePhoto ? (
+                <img src={storePhoto} alt={`${store?.storeName || "Store"} photo`} />
+              ) : (
+                <div className="avatar-fallback">🏪</div>
+              )}
+            </div>
             <div className="profile-info">
               <div className="profile-name-row">
-                <span className="profile-name">Universal Store</span>
-                <span className="level-badge">🏅 Gold</span>
+                <span className="profile-name">{store?.storeName || "My Store"}</span>
               </div>
               <div className="profile-email">{currentUser?.email}</div>
               <div className="profile-id">ID: {currentUser?.id}</div>
@@ -53,7 +67,7 @@ function MineSeller() {
               <div className="stat-label">My Collection</div>
             </Link>
             <Link to="/shop-collection" className="stat-item">
-              <div className="stat-value">20</div>
+              <div className="stat-value">0</div>
               <div className="stat-label">Shop Collection</div>
             </Link>
             <Link to="/my-browse" className="stat-item">
@@ -161,7 +175,7 @@ function MineSeller() {
               <div className="menu-text">Payment Password</div>
               <span className="menu-arrow">›</span>
             </Link>
-            <Link to="/set-up" className="menu-item">
+            <Link to="/seller/set-up" className="menu-item">
               <div className="menu-icon" style={{ background: '#eafaf1' }}>⚙️</div>
               <div className="menu-text">Set up</div>
               <span className="menu-arrow">›</span>
@@ -222,7 +236,7 @@ function MineSeller() {
           align-items:center;
         }
         .header-title{ font-size:17px; font-weight:800; }
-        .settings-icon{ font-size:18px; opacity:0.9; }
+        .settings-icon{ font-size:18px; opacity:0.9; text-decoration:none; }
 
         /* ---------- Scroll body ---------- */
         .scroll-area{
@@ -279,17 +293,15 @@ function MineSeller() {
           border:2px solid var(--grey-light);
         }
         .avatar img{ width:100%; height:100%; object-fit:cover; }
+        .avatar-fallback{
+          width:100%; height:100%;
+          display:flex; align-items:center; justify-content:center;
+          background:var(--grey-light);
+          font-size:24px;
+        }
         .profile-info{ flex:1; min-width:0; }
         .profile-name-row{ display:flex; align-items:center; gap:8px; }
         .profile-name{ font-size:15.5px; font-weight:800; color:var(--navy); }
-        .level-badge{
-          background:linear-gradient(135deg, #ffe6ac, var(--gold));
-          color:#7a4b00;
-          font-size:9.5px;
-          font-weight:800;
-          padding:2px 8px;
-          border-radius:8px;
-        }
         .profile-email{ font-size:11.5px; color:var(--grey-text); margin-top:3px; }
         .profile-id{ font-size:11px; color:var(--grey-text); margin-top:2px; }
         .profile-arrow{ font-size:16px; color:#c3cbe0; }

@@ -112,4 +112,41 @@ export default class ProductCategoryRepository {
 
     return { rows, count };
   }
+
+  static async findAndCountAllPublic(
+    { filter, limit = 0, offset = 0, orderBy = "" },
+    options: IRepositoryOptions
+  ) {
+    let criteriaAnd: any = [];
+
+    if (filter && filter.name) {
+      criteriaAnd.push({
+        name: {
+          $regex: MongooseQueryUtils.escapeRegExp(filter.name),
+          $options: "i",
+        },
+      });
+    }
+
+    const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
+    const skip = Number(offset || 0) || undefined;
+    const limitEscaped = Number(limit || 0) || undefined;
+    const criteria = criteriaAnd.length ? { $and: criteriaAnd } : {};
+
+    const rows = await MongooseRepository.wrapWithSessionIfExists(
+      ProductCategory(options.database)
+        .find(criteria)
+        .skip(skip)
+        .limit(limitEscaped)
+        .sort(sort),
+      options
+    );
+
+    const count = await MongooseRepository.wrapWithSessionIfExists(
+      ProductCategory(options.database).countDocuments(criteria),
+      options
+    );
+
+    return { rows, count };
+  }
 }

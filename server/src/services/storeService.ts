@@ -59,6 +59,46 @@ class StoreService {
       throw error;
     }
   }
+
+  static async updateDetails(id, data, options) {
+    const session = await MongooseRepository.createSession(options.database);
+
+    try {
+      const store = await StoreRepository.updateDetails(id, data, {
+        ...options,
+        session,
+      });
+
+      await MongooseRepository.commitTransaction(session);
+
+      return store;
+    } catch (error) {
+      await MongooseRepository.abortTransaction(session);
+      throw error;
+    }
+  }
+
+  static async getDashboard(options) {
+    return StoreRepository.getDashboard(options);
+  }
+
+  static async updateOwn(data, options) {
+    const session = await MongooseRepository.createSession(options.database);
+
+    try {
+      const store = await StoreRepository.updateOwn(data, {
+        ...options,
+        session,
+      });
+
+      await MongooseRepository.commitTransaction(session);
+
+      return store;
+    } catch (error) {
+      await MongooseRepository.abortTransaction(session);
+      throw error;
+    }
+  }
 }
 
 export default StoreService;

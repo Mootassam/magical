@@ -26,4 +26,29 @@ export default class StoreService {
 
     return response.data;
   }
+
+  static async getDashboard() {
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.get(
+      `/tenant/${tenantId}/store/my/dashboard`,
+    );
+
+    return response.data;
+  }
+
+  static async updateOwn(data) {
+    const body = {
+      data,
+    };
+
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.put(
+      `/tenant/${tenantId}/store/my`,
+      body,
+    );
+
+    return response.data;
+  }
 }

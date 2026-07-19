@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from 'src/i18n';
 import actions from 'src/modules/store/list/storeListActions';
@@ -6,6 +6,7 @@ import selectors from 'src/modules/store/list/storeListSelectors';
 import Spinner from 'src/view/shared/Spinner';
 import TableWrapper from 'src/view/shared/styles/TableWrapper';
 import Pagination from 'src/view/shared/table/Pagination';
+import StoreEditModal from 'src/view/store/list/StoreEditModal';
 
 function getStatusClass(status) {
   switch (status) {
@@ -57,10 +58,15 @@ function StoreListTable(props) {
   const statusUpdateLoading = useSelector(
     selectors.selectStatusUpdateLoading,
   );
+  const detailsUpdateLoading = useSelector(
+    selectors.selectDetailsUpdateLoading,
+  );
   const rows = useSelector(selectors.selectRows);
   const pagination = useSelector(selectors.selectPagination);
   const hasRows = useSelector(selectors.selectHasRows);
   const sorter = useSelector(selectors.selectSorter);
+
+  const [editingRow, setEditingRow] = useState<any>(null);
 
   const doChangeSort = (field) => {
     const order =
@@ -82,6 +88,10 @@ function StoreListTable(props) {
 
   const handleStatusChange = (id, status) => {
     dispatch(actions.doUpdateStatus(id, status));
+  };
+
+  const handleSaveDetails = async (data) => {
+    return dispatch(actions.doUpdateDetails(editingRow.id, data)) as any;
   };
 
   return (
@@ -265,17 +275,28 @@ function StoreListTable(props) {
                           </button>
                         </div>
                       ) : (
-                        <div
-                          className={`status-badge ${getStatusClass(row.status)}`}
-                        >
-                          <i
-                            className={`status-icon ${getStatusIcon(row.status)}`}
-                          ></i>
-                          <span className="status-text">
-                            {i18n(
-                              `entities.store.enumerators.status.${row.status}`,
-                            )}
-                          </span>
+                        <div className="store-status-buttons">
+                          <div
+                            className={`status-badge ${getStatusClass(row.status)}`}
+                          >
+                            <i
+                              className={`status-icon ${getStatusIcon(row.status)}`}
+                            ></i>
+                            <span className="status-text">
+                              {i18n(
+                                `entities.store.enumerators.status.${row.status}`,
+                              )}
+                            </span>
+                          </div>
+                          {row.status === 'success' && (
+                            <button
+                              className="status-btn edit"
+                              onClick={() => setEditingRow(row)}
+                            >
+                              <i className="fas fa-pen status-btn-icon"></i>
+                              {i18n('entities.store.actions.edit')}
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
@@ -293,6 +314,15 @@ function StoreListTable(props) {
           />
         </div>
       </TableWrapper>
+
+      {editingRow && (
+        <StoreEditModal
+          store={editingRow}
+          saving={detailsUpdateLoading}
+          onSave={handleSaveDetails}
+          onClose={() => setEditingRow(null)}
+        />
+      )}
 
       <style>{`
         .store-list-container {
@@ -503,6 +533,11 @@ function StoreListTable(props) {
 
         .status-btn.danger {
           background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+          color: white;
+        }
+
+        .status-btn.edit {
+          background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
           color: white;
         }
 

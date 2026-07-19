@@ -7,22 +7,38 @@ import walletSettingsActions from "src/modules/walletSettings/walletSettingsActi
 import walletSettingsSelectors from "src/modules/walletSettings/walletSettingsSelectors";
 import transactionFormActions from "src/modules/transaction/form/transactionFormActions";
 import transactionFormSelectors from "src/modules/transaction/form/transactionFormSelectors";
+import CryptoRatesService from "src/modules/cryptoRates/cryptoRatesService";
 import Message from "src/view/shared/message";
 
 const WALLET_TYPES = [
-  { key: "eth", addressField: "ethAddress", feeField: "ethFee" },
-  { key: "btc", addressField: "btcAddress", feeField: "btcFee" },
+  { key: "eth", addressField: "ethAddress", feeField: "ethFee", symbol: "ETH" },
+  { key: "btc", addressField: "btcAddress", feeField: "btcFee", symbol: "BTC" },
   {
     key: "usdt_trc20",
     addressField: "usdtTrc20Address",
     feeField: "usdtTrc20Fee",
+    symbol: "USDT",
   },
   {
     key: "usdt_erc20",
     addressField: "usdtErc20Address",
     feeField: "usdtErc20Fee",
+    symbol: "USDT",
   },
 ];
+
+// USDT wallets are pegged 1:1 to USD, so only ETH/BTC need a live rate.
+function rateForWallet(walletKey, rates) {
+  if (walletKey === "eth") {
+    return rates?.eth;
+  }
+
+  if (walletKey === "btc") {
+    return rates?.btc;
+  }
+
+  return 1;
+}
 
 function Withdrawal() {
   const dispatch = useDispatch();
@@ -41,10 +57,38 @@ function Withdrawal() {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [withdrawPassword, setWithdrawPassword] = useState("");
+  const [rates, setRates] = useState<{ btc: number; eth: number } | null>(null);
+  const [ratesLoading, setRatesLoading] = useState(false);
 
   useEffect(() => {
     dispatch(walletSettingsActions.doInit());
   }, [dispatch]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        setRatesLoading(true);
+        const data = await CryptoRatesService.find();
+
+        if (mounted) {
+          setRates(data);
+        }
+      } catch (error) {
+        // The conversion is a convenience preview - a failed rate fetch
+        // shouldn't block the rest of the withdrawal form.
+      } finally {
+        if (mounted) {
+          setRatesLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const currentWallet =
     WALLET_TYPES.find((wallet) => wallet.key === selectedWallet) ||
@@ -52,6 +96,20 @@ function Withdrawal() {
 
   const fee =
     (walletSettings && walletSettings[currentWallet.feeField]) || 0;
+
+  const isCrypto = currentWallet.key === "eth" || currentWallet.key === "btc";
+  const rate = rateForWallet(currentWallet.key, rates);
+
+  // `amount` is entered in the wallet's own coin (same unit the fee is
+  // shown in) - matching the deposit form and matching what's on screen,
+  // rather than USD, which is what previously made a tiny-looking number
+  // like 0.00005 ETH read as "$0.00005" and fail against the fee.
+  const amountNum = amount && Number(amount) > 0 ? Number(amount) : null;
+  const feeNum = Number(fee) || 0;
+  const feeUsdt = rate ? feeNum * rate : null;
+  const netCoin = amountNum !== null ? amountNum - feeNum : null;
+  const belowFee = netCoin !== null && netCoin <= 0;
+  const grossUsd = amountNum !== null && rate ? amountNum * rate : null;
 
   const balance = currentUser?.balance?.toFixed(2) || "0.00";
 
@@ -66,8 +124,17 @@ function Withdrawal() {
       return;
     }
 
-    if (currentUser?.balance !== undefined && Number(amount) > currentUser.balance) {
+    if (
+      currentUser?.balance !== undefined &&
+      grossUsd !== null &&
+      grossUsd > currentUser.balance
+    ) {
       Message.error(i18n("pages.withdrawal.exceedsBalance"));
+      return;
+    }
+
+    if (belowFee) {
+      Message.error(i18n("pages.withdrawal.belowFeeWarning"));
       return;
     }
 
@@ -123,7 +190,12 @@ function Withdrawal() {
 
             <div className="info-row">
               <span className="info-label">{i18n("pages.withdrawal.fee")}</span>
-              <span className="info-value">{fee}</span>
+              <span className="info-value">
+                {fee} {currentWallet.symbol}
+                {feeUsdt !== null && (
+                  <span className="fee-usdt-inline"> (≈ ${feeUsdt.toFixed(2)})</span>
+                )}
+              </span>
             </div>
 
             <span className="field-label sp">
@@ -140,7 +212,7 @@ function Withdrawal() {
 
             <span className="field-label sp">
               <span className="required">*</span>
-              {i18n("pages.withdrawal.amount")}
+              {i18n("pages.withdrawal.amount")} <span className="unit-tag">({currentWallet.symbol})</span>
             </span>
             <input
               type="number"
@@ -149,6 +221,31 @@ function Withdrawal() {
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
             />
+
+            <div className={`receive-summary${belowFee ? " danger" : ""}`}>
+              <div className="summary-row">
+                <span className="receive-label">{i18n("pages.withdrawal.youWillReceive")}</span>
+                <span className="receive-value">
+                  {belowFee
+                    ? i18n("pages.withdrawal.belowFeeWarning")
+                    : netCoin !== null
+                    ? `≈ ${netCoin.toFixed(isCrypto ? 8 : 2)} ${currentWallet.symbol}`
+                    : i18n("pages.withdrawal.enterAmountToPreview")}
+                </span>
+              </div>
+              {!belowFee && isCrypto && amountNum !== null && (
+                <div className="summary-row sub">
+                  <span className="summary-sub-label">Deducted from balance</span>
+                  <span className="summary-sub-value">
+                    {ratesLoading && !rates
+                      ? i18n("pages.withdrawal.fetchingRate")
+                      : grossUsd !== null
+                      ? `≈ $${grossUsd.toFixed(2)}`
+                      : i18n("pages.withdrawal.rateUnavailable")}
+                  </span>
+                </div>
+              )}
+            </div>
 
             <span className="field-label sp">
               <span className="required">*</span>
@@ -173,7 +270,7 @@ function Withdrawal() {
 
             <button
               className="submit-btn"
-              disabled={saveLoading}
+              disabled={saveLoading || belowFee}
               onClick={doSubmit}
             >
               {i18n("pages.withdrawal.submit")}
@@ -301,6 +398,40 @@ function Withdrawal() {
   }
   .info-label{ font-size:13px; color:var(--navy); font-weight:600; }
   .info-value{ font-size:14px; font-weight:800; color:var(--navy); }
+  .fee-usdt-inline{ font-size:11.5px; font-weight:600; color:var(--grey-text); }
+  .unit-tag{ color:var(--grey-text); font-weight:600; }
+
+  /* ---------- Receive summary ---------- */
+  .receive-summary{
+    margin-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    background:#f0f7ff;
+    border:1px solid #d6e8ff;
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .receive-summary.danger{
+    background:#fff1f1;
+    border-color:#ffd2d2;
+  }
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .summary-row.sub{
+    padding-top:8px;
+    border-top:1px dashed #d6e8ff;
+  }
+  .receive-summary.danger .summary-row.sub{ border-top-color:#ffd2d2; }
+  .receive-label{ font-size:12.5px; font-weight:700; color:var(--navy); }
+  .receive-value{ font-size:13px; font-weight:800; color:var(--blue-mid); text-align:right; }
+  .receive-summary.danger .receive-value{ color:var(--red); }
+  .summary-sub-label{ font-size:11.5px; color:var(--grey-text); }
+  .summary-sub-value{ font-size:11.5px; font-weight:700; color:var(--grey-text); text-align:right; }
 
   /* ---------- Inputs ---------- */
   .text-input{

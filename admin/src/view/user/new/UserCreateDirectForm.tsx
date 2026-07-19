@@ -11,7 +11,6 @@ import * as yup from 'yup';
 import yupFormSchemas from 'src/modules/shared/yup/yupFormSchemas';
 import userEnumerators from 'src/modules/user/userEnumerators';
 import { yupResolver } from '@hookform/resolvers/yup';
-import VipAutocompleteFormItem from 'src/view/vip/autocomplete/VipAutocompleteFormItem';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Errors from 'src/modules/shared/error/errors';
@@ -20,13 +19,9 @@ const schema = yup.object().shape({
   email: yupFormSchemas.email(i18n('user.fields.email')).required(),
   password: yupFormSchemas.string(i18n('user.fields.password')).required().min(6),
   fullName: yupFormSchemas.string(i18n('fullName')).required(),
-  vip: yupFormSchemas.relationToOne(i18n('user.fields.vip')),
   balance: yupFormSchemas.decimal(i18n('user.fields.balance'), {
     required: false,
     min: 0,
-  }),
-  invitationcode: yupFormSchemas.string(i18n('user.fields.invitationcode'), {
-    required: false,
   }),
   status: yupFormSchemas.enumerator(i18n('user.fields.status'), {
     options: userEnumerators.status,
@@ -41,9 +36,7 @@ function UserCreateDirectForm(props) {
     email: '',
     password: '',
     fullName: '',
-    vip: null,
     balance: 0,
-    invitationcode: '',
     status: 'active',
   }));
 
@@ -127,22 +120,6 @@ function UserCreateDirectForm(props) {
               <InputNumberFormItem
                 name="balance"
                 label={i18n('user.fields.balance')}
-              />
-            </Col>
-          </Row>
-
-          <Row>
-            <Col sm={6}>
-              <VipAutocompleteFormItem
-                name="vip"
-                label={i18n('user.fields.vip')}
-                required={false}
-              />
-            </Col>
-            <Col sm={6}>
-              <InputFormItem
-                name="invitationcode"
-                label={i18n('user.fields.invitationcode')}
               />
             </Col>
           </Row>

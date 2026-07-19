@@ -16,7 +16,7 @@ function ProductDetails(props) {
 
   useEffect(() => {
     if (id) {
-      dispatch(shopProductActions.doFind(id));
+      dispatch(shopProductActions.doFind(id, true));
     }
   }, [dispatch, id]);
 

@@ -11,4 +11,14 @@ export default class ShopCategoryService {
 
     return response.data;
   }
+
+  // Public browse - no tenant, no auth. Used by storefront pages that must
+  // work for anonymous shoppers who have no tenant in local storage.
+  static async listPublic() {
+    const response = await authAxios.get(
+      `/product-category/browse-public`,
+    );
+
+    return response.data;
+  }
 }

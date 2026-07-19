@@ -229,6 +229,31 @@ const authActions = {
   },
 
 
+  doUpdateMemberProfile: (data) => async (dispatch) => {
+    try {
+      dispatch({
+        type: authActions.UPDATE_PROFILE_START,
+      });
+
+      await service.updatePhoto(data);
+
+      dispatch({
+        type: authActions.UPDATE_PROFILE_SUCCESS,
+      });
+      await dispatch(authActions.doRefreshCurrentUser());
+      Message.success(i18n("auth.profile.success"));
+
+      return true;
+    } catch (error) {
+      Errors.handle(error);
+      dispatch({
+        type: authActions.UPDATE_PROFILE_ERROR,
+      });
+
+      return false;
+    }
+  },
+
   doUpdateProfileWallet: (data) => async (dispatch) => {
     try {
       dispatch({

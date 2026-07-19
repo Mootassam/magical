@@ -12,6 +12,7 @@ const en = {
     noPendingRecord: 'No pending record found',
     inValidWithdrawPassword: 'Your withdraw Password is not correct please check again',
     exceedsBalance: 'It looks like your withdrawal amount exceeds your balance',
+    withdrawalBelowFee: 'The withdrawal amount must be greater than the network fee',
     missingWalletAddress: 'Please go to the "Wallet" section to bind your USDT (TRC20) or ERC20 address before submitting a withdrawal request.',
     requiredAmount: 'Please write amount',
     notFoundTransaction: 'Transaction not found',

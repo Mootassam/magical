@@ -102,6 +102,13 @@ export default class Storage {
         bypassWritingPermissions: true,
         publicRead: true,
       },
+      storeBanner: {
+        id: 'storeBanner',
+        folder: 'tenant/:tenantId/store/banner/:userId',
+        maxSizeInBytes: 10 * 1024 * 1024,
+        bypassWritingPermissions: true,
+        publicRead: true,
+      },
 
       productPhoto: {
         id: 'productPhoto',

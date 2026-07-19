@@ -115,6 +115,10 @@ const privateRoutes = [
     path: "/set-up",
     loader: () => import("src/view/pages/Estore/SetUp"),
   },
+  {
+    path: "/seller/set-up",
+    loader: () => import("src/view/pages/Estore/SellerSetUp"),
+  },
 ];
 
 const screenRoutes = [

@@ -1,7 +1,7 @@
 import PermissionChecker from "../../services/user/permissionChecker";
 import ApiResponseHandler from "../apiResponseHandler";
 import Permissions from "../../security/permissions";
-import HuggingFaceImportService from "../../services/huggingFaceImportService";
+import SampleProductImportService from "../../services/sampleProductImportService";
 
 export default async (req, res, next) => {
   try {
@@ -9,7 +9,7 @@ export default async (req, res, next) => {
       Permissions.values.productImportHuggingFace
     );
 
-    const payload = await HuggingFaceImportService.run(req);
+    const payload = await SampleProductImportService.run(req);
 
     await ApiResponseHandler.success(req, res, payload);
   } catch (error) {

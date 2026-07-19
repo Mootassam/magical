@@ -7,9 +7,24 @@ const selectRows = createSelector(
   (raw) => raw.rows,
 );
 
+const selectCount = createSelector(
+  [selectRaw],
+  (raw) => raw.count,
+);
+
 const selectLoading = createSelector(
   [selectRaw],
   (raw) => Boolean(raw.loading),
+);
+
+const selectLoadingMore = createSelector(
+  [selectRaw],
+  (raw) => Boolean(raw.loadingMore),
+);
+
+const selectHasMore = createSelector(
+  [selectRaw],
+  (raw) => Boolean(raw.hasMore),
 );
 
 const selectRecord = createSelector(
@@ -24,7 +39,10 @@ const selectFindLoading = createSelector(
 
 const shopProductSelectors = {
   selectRows,
+  selectCount,
   selectLoading,
+  selectLoadingMore,
+  selectHasMore,
   selectRecord,
   selectFindLoading,
 };

@@ -273,6 +273,22 @@ class ProductRepository {
     return this._fillFileDownloadUrls(record);
   }
 
+  static async findByIdPublic(id, options: IRepositoryOptions) {
+    let record = await MongooseRepository.wrapWithSessionIfExists(
+      Product(options.database)
+        .findById(id)
+        .populate("vip")
+        .populate("category"),
+      options
+    );
+
+    if (!record) {
+      throw new Error404();
+    }
+
+    return this._fillFileDownloadUrls(record);
+  }
+
   static async findAndCountAll(
     { filter, limit = 0, offset = 0, orderBy = "" },
     options: IRepositoryOptions
@@ -341,8 +357,81 @@ class ProductRepository {
     const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
 
     const skip = Number(offset || 0) || undefined;
-    const limitEscaped = Number(limit || 0) || undefined;
+    // Cap explicit limits so a stray/abusive request can't force an
+    // unbounded-in-practice fetch; callers that intentionally want
+    // everything (e.g. CSV export) simply don't pass a limit at all.
+    const limitEscaped = Number(limit || 0)
+      ? Math.min(Number(limit), 200)
+      : undefined;
     const criteria = criteriaAnd.length ? { $and: criteriaAnd } : null;
+
+    let rows = await Product(options.database)
+      .find(criteria)
+      .skip(skip)
+      .limit(limitEscaped)
+      .populate("vip")
+      .populate("category")
+      .sort(sort);
+
+    const count = await Product(options.database).countDocuments(criteria);
+
+    rows = await Promise.all(rows.map(this._fillFileDownloadUrls));
+
+    return { rows, count };
+  }
+
+  static async findAndCountAllPublic(
+    { filter, limit = 0, offset = 0, orderBy = "" },
+    options: IRepositoryOptions
+  ) {
+    let criteriaAnd: any = [];
+
+    if (filter) {
+      if (filter.id) {
+        criteriaAnd.push({
+          ["_id"]: MongooseQueryUtils.uuid(filter.id),
+        });
+      }
+
+      if (filter.title) {
+        criteriaAnd.push({
+          title: {
+            $regex: MongooseQueryUtils.escapeRegExp(filter.title),
+            $options: "i",
+          },
+        });
+      }
+
+      if (filter.category) {
+        criteriaAnd.push({
+          category: filter.category,
+        });
+      }
+
+      if (filter.priceMin !== undefined || filter.priceMax !== undefined) {
+        const priceFilter: any = {};
+
+        if (filter.priceMin !== undefined && filter.priceMin !== "") {
+          priceFilter.$gte = Number(filter.priceMin);
+        }
+
+        if (filter.priceMax !== undefined && filter.priceMax !== "") {
+          priceFilter.$lte = Number(filter.priceMax);
+        }
+
+        if (Object.keys(priceFilter).length) {
+          criteriaAnd.push({ price: priceFilter });
+        }
+      }
+    }
+
+    const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
+
+    const skip = Number(offset || 0) || undefined;
+    const limitEscaped = Number(limit || 0)
+      ? Math.min(Number(limit), 200)
+      : undefined;
+    const criteria = criteriaAnd.length ? { $and: criteriaAnd } : {};
 
     let rows = await Product(options.database)
       .find(criteria)

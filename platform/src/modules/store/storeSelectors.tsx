@@ -17,10 +17,28 @@ const selectSaveLoading = createSelector(
   (raw) => Boolean(raw.saveLoading),
 );
 
+const selectDashboard = createSelector(
+  [selectRaw],
+  (raw) => raw.dashboard,
+);
+
+const selectDashboardLoading = createSelector(
+  [selectRaw],
+  (raw) => Boolean(raw.dashboardLoading),
+);
+
+const selectUpdateOwnLoading = createSelector(
+  [selectRaw],
+  (raw) => Boolean(raw.updateOwnLoading),
+);
+
 const storeSelectors = {
   selectInitLoading,
   selectSaveLoading,
   selectStore,
+  selectDashboard,
+  selectDashboardLoading,
+  selectUpdateOwnLoading,
   selectRaw,
 };
 

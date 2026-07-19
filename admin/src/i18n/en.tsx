@@ -1814,8 +1814,9 @@ const en = {
       },
       importHuggingFace: {
         button: 'Import Sample Products',
-        confirm: 'This will fetch product data from several public product datasets (Hugging Face, DummyJSON, Fake Store API) and create new categories and products in your store. Continue?',
+        confirm: 'This will import sample products from the bundled fashion, laptop and general merchandise catalogs, creating matching categories (e.g. Men/Women for fashion) as it goes. The general merchandise catalog is large and continues importing in the background. Continue?',
         success: 'Import complete: {0} new categories and {1} new products added.',
+        backgroundImportStarted: ' The large general merchandise catalog is still importing in the background - refresh the list in a few minutes to see more products.',
       },
     },
 
@@ -2326,6 +2327,9 @@ const en = {
         idCardBack: 'ID Card Back',
         status: 'Status',
         createdAt: 'Submitted',
+        storeRating: 'Store Rating',
+        creditScore: 'Credit Score',
+        numberOfFollowers: 'Number of Followers',
       },
       enumerators: {
         status: {
@@ -2347,6 +2351,10 @@ const en = {
       actions: {
         accept: 'Accept',
         reject: 'Reject',
+        edit: 'Edit',
+      },
+      editModal: {
+        title: 'Edit Store Details',
       },
       filters: {
         allStatuses: 'All statuses',

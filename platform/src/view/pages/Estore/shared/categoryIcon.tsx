@@ -24,6 +24,8 @@ const ICON_RULES: Array<[string[], string]> = [
   [['saree'], '🥻'],
 ];
 
+export const FALLBACK_CATEGORY_ICON = '🏷️';
+
 export default function categoryIcon(name: string): string {
   const key = (name || '').toLowerCase();
 
@@ -33,5 +35,5 @@ export default function categoryIcon(name: string): string {
     }
   }
 
-  return '🏷️';
+  return FALLBACK_CATEGORY_ICON;
 }

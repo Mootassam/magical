@@ -178,13 +178,19 @@ const productListActions = {
             .join('; ')}`,
         );
       } else {
-        Message.success(
-          i18n(
-            'entities.product.importHuggingFace.success',
-            result.categoriesCreated,
-            result.productsCreated,
-          ),
+        let successMessage = i18n(
+          'entities.product.importHuggingFace.success',
+          result.categoriesCreated,
+          result.productsCreated,
         );
+
+        if (result.backgroundImport?.status === 'started') {
+          successMessage += i18n(
+            'entities.product.importHuggingFace.backgroundImportStarted',
+          );
+        }
+
+        Message.success(successMessage);
       }
 
       dispatch(productListActions.doFetch());

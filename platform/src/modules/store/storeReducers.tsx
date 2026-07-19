@@ -4,6 +4,9 @@ const initialData = {
   initLoading: false,
   saveLoading: false,
   store: null,
+  dashboard: null,
+  dashboardLoading: false,
+  updateOwnLoading: false,
 };
 
 export default (state = initialData, { type, payload }) => {
@@ -49,6 +52,51 @@ export default (state = initialData, { type, payload }) => {
     return {
       ...state,
       saveLoading: false,
+    };
+  }
+
+  if (type === actions.DASHBOARD_STARTED) {
+    return {
+      ...state,
+      dashboardLoading: true,
+    };
+  }
+
+  if (type === actions.DASHBOARD_SUCCESS) {
+    return {
+      ...state,
+      dashboard: payload,
+      dashboardLoading: false,
+    };
+  }
+
+  if (type === actions.DASHBOARD_ERROR) {
+    return {
+      ...state,
+      dashboard: null,
+      dashboardLoading: false,
+    };
+  }
+
+  if (type === actions.UPDATE_OWN_STARTED) {
+    return {
+      ...state,
+      updateOwnLoading: true,
+    };
+  }
+
+  if (type === actions.UPDATE_OWN_SUCCESS) {
+    return {
+      ...state,
+      store: payload,
+      updateOwnLoading: false,
+    };
+  }
+
+  if (type === actions.UPDATE_OWN_ERROR) {
+    return {
+      ...state,
+      updateOwnLoading: false,
     };
   }
 

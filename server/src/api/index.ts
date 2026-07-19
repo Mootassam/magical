@@ -63,6 +63,7 @@ authSocial(app, routes);
 require("./auditLog").default(routes);
 require("./auth").default(routes);
 require("./walletSettings").default(routes);
+require("./cryptoRates").default(routes);
 require("./store").default(routes);
 require("./deliveryAddress").default(routes);
 require("./order").default(routes);

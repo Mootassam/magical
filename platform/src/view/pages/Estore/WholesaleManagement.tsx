@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import shopCategoryActions from "src/modules/shop/shopCategoryActions";
 import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
@@ -25,7 +25,10 @@ function WholesaleManagement() {
   const categories = useSelector(shopCategorySelectors.selectRows);
   const categoriesLoading = useSelector(shopCategorySelectors.selectLoading);
   const products = useSelector(shopProductSelectors.selectRows);
+  const productsCount = useSelector(shopProductSelectors.selectCount);
   const productsLoading = useSelector(shopProductSelectors.selectLoading);
+  const loadingMore = useSelector(shopProductSelectors.selectLoadingMore);
+  const hasMore = useSelector(shopProductSelectors.selectHasMore);
   const listedProductIds = useSelector(storeListingSelectors.selectListedProductIds);
   const listingSaveLoading = useSelector(storeListingSelectors.selectCreateLoading);
 
@@ -37,6 +40,9 @@ function WholesaleManagement() {
     max: "",
   });
   const [listingProduct, setListingProduct] = useState<any>(null);
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     dispatch(shopCategoryActions.doFetch());
@@ -52,6 +58,31 @@ function WholesaleManagement() {
         appliedPriceRange.max,
       ),
     );
+  }, [dispatch, selectedCategoryId, appliedPriceRange]);
+
+  // Infinite scroll: load the next page of products (10 at a time) as the
+  // user nears the bottom of the list, instead of fetching the whole
+  // catalog (or whole category) up front.
+  useEffect(() => {
+    const root = scrollRef.current;
+    const target = sentinelRef.current;
+
+    if (!root || !target) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          dispatch(shopProductActions.doFetchMore());
+        }
+      },
+      { root, rootMargin: "150px" },
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
   }, [dispatch, selectedCategoryId, appliedPriceRange]);
 
   const doSelectCategory = (categoryId: string | null) => {
@@ -147,14 +178,15 @@ function WholesaleManagement() {
           </div>
         </div>
 
-        <div className="scroll-area">
+        <div className="scroll-area" ref={scrollRef}>
 
           <div className="result-count">
             {isInitialLoading ? (
               "Loading items…"
             ) : (
               <>
-                Showing <b>{products.length}</b> item{products.length === 1 ? "" : "s"}
+                Showing <b>{products.length}</b> of <b>{productsCount}</b> item
+                {productsCount === 1 ? "" : "s"}
                 {selectedCategory ? ` in ${selectedCategory.name}` : ""}
               </>
             )}
@@ -192,7 +224,7 @@ function WholesaleManagement() {
                     onClick={() => doOpenListingModal(product)}
                   >
                     <div className="prod-thumb">
-                      {product.image && <img src={product.image} alt={product.title} />}
+                      {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
                     </div>
                     <div className="prod-info">
                       <div className="prod-name">{product.title}</div>
@@ -216,6 +248,15 @@ function WholesaleManagement() {
               })}
             </div>
           )}
+
+          <div className="load-more-sentinel" ref={sentinelRef}>
+            {!isInitialLoading && loadingMore && (
+              <div className="empty-state">Loading more…</div>
+            )}
+            {!isInitialLoading && !loadingMore && !hasMore && products.length > 0 && (
+              <div className="empty-state">You've reached the end.</div>
+            )}
+          </div>
 
         </div>
 
@@ -427,6 +468,17 @@ function WholesaleManagement() {
           color:var(--grey-text);
           font-size:13px;
           padding:60px 20px;
+        }
+
+        .load-more-sentinel{
+          height:30px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        }
+        .load-more-sentinel .empty-state{
+          padding:14px 20px;
+          font-size:12px;
         }
 
         .grid{

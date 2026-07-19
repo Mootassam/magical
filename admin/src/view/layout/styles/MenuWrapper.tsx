@@ -6,6 +6,12 @@ const MenuWrapper = styled.div`
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .panel-body {
     padding: 5px;
