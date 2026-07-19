@@ -5,13 +5,16 @@ import destroyActions from 'src/modules/product/destroy/productDestroyActions';
 import destroySelectors from 'src/modules/product/destroy/productDestroySelectors';
 import actions from 'src/modules/product/list/productListActions';
 import selectors from 'src/modules/product/list/productListSelectors';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import ConfirmModal from 'src/view/shared/modals/ConfirmModal';
 import ButtonIcon from 'src/view/shared/ButtonIcon';
 import Toolbar from 'src/view/shared/styles/Toolbar';
+import Message from 'src/view/shared/message';
 import ReactTooltip from 'react-tooltip';
+
+const IMPORT_STATUS_POLL_MS = 5000;
 
 function CouponsToolbar(props) {
   const [
@@ -60,6 +63,57 @@ function CouponsToolbar(props) {
   const huggingFaceImportLoading = useSelector(
     selectors.selectHuggingFaceImportLoading,
   );
+  const importStatus = useSelector(selectors.selectImportStatus);
+
+  const previousImportStatusRef = useRef<string | undefined>(undefined);
+
+  // Poll for progress on the (potentially very long-running) background
+  // catalog import - once on mount, so returning admins can see an import
+  // that's still going or that failed while they were away, then every few
+  // seconds for as long as it's actively running.
+  useEffect(() => {
+    if (!hasPermissionToImportHuggingFace) {
+      return;
+    }
+
+    dispatch(actions.doFetchImportStatus());
+
+    const interval = setInterval(() => {
+      dispatch(actions.doFetchImportStatus());
+    }, IMPORT_STATUS_POLL_MS);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, hasPermissionToImportHuggingFace]);
+
+  useEffect(() => {
+    const previousStatus = previousImportStatusRef.current;
+
+    if (
+      previousStatus === 'running' &&
+      importStatus?.status === 'completed'
+    ) {
+      Message.success(
+        i18n(
+          'entities.product.importHuggingFace.progressCompleted',
+          importStatus.rowsProcessed,
+          importStatus.productsCreated,
+        ),
+      );
+      dispatch(actions.doFetch());
+    }
+
+    if (previousStatus === 'running' && importStatus?.status === 'failed') {
+      Message.error(
+        i18n(
+          'entities.product.importHuggingFace.progressFailed',
+          importStatus.errorMessage || 'unknown error',
+        ),
+      );
+    }
+
+    previousImportStatusRef.current = importStatus?.status;
+  }, [importStatus, dispatch]);
 
   const doOpenDestroyAllConfirmModal = () => {
     setDestroyAllConfirmVisible(true);
@@ -253,6 +307,29 @@ function CouponsToolbar(props) {
           />
           &nbsp;{i18n('entities.product.importHuggingFace.button')}
         </button>
+      )}
+
+      {hasPermissionToImportHuggingFace && importStatus?.status === 'running' && (
+        <span className="text-muted" style={{ fontSize: '0.85em', marginLeft: 8 }}>
+          <i className="fas fa-spinner fa-spin" />
+          &nbsp;
+          {i18n(
+            'entities.product.importHuggingFace.progressRunning',
+            (importStatus.rowsProcessed || 0).toLocaleString(),
+            (importStatus.productsCreated || 0).toLocaleString(),
+          )}
+        </span>
+      )}
+
+      {hasPermissionToImportHuggingFace && importStatus?.status === 'failed' && (
+        <span className="text-danger" style={{ fontSize: '0.85em', marginLeft: 8 }}>
+          <i className="fas fa-exclamation-triangle" />
+          &nbsp;
+          {i18n(
+            'entities.product.importHuggingFace.progressFailed',
+            importStatus.errorMessage || 'unknown error',
+          )}
+        </span>
       )}
 
       {renderDestroyButton()}

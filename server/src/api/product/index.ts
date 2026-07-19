@@ -26,6 +26,10 @@ export default (app) => {
     `/tenant/:tenantId/product/import-huggingface`,
     require('./productImportHuggingFace').default,
   );
+  app.get(
+    `/tenant/:tenantId/product/import-huggingface/status`,
+    require('./productImportSampleStatus').default,
+  );
   app.delete(
     `/tenant/:tenantId/product`,
     require('./productDestroy').default,

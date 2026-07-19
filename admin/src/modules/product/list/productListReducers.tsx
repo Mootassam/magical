@@ -7,6 +7,7 @@ const initialData = {
   count: 0,
   loading: false,
   huggingFaceImportLoading: false,
+  importStatus: null as any,
   filter: {},
   rawFilter: {},
   pagination: {
@@ -154,6 +155,13 @@ rawFilter: payload ? payload.rawFilter : {},
     return {
       ...state,
       huggingFaceImportLoading: false,
+    };
+  }
+
+  if (type === actions.IMPORT_STATUS_FETCHED) {
+    return {
+      ...state,
+      importStatus: payload,
     };
   }
 

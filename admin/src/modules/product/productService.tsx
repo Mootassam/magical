@@ -87,6 +87,16 @@ export default class ProductService {
     return response.data;
   }
 
+  static async importSampleStatus() {
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.get(
+      `/tenant/${tenantId}/product/import-huggingface/status`,
+    );
+
+    return response.data;
+  }
+
   static async find(id) {
     const tenantId = AuthCurrentTenant.get();
 

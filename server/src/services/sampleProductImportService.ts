@@ -5,6 +5,7 @@ import XLSX from "xlsx";
 import MongooseRepository from "../database/repositories/mongooseRepository";
 import ProductCategoryRepository from "../database/repositories/productCategoryRepository";
 import AuditLogRepository from "../database/repositories/auditLogRepository";
+import SampleProductImportRun from "../database/models/sampleProductImportRun";
 
 // Sample product data ships as static files read straight off the server's
 // own disk instead of being fetched from Hugging Face / DummyJSON / Fake
@@ -24,6 +25,11 @@ const BATCH_SIZE = 500;
 // UK_data.csv is ~2.2M rows - bigger batches keep the round trips to Mongo
 // down for a file this size.
 const LARGE_BATCH_SIZE = 1000;
+const UK_DATA_DATASET = "UK_data.csv";
+// If a "running" import hasn't updated its progress in this long, it almost
+// certainly died with the process (e.g. a dev-server restart) rather than
+// still being genuinely in flight - safe to treat as resumable.
+const STALE_RUN_MS = 3 * 60 * 1000;
 
 function capitalize(value) {
   if (!value) {
@@ -127,9 +133,23 @@ async function insertBatch(Product, docs) {
   }
 }
 
-async function importCsvFile(filePath, Product, mapRow, batchSize = BATCH_SIZE) {
+async function importCsvFile(
+  filePath,
+  Product,
+  mapRow,
+  {
+    batchSize = BATCH_SIZE,
+    skipRows = 0,
+    onProgress,
+  }: { batchSize?: number; skipRows?: number; onProgress?: (progress: {
+    rowsProcessed: number;
+    created: number;
+    skipped: number;
+  }) => void | Promise<void> } = {}
+) {
   let created = 0;
   let skipped = 0;
+  let rowsProcessed = 0;
   let batch: any[] = [];
 
   const parser = fs
@@ -144,6 +164,15 @@ async function importCsvFile(filePath, Product, mapRow, batchSize = BATCH_SIZE) 
     );
 
   for await (const record of parser) {
+    rowsProcessed += 1;
+
+    // Resuming a previously-interrupted run: fast-forward past rows already
+    // accounted for (already inserted or already counted as skipped) rather
+    // than re-attempting them.
+    if (rowsProcessed <= skipRows) {
+      continue;
+    }
+
     let doc;
 
     try {
@@ -163,6 +192,10 @@ async function importCsvFile(filePath, Product, mapRow, batchSize = BATCH_SIZE) 
       created += result.created;
       skipped += result.skipped;
       batch = [];
+
+      if (onProgress) {
+        await onProgress({ rowsProcessed, created, skipped });
+      }
     }
   }
 
@@ -172,7 +205,11 @@ async function importCsvFile(filePath, Product, mapRow, batchSize = BATCH_SIZE) 
     skipped += result.skipped;
   }
 
-  return { created, skipped };
+  if (onProgress) {
+    await onProgress({ rowsProcessed, created, skipped });
+  }
+
+  return { created, skipped, rowsProcessed };
 }
 
 async function importXlsxFile(filePath, Product, mapRow, batchSize = BATCH_SIZE) {
@@ -301,12 +338,6 @@ async function mapUkDataRow(record, ctx) {
 }
 
 class SampleProductImportService {
-  // UK_data.csv is large enough (~2.2M rows) that importing it can take
-  // longer than an HTTP request/reverse-proxy is willing to wait, so it
-  // runs in the background after the response is sent. This guards against
-  // starting a second run for the same tenant while one is still going.
-  static runningTenants = new Set<string>();
-
   static async run(options) {
     if (!fs.existsSync(DATA_DIR)) {
       throw new Error(
@@ -349,46 +380,11 @@ class SampleProductImportService {
     let backgroundImport: any = null;
 
     if (fs.existsSync(UK_DATA_CSV)) {
-      const tenantKey = String(currentTenant.id);
-
-      if (SampleProductImportService.runningTenants.has(tenantKey)) {
-        backgroundImport = { dataset: "UK_data.csv", status: "already-running" };
-      } else {
-        SampleProductImportService.runningTenants.add(tenantKey);
-        backgroundImport = { dataset: "UK_data.csv", status: "started" };
-
-        importCsvFile(
-          UK_DATA_CSV,
-          Product,
-          (record) => mapUkDataRow(record, ctx),
-          LARGE_BATCH_SIZE
-        )
-          .then(({ created, skipped }) =>
-            AuditLogRepository.log(
-              {
-                entityName: "product",
-                entityId: "sample-data-import",
-                action: AuditLogRepository.CREATE,
-                values: {
-                  source: "sample-data-import",
-                  dataset: "UK_data.csv",
-                  productsCreated: created,
-                  productsSkipped: skipped,
-                },
-              },
-              options
-            )
-          )
-          .catch((error) => {
-            console.error(
-              "sampleProductImportService: UK_data.csv background import failed",
-              error
-            );
-          })
-          .finally(() => {
-            SampleProductImportService.runningTenants.delete(tenantKey);
-          });
-      }
+      backgroundImport = await SampleProductImportService._startOrResumeUkDataImport(
+        Product,
+        ctx,
+        options
+      );
     }
 
     await AuditLogRepository.log(
@@ -414,6 +410,174 @@ class SampleProductImportService {
       productsSkipped,
       datasets: datasetSummaries,
       backgroundImport,
+    };
+  }
+
+  // UK_data.csv (~2.2M rows) runs in the background after the response is
+  // sent, since it takes far longer than an HTTP request/reverse-proxy is
+  // willing to wait. Progress is persisted to the database (not kept only
+  // in memory) so that if the server process dies mid-import - a dev-server
+  // restart, a deploy, a crash - the next click on "Import" resumes from
+  // where it left off instead of silently having imported an incomplete
+  // dataset with no record of it.
+  static async _startOrResumeUkDataImport(Product, ctx, options) {
+    const database = options.database;
+    const tenantId = ctx.currentTenant.id;
+
+    const existing = await SampleProductImportRun(database).findOne({
+      tenant: tenantId,
+      dataset: UK_DATA_DATASET,
+    });
+
+    if (existing && existing.status === "running") {
+      const isStale =
+        Date.now() - new Date(existing.updatedAt).getTime() > STALE_RUN_MS;
+
+      if (!isStale) {
+        return {
+          dataset: UK_DATA_DATASET,
+          status: "already-running",
+          rowsProcessed: existing.rowsProcessed,
+        };
+      }
+      // Otherwise the previous "running" record is stale (its process died
+      // without ever marking it failed/completed) - fall through and
+      // resume it below.
+    }
+
+    if (existing && existing.status === "completed") {
+      return {
+        dataset: UK_DATA_DATASET,
+        status: "already-completed",
+        rowsProcessed: existing.rowsProcessed,
+        productsCreated: existing.productsCreated,
+      };
+    }
+
+    const skipRows = existing ? existing.rowsProcessed : 0;
+    const baseCreated = existing ? existing.productsCreated : 0;
+    const baseSkipped = existing ? existing.productsSkipped : 0;
+    const resuming = Boolean(existing);
+
+    const run = await SampleProductImportRun(database).findOneAndUpdate(
+      { tenant: tenantId, dataset: UK_DATA_DATASET },
+      {
+        $set: {
+          status: "running",
+          errorMessage: null,
+          startedAt: existing?.startedAt || new Date(),
+        },
+        $setOnInsert: {
+          rowsProcessed: 0,
+          productsCreated: 0,
+          productsSkipped: 0,
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    const runId = run._id;
+
+    importCsvFile(UK_DATA_CSV, Product, (record) => mapUkDataRow(record, ctx), {
+      batchSize: LARGE_BATCH_SIZE,
+      skipRows,
+      onProgress: async ({ rowsProcessed, created, skipped }) => {
+        await SampleProductImportRun(database)
+          .updateOne(
+            { _id: runId },
+            {
+              $set: {
+                rowsProcessed,
+                productsCreated: baseCreated + created,
+                productsSkipped: baseSkipped + skipped,
+              },
+            }
+          )
+          .catch(() => {});
+      },
+    })
+      .then(async ({ created, skipped, rowsProcessed }) => {
+        const finalCreated = baseCreated + created;
+        const finalSkipped = baseSkipped + skipped;
+
+        await SampleProductImportRun(database).updateOne(
+          { _id: runId },
+          {
+            $set: {
+              status: "completed",
+              rowsProcessed,
+              productsCreated: finalCreated,
+              productsSkipped: finalSkipped,
+              finishedAt: new Date(),
+            },
+          }
+        );
+
+        await AuditLogRepository.log(
+          {
+            entityName: "product",
+            entityId: "sample-data-import",
+            action: AuditLogRepository.CREATE,
+            values: {
+              source: "sample-data-import",
+              dataset: UK_DATA_DATASET,
+              productsCreated: finalCreated,
+              productsSkipped: finalSkipped,
+            },
+          },
+          options
+        );
+      })
+      .catch(async (error) => {
+        console.error(
+          "sampleProductImportService: UK_data.csv background import failed",
+          error
+        );
+
+        await SampleProductImportRun(database)
+          .updateOne(
+            { _id: runId },
+            {
+              $set: {
+                status: "failed",
+                errorMessage: String(error?.message || error).slice(0, 500),
+              },
+            }
+          )
+          .catch(() => {});
+      });
+
+    return {
+      dataset: UK_DATA_DATASET,
+      status: resuming ? "resumed" : "started",
+      rowsProcessed: skipRows,
+    };
+  }
+
+  // Lets the admin UI poll for live progress on the UK_data.csv background
+  // import instead of only ever seeing a one-time "started" toast.
+  static async getStatus(options) {
+    const currentTenant = MongooseRepository.getCurrentTenant(options);
+
+    const run = await SampleProductImportRun(options.database).findOne({
+      tenant: currentTenant.id,
+      dataset: UK_DATA_DATASET,
+    });
+
+    if (!run) {
+      return { dataset: UK_DATA_DATASET, status: "not-started" };
+    }
+
+    return {
+      dataset: UK_DATA_DATASET,
+      status: run.status,
+      rowsProcessed: run.rowsProcessed,
+      productsCreated: run.productsCreated,
+      productsSkipped: run.productsSkipped,
+      errorMessage: run.errorMessage,
+      startedAt: run.startedAt,
+      finishedAt: run.finishedAt,
+      updatedAt: run.updatedAt,
     };
   }
 }

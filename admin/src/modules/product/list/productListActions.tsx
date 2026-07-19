@@ -29,6 +29,8 @@ const productListActions = {
   HUGGINGFACE_IMPORT_SUCCESS: `${prefix}_HUGGINGFACE_IMPORT_SUCCESS`,
   HUGGINGFACE_IMPORT_ERROR: `${prefix}_HUGGINGFACE_IMPORT_ERROR`,
 
+  IMPORT_STATUS_FETCHED: `${prefix}_IMPORT_STATUS_FETCHED`,
+
   doClearAllSelected() {
     return {
       type: productListActions.CLEAR_ALL_SELECTED,
@@ -188,11 +190,26 @@ const productListActions = {
           successMessage += i18n(
             'entities.product.importHuggingFace.backgroundImportStarted',
           );
+        } else if (result.backgroundImport?.status === 'resumed') {
+          successMessage += i18n(
+            'entities.product.importHuggingFace.backgroundImportResumed',
+          );
+        } else if (result.backgroundImport?.status === 'already-running') {
+          Message.success(
+            i18n(
+              'entities.product.importHuggingFace.backgroundImportAlreadyRunning',
+            ),
+          );
+        } else if (result.backgroundImport?.status === 'already-completed') {
+          successMessage = i18n(
+            'entities.product.importHuggingFace.backgroundImportAlreadyCompleted',
+          );
         }
 
         Message.success(successMessage);
       }
 
+      dispatch(productListActions.doFetchImportStatus());
       dispatch(productListActions.doFetch());
     } catch (error) {
       Errors.handle(error);
@@ -200,6 +217,19 @@ const productListActions = {
       dispatch({
         type: productListActions.HUGGINGFACE_IMPORT_ERROR,
       });
+    }
+  },
+
+  doFetchImportStatus: () => async (dispatch) => {
+    try {
+      const status = await ProductService.importSampleStatus();
+
+      dispatch({
+        type: productListActions.IMPORT_STATUS_FETCHED,
+        payload: status,
+      });
+    } catch (error) {
+      // Silent - this is a background progress poll, not a user action.
     }
   },
 };

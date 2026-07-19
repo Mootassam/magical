@@ -21,6 +21,7 @@ const models = [
   require('./dons').default,
   require('./historiquePoints').default,
   require('./votes').default,
+  require('./sampleProductImportRun').default,
 ];
 
 export default function init(database) {
