@@ -6,15 +6,14 @@ import MongooseRepository from "../database/repositories/mongooseRepository";
 import ProductCategoryRepository from "../database/repositories/productCategoryRepository";
 import AuditLogRepository from "../database/repositories/auditLogRepository";
 
-// Sample product data now ships as static files in the admin app instead of
-// being fetched from Hugging Face / DummyJSON / Fake Store on every import.
-// Defaults to the sibling admin/public/data folder in this monorepo checkout;
-// override with SAMPLE_PRODUCTS_DATA_DIR if admin and server are deployed
-// separately.
-const DEFAULT_DATA_DIR = path.resolve(
-  __dirname,
-  "../../../admin/public/data"
-);
+// Sample product data ships as static files read straight off the server's
+// own disk instead of being fetched from Hugging Face / DummyJSON / Fake
+// Store on every import (and instead of living under admin/public/data,
+// which used to get bundled into every admin build - these files are
+// hundreds of MB and are never served to the browser). Defaults to this
+// sibling server/data folder; override with SAMPLE_PRODUCTS_DATA_DIR if the
+// files live elsewhere on the deployed server.
+const DEFAULT_DATA_DIR = path.resolve(__dirname, "../../data");
 const DATA_DIR = process.env.SAMPLE_PRODUCTS_DATA_DIR || DEFAULT_DATA_DIR;
 
 const FASHION_CSV = path.join(DATA_DIR, "fashion.csv");

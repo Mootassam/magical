@@ -1,5 +1,2 @@
 node_modules/
 build/
-
-# Exceeds GitHub's 100MB file size limit - keep locally, never commit.
-public/data/UK_data.csv
