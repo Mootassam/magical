@@ -37,7 +37,18 @@ function Mine() {
 
         <div className="scroll-area">
 
-          {currentUser?.store && (
+          {currentUser?.store && store?.frozen && (
+            <div className="approved-banner frozen">
+              <span className="approved-icon">🚫</span>
+              <div className="approved-text">
+                <div className="approved-title">Store Frozen</div>
+                <div className="approved-sub">Your seller account has been temporarily frozen.</div>
+              </div>
+              <Link to="/customer-service" className="approved-link">Contact Customer Service</Link>
+            </div>
+          )}
+
+          {currentUser?.store && !store?.frozen && (
             <div className="approved-banner">
               <span className="approved-icon">✅</span>
               <div className="approved-text">
@@ -58,7 +69,9 @@ function Mine() {
             <div className="profile-info">
               <div className="profile-name">{currentUser?.fullName || currentUser?.email}</div>
               <div className="profile-email">{currentUser?.email}</div>
-              <div className="profile-id">ID: {currentUser?.id}</div>
+              <div className="profile-id">
+                {store?.storeId ? `Store ID: ${store.storeId}` : `ID: ${currentUser?.id}`}
+              </div>
             </div>
             <span className="profile-arrow">›</span>
           </Link>
@@ -262,6 +275,11 @@ function Mine() {
           box-shadow:0 10px 24px rgba(18,184,134,0.3);
           margin-bottom:14px;
         }
+        .approved-banner.frozen{
+          background:linear-gradient(120deg, #e53e3e, #c53030);
+          box-shadow:0 10px 24px rgba(197,48,48,0.3);
+        }
+        .approved-banner.frozen .approved-link{ color:#c53030; }
         .approved-icon{ font-size:24px; flex-shrink:0; }
         .approved-text{ flex:1; }
         .approved-title{ font-size:13px; font-weight:800; }

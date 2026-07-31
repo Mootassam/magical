@@ -5,21 +5,35 @@ import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
 import storeActions from "src/modules/store/storeActions";
 import storeSelectors from "src/modules/store/storeSelectors";
+import FrozenStoreModal from "src/view/pages/Estore/FrozenStoreModal";
 
 function MineSeller() {
   const dispatch = useDispatch();
   const currentUser = useSelector(authSelectors.selectCurrentUser);
   const store = useSelector(storeSelectors.selectStore);
+  const initLoading = useSelector(storeSelectors.selectInitLoading);
+  const dashboard = useSelector(storeSelectors.selectDashboard);
 
   useEffect(() => {
     dispatch(storeActions.doInit());
+    dispatch(storeActions.doFetchDashboard());
   }, [dispatch]);
+
+  const waitingForDeliveryCount = dashboard?.waitingForDeliveryCount || 0;
 
   const storePhoto = store?.storePhoto?.[0]?.downloadUrl;
 
   const doSignout = () => {
     dispatch(authActions.doSignout());
   };
+
+  if (initLoading || !store) {
+    return null;
+  }
+
+  if (store.frozen) {
+    return <FrozenStoreModal />;
+  }
 
   return (
     <>
@@ -56,7 +70,9 @@ function MineSeller() {
                 <span className="profile-name">{store?.storeName || "My Store"}</span>
               </div>
               <div className="profile-email">{currentUser?.email}</div>
-              <div className="profile-id">ID: {currentUser?.id}</div>
+              <div className="profile-id">
+                {store?.storeId ? `Store ID: ${store.storeId}` : `ID: ${currentUser?.id}`}
+              </div>
             </div>
             <span className="profile-arrow">›</span>
           </Link>
@@ -138,6 +154,9 @@ function MineSeller() {
             <Link to="/orders" className="menu-item">
               <div className="menu-icon" style={{ background: '#eafaf1' }}>🧾</div>
               <div className="menu-text">Orders</div>
+              {waitingForDeliveryCount > 0 && (
+                <span className="menu-count-badge">{waitingForDeliveryCount} waiting for delivery</span>
+              )}
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/withdrawal-record" className="menu-item">
@@ -389,6 +408,16 @@ function MineSeller() {
           flex-shrink:0;
         }
         .menu-text{ flex:1; font-size:13px; font-weight:600; color:var(--navy); }
+        .menu-count-badge{
+          background:#fff0eb;
+          color:#ff5470;
+          font-size:10.5px;
+          font-weight:700;
+          padding:3px 9px;
+          border-radius:10px;
+          white-space:nowrap;
+          margin-right:6px;
+        }
         .menu-arrow{ color:#c3cbe0; font-size:13px; }
 
         .logout-btn{

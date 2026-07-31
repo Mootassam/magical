@@ -8,7 +8,7 @@ export default class AuthService {
     email,
     password,
     phoneNumber,
-    withdrawPassword
+    withdrawPassword?
   ) {
     const invitationToken = AuthInvitationToken.get();
 

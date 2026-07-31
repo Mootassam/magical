@@ -17,7 +17,7 @@ const MAIN_BUSINESS_OPTIONS = [
   "sports_outdoors",
   "toys_hobbies",
   "food_beverages",
-  "other",
+  "all",
 ];
 
 function UploadBox({ label, value, uploading, onChange, inputRef }) {
@@ -68,6 +68,7 @@ function ApplyMerchant() {
   const [storeName, setStoreName] = useState("");
   const [contact, setContact] = useState("");
   const [idNumber, setIdNumber] = useState("");
+  const [invitationCode, setInvitationCode] = useState("");
   const [mainBusiness, setMainBusiness] = useState(MAIN_BUSINESS_OPTIONS[0]);
   const [address, setAddress] = useState("");
   const [storePhoto, setStorePhoto] = useState<any>(null);
@@ -86,6 +87,7 @@ function ApplyMerchant() {
       setStoreName(store.storeName || "");
       setContact(store.contact || "");
       setIdNumber(store.idNumber || "");
+      setInvitationCode(store.invitationcode || "");
       setMainBusiness(store.mainBusiness || MAIN_BUSINESS_OPTIONS[0]);
       setAddress(store.address || "");
       setStorePhoto(store.storePhoto && store.storePhoto[0] ? store.storePhoto[0] : null);
@@ -158,6 +160,7 @@ function ApplyMerchant() {
       storeName: storeName.trim(),
       contact: contact.trim(),
       idNumber: idNumber.trim(),
+      invitationcode: invitationCode.trim(),
       mainBusiness,
       address: address.trim(),
       storePhoto: [storePhoto],
@@ -205,6 +208,9 @@ function ApplyMerchant() {
               <div className="summary-card">
                 <div className="summary-row"><span className="summary-label">{i18n("pages.applyMerchant.storeName")}</span><span className="summary-value">{store.storeName}</span></div>
                 <div className="summary-row"><span className="summary-label">{i18n("pages.applyMerchant.mainBusiness")}</span><span className="summary-value">{i18n(`pages.applyMerchant.enumerators.mainBusiness.${store.mainBusiness}`)}</span></div>
+                {store.invitationcode && (
+                  <div className="summary-row"><span className="summary-label">{i18n("pages.applyMerchant.invitationCode")}</span><span className="summary-value">{store.invitationcode}</span></div>
+                )}
                 <div className="summary-row"><span className="summary-label">{i18n("pages.applyMerchant.address")}</span><span className="summary-value">{store.address}</span></div>
                 <div className="summary-photos">
                   {store.storePhoto && store.storePhoto[0] && (
@@ -283,6 +289,17 @@ function ApplyMerchant() {
                   placeholder={i18n("pages.applyMerchant.idNumberPlaceholder")}
                   value={idNumber}
                   onChange={(event) => setIdNumber(event.target.value)}
+                />
+              </div>
+
+              <div className="field-block">
+                <div className="field-label">{i18n("pages.applyMerchant.invitationCode")}</div>
+                <input
+                  type="text"
+                  className="text-input"
+                  placeholder={i18n("pages.applyMerchant.invitationCodePlaceholder")}
+                  value={invitationCode}
+                  onChange={(event) => setInvitationCode(event.target.value)}
                 />
               </div>
 

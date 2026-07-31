@@ -12,9 +12,11 @@ export default (database) => {
   const StoreSchema = new Schema(
     {
       storeName: { type: String, required: true },
+      storeId: { type: String, unique: true, sparse: true },
       description: { type: String },
       contact: { type: String },
       idNumber: { type: String },
+      invitationcode: { type: String },
       mainBusiness: {
         type: String,
         enum: [
@@ -25,7 +27,7 @@ export default (database) => {
           "sports_outdoors",
           "toys_hobbies",
           "food_beverages",
-          "other",
+          "all",
         ],
       },
       address: { type: String },
@@ -38,6 +40,9 @@ export default (database) => {
         enum: ["pending", "rejected", "success"],
         default: "pending",
       },
+      frozen: { type: Boolean, default: false },
+      frozenAt: { type: Date },
+      unfrozenAt: { type: Date },
       storeRating: {
         type: Number,
         default: 5,

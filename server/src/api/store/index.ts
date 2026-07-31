@@ -24,6 +24,11 @@ export default (app) => {
   );
 
   app.put(
+    `/tenant/:tenantId/store/:id/unfreeze`,
+    require("./storeUnfreeze").default
+  );
+
+  app.put(
     `/tenant/:tenantId/store/:id/details`,
     require("./storeUpdateDetails").default
   );

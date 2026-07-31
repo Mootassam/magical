@@ -27,10 +27,6 @@ const schema = yup.object().shape({
   phoneNumber: yupFormSchemas.string(i18n("user.fields.phoneNumber"), {
     required: true,
   }),
-  withdrawPassword: yupFormSchemas.string(
-    i18n("user.fields.withdrawPassword"),
-    { required: true }
-  ),
   rememberMe: yupFormSchemas.boolean(i18n("user.fields.rememberMe")),
 });
 
@@ -52,7 +48,6 @@ function Register() {
     email: "",
     password: "",
     phoneNumber: "",
-    withdrawPassword: "",
     rememberMe: true,
   });
 
@@ -140,15 +135,13 @@ function Register() {
     email,
     password,
     phoneNumber,
-    withdrawPassword,
   }) => {
     const fullPhoneNumber = `${selectedCountry?.value || "+1"}${phoneNumber}`;
     dispatch(
       actions.doRegisterEmailAndPassword(
         email,
         password,
-        fullPhoneNumber,
-        withdrawPassword
+        fullPhoneNumber
       )
     );
   };
@@ -272,13 +265,6 @@ function Register() {
                 )}
               </div>
             </div>
-
-            <label className="field-label" htmlFor="withdrawPassword">Withdraw Password</label>
-            <InputFormItem
-              type="password"
-              name="withdrawPassword"
-              placeholder="Set a withdrawal password"
-            />
 
             <label className="field-label" htmlFor="password">Password</label>
             <div className="field-wrap">

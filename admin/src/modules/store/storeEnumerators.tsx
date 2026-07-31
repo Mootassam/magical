@@ -8,7 +8,7 @@ const storeEnumerators = {
     'sports_outdoors',
     'toys_hobbies',
     'food_beverages',
-    'other',
+    'all',
   ],
 };
 

@@ -8,6 +8,7 @@ const initialData = {
   loading: false,
   statusUpdateLoading: false,
   detailsUpdateLoading: false,
+  unfreezeLoading: false,
   filter: {},
   rawFilter: {},
   pagination: {
@@ -114,6 +115,27 @@ export default (state = initialData, { type, payload }) => {
     return {
       ...state,
       detailsUpdateLoading: false,
+    };
+  }
+
+  if (type === actions.UNFREEZE_STARTED) {
+    return {
+      ...state,
+      unfreezeLoading: true,
+    };
+  }
+
+  if (type === actions.UNFREEZE_SUCCESS) {
+    return {
+      ...state,
+      unfreezeLoading: false,
+    };
+  }
+
+  if (type === actions.UNFREEZE_ERROR) {
+    return {
+      ...state,
+      unfreezeLoading: false,
     };
   }
 

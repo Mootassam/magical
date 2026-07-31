@@ -38,6 +38,8 @@ function createEmptyRow() {
   return {
     key: `row-${rowKeySeed}`,
     storeId: '',
+    storeQuery: '',
+    storeDropdownOpen: false,
     customerName: '',
     productId: '',
     quantity: 1,
@@ -45,6 +47,11 @@ function createEmptyRow() {
     storeProducts: [] as Array<any>,
     storeProductsLoading: false,
   };
+}
+
+function formatPrice(value) {
+  const price = Number(value);
+  return Number.isFinite(price) ? `$${price.toFixed(2)}` : '';
 }
 
 function AutomatOrderForm(props) {
@@ -84,6 +91,35 @@ function AutomatOrderForm(props) {
 
   const doGenerateName = (key) => {
     updateRow(key, { customerName: generateRandomFullName() });
+  };
+
+  const getFilteredStores = (query: string) => {
+    const q = query.trim().toLowerCase();
+
+    if (!q) {
+      return stores;
+    }
+
+    return stores.filter(
+      (store: any) =>
+        (store.storeName || '').toLowerCase().includes(q) ||
+        (store.storeId || '').toLowerCase().includes(q),
+    );
+  };
+
+  const doStoreQueryChange = (key, value) => {
+    updateRow(key, { storeQuery: value, storeDropdownOpen: true });
+  };
+
+  const doSelectStore = (key, store: any) => {
+    updateRow(key, {
+      storeQuery: store.storeId
+        ? `${store.storeName} (#${store.storeId})`
+        : store.storeName,
+      storeDropdownOpen: false,
+    });
+
+    doChangeStore(key, store.id);
   };
 
   const doChangeStore = async (key, storeId) => {
@@ -174,24 +210,53 @@ function AutomatOrderForm(props) {
               </div>
 
               <div className="automat-order-row-fields">
-                <div className="automat-order-field">
+                <div className="automat-order-field automat-order-store-field">
                   <label>{i18n('entities.automatOrder.fields.storeName')}</label>
-                  <select
-                    value={row.storeId}
-                    disabled={storesLoading}
-                    onChange={(event) => doChangeStore(row.key, event.target.value)}
-                  >
-                    <option value="">
-                      {storesLoading
-                        ? i18n('entities.automatOrder.loadingStores')
-                        : i18n('entities.automatOrder.selectStore')}
-                    </option>
-                    {stores.map((store: any) => (
-                      <option key={store.id} value={store.id}>
-                        {store.storeName}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="automat-order-store-search">
+                    <input
+                      type="text"
+                      placeholder={
+                        storesLoading
+                          ? i18n('entities.automatOrder.loadingStores')
+                          : i18n('entities.automatOrder.searchStorePlaceholder')
+                      }
+                      disabled={storesLoading}
+                      value={row.storeQuery}
+                      onChange={(event) => doStoreQueryChange(row.key, event.target.value)}
+                      onFocus={() => updateRow(row.key, { storeDropdownOpen: true })}
+                      onBlur={() =>
+                        setTimeout(
+                          () => updateRow(row.key, { storeDropdownOpen: false }),
+                          150,
+                        )
+                      }
+                    />
+                    {row.storeDropdownOpen && !storesLoading && (
+                      <div className="automat-order-store-dropdown">
+                        {getFilteredStores(row.storeQuery).length === 0 && (
+                          <div className="automat-order-store-empty">
+                            {i18n('entities.automatOrder.noStoresFound')}
+                          </div>
+                        )}
+                        {getFilteredStores(row.storeQuery).map((store: any) => (
+                          <div
+                            key={store.id}
+                            className="automat-order-store-option"
+                            onClick={() => doSelectStore(row.key, store)}
+                          >
+                            <span className="automat-order-store-option-name">
+                              {store.storeName}
+                            </span>
+                            {store.storeId && (
+                              <span className="automat-order-store-option-id">
+                                #{store.storeId}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="automat-order-field">
@@ -237,6 +302,8 @@ function AutomatOrderForm(props) {
                     {row.storeProducts.map((listing: any) => (
                       <option key={listing.id} value={listing.product}>
                         {listing.title}
+                        {formatPrice(listing.salesPrice) &&
+                          ` — ${formatPrice(listing.salesPrice)}`}
                       </option>
                     ))}
                   </select>
@@ -372,6 +439,63 @@ function AutomatOrderForm(props) {
         .automat-order-field select:focus,
         .automat-order-field input:focus {
           border-color: #4299e1;
+        }
+
+        .automat-order-store-field {
+          position: relative;
+        }
+
+        .automat-order-store-search {
+          position: relative;
+        }
+
+        .automat-order-store-search input {
+          width: 100%;
+        }
+
+        .automat-order-store-dropdown {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          margin-top: 4px;
+          background: #fff;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 8px;
+          box-shadow: 0 8px 20px rgba(20,40,100,0.12);
+          max-height: 220px;
+          overflow-y: auto;
+          z-index: 20;
+        }
+
+        .automat-order-store-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 8px 10px;
+          font-size: 13px;
+          color: #334155;
+          cursor: pointer;
+        }
+
+        .automat-order-store-option:hover {
+          background: #f1f5f9;
+        }
+
+        .automat-order-store-option-id {
+          font-size: 12px;
+          color: #64748b;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+
+        .automat-order-store-empty {
+          padding: 10px;
+          font-size: 12.5px;
+          color: #94a3b8;
+          text-align: center;
+          font-style: italic;
         }
 
         .automat-order-name-row {

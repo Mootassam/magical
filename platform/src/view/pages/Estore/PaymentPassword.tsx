@@ -10,28 +10,37 @@ import ButtonIcon from "src/shared/ButtonIcon";
 import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
 
-const schema = yup.object().shape({
-  oldWithdrawPassword: yupFormSchemas.string(
-    i18n("user.fields.oldWithdrawPassword"),
-    { required: true }
-  ),
-  newWithdrawPassword: yupFormSchemas.string(
-    i18n("user.fields.newWithdrawPassword"),
-    { required: true, min: 6 }
-  ),
-  newWithdrawPasswordConfirmation: yupFormSchemas
-    .string(i18n("user.fields.newWithdrawPasswordConfirmation"), {
-      required: true,
-    })
-    .oneOf(
-      [yup.ref("newWithdrawPassword"), null],
-      i18n("auth.passwordChange.mustMatch")
+function buildSchema(hasWithdrawPassword) {
+  return yup.object().shape({
+    ...(hasWithdrawPassword
+      ? {
+          oldWithdrawPassword: yupFormSchemas.string(
+            i18n("user.fields.oldWithdrawPassword"),
+            { required: true }
+          ),
+        }
+      : {}),
+    newWithdrawPassword: yupFormSchemas.string(
+      i18n("user.fields.newWithdrawPassword"),
+      { required: true, min: 6 }
     ),
-});
+    newWithdrawPasswordConfirmation: yupFormSchemas
+      .string(i18n("user.fields.newWithdrawPasswordConfirmation"), {
+        required: true,
+      })
+      .oneOf(
+        [yup.ref("newWithdrawPassword"), null],
+        i18n("auth.passwordChange.mustMatch")
+      ),
+  });
+}
 
 function PaymentPassword() {
   const dispatch = useDispatch();
   const saveLoading = useSelector(authSelectors.selectLoadingWithdrawPasswordChange);
+  const currentUser = useSelector(authSelectors.selectCurrentUser);
+
+  const hasWithdrawPassword = Boolean(currentUser?.withdrawPassword);
 
   const [initialValues] = useState(() => ({
     oldWithdrawPassword: "",
@@ -40,7 +49,7 @@ function PaymentPassword() {
   }));
 
   const form = useForm({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(buildSchema(hasWithdrawPassword)),
     mode: "onSubmit",
     defaultValues: initialValues,
   });
@@ -65,16 +74,20 @@ function PaymentPassword() {
             <FormProvider {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
 
-                <span className="field-label">{i18n("user.fields.oldWithdrawPassword")}</span>
-                <InputFormItem
-                  type="password"
-                  name="oldWithdrawPassword"
-                  autoComplete="current-password"
-                  placeholder="Please enter your current transaction password"
-                  className="text-input"
-                />
+                {hasWithdrawPassword && (
+                  <>
+                    <span className="field-label">{i18n("user.fields.oldWithdrawPassword")}</span>
+                    <InputFormItem
+                      type="password"
+                      name="oldWithdrawPassword"
+                      autoComplete="current-password"
+                      placeholder="Please enter your current transaction password"
+                      className="text-input"
+                    />
+                  </>
+                )}
 
-                <span className="field-label sp">{i18n("user.fields.newWithdrawPassword")}</span>
+                <span className={`field-label${hasWithdrawPassword ? " sp" : ""}`}>{i18n("user.fields.newWithdrawPassword")}</span>
                 <InputFormItem
                   type="password"
                   name="newWithdrawPassword"

@@ -65,7 +65,7 @@ const authActions = {
     password,
 
     phoneNumber,
-    withdrawPassword) => async (dispatch) => {
+    withdrawPassword?) => async (dispatch) => {
       try {
         dispatch({ type: authActions.AUTH_START });
 

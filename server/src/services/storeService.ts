@@ -60,6 +60,24 @@ class StoreService {
     }
   }
 
+  static async unfreeze(id, options) {
+    const session = await MongooseRepository.createSession(options.database);
+
+    try {
+      const store = await StoreRepository.unfreeze(id, {
+        ...options,
+        session,
+      });
+
+      await MongooseRepository.commitTransaction(session);
+
+      return store;
+    } catch (error) {
+      await MongooseRepository.abortTransaction(session);
+      throw error;
+    }
+  }
+
   static async updateDetails(id, data, options) {
     const session = await MongooseRepository.createSession(options.database);
 

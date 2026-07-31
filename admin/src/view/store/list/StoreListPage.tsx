@@ -11,18 +11,39 @@ import { Col, Container, Row } from 'react-bootstrap';
 function StoreListPage(props) {
   const dispatch = useDispatch();
   const [status, setStatus] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     dispatch(actions.doFetch());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
+  const doFetchWith = (nextStatus, nextSearch) => {
+    const filter = {
+      ...(nextStatus ? { status: nextStatus } : {}),
+      ...(nextSearch ? { search: nextSearch } : {}),
+    };
+    dispatch(actions.doFetch(filter, filter));
+  };
+
   const onStatusChange = (event) => {
     const value = event.target.value;
     setStatus(value);
+    doFetchWith(value, search);
+  };
 
-    const filter = value ? { status: value } : {};
-    dispatch(actions.doFetch(filter, filter));
+  const onSearchChange = (event) => {
+    setSearch(event.target.value);
+  };
+
+  const onSearchKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      doFetchWith(status, search);
+    }
+  };
+
+  const onSearchBlur = () => {
+    doFetchWith(status, search);
   };
 
   return (
@@ -30,8 +51,19 @@ function StoreListPage(props) {
       <ContentWrapper>
         <Container fluid={true}>
           <Row>
-            <Col xs={9}>
+            <Col xs={6}>
               <PageTitle>{i18n('entities.store.list.title')}</PageTitle>
+            </Col>
+            <Col md="auto">
+              <input
+                type="text"
+                className="form-control"
+                placeholder={i18n('entities.store.filters.searchPlaceholder')}
+                value={search}
+                onChange={onSearchChange}
+                onKeyDown={onSearchKeyDown}
+                onBlur={onSearchBlur}
+              />
             </Col>
             <Col md="auto">
               <select

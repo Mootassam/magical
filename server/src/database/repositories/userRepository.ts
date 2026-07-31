@@ -213,8 +213,6 @@ static async updateUser(
           ipAddress: clientIP,
           firstName: data.firstName,
           fullName: data.fullName,
-          withdrawPassword: data.withdrawPassword,
-          invitationcode: data.invitationcode,
           refcode: await this.createUniqueRefCode(options),
           couponcode: await this.createUniqueRefCode(options),
         },
@@ -293,9 +291,6 @@ static async updateUser(
           country: country,
           firstName: data.firstName,
           fullName: data.fullName,
-          gender: data.gender,
-          withdrawPassword: data.withdrawPassword,
-          invitationcode: data.invitationcode,
           refcode: await this.createUniqueRefCode(options),
           // Use admin-supplied balance if provided, otherwise the company default.
           balance: data.balance !== undefined ? data.balance : settingsBalance,

@@ -33,6 +33,17 @@ export default class StoreService {
     return response.data;
   }
 
+  static async unfreeze(id) {
+    const tenantId = AuthCurrentTenant.get();
+
+    const response = await authAxios.put(
+      `/tenant/${tenantId}/store/${id}/unfreeze`,
+      {},
+    );
+
+    return response.data;
+  }
+
   static async updateDetails(id, data) {
     const tenantId = AuthCurrentTenant.get();
 

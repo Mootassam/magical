@@ -11,6 +11,8 @@ import MongooseQueryUtils from "../utils/mongooseQueryUtils";
 import Error400 from "../../errors/Error400";
 import { IRepositoryOptions } from "./IRepositoryOptions";
 
+const WHOLESALE_DISCOUNT = 0.2;
+
 function round2(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
@@ -47,6 +49,7 @@ export default class StoreRepository {
       storeName: data.storeName,
       contact: data.contact,
       idNumber: data.idNumber,
+      invitationcode: data.invitationcode,
       mainBusiness: data.mainBusiness,
       address: data.address,
       storePhoto: data.storePhoto || [],
@@ -91,6 +94,7 @@ export default class StoreRepository {
       [
         {
           ...values,
+          storeId: await this.createUniqueStoreId(options),
           status: "pending",
           user: currentUser.id,
           tenant: currentTenant.id,
@@ -112,6 +116,20 @@ export default class StoreRepository {
     );
 
     return this._fillFileDownloadUrls(store);
+  }
+
+  // Every store gets its own unique 5-digit ID (10000-99999), used by staff
+  // to look up a store instead of the raw Mongo ObjectId.
+  static async createUniqueStoreId(options: IRepositoryOptions) {
+    let storeId;
+    let exists = true;
+
+    while (exists) {
+      storeId = String(Math.floor(10000 + Math.random() * 90000));
+      exists = await Store(options.database).exists({ storeId });
+    }
+
+    return storeId;
   }
 
   // Seller: self-service edits to the store's public-facing profile (name,
@@ -209,6 +227,17 @@ export default class StoreRepository {
       if (filter.mainBusiness) {
         criteriaAnd.push({ mainBusiness: filter.mainBusiness });
       }
+
+      if (filter.search) {
+        const regex = {
+          $regex: MongooseQueryUtils.escapeRegExp(filter.search),
+          $options: "i",
+        };
+
+        criteriaAnd.push({
+          $or: [{ storeName: regex }, { storeId: regex }],
+        });
+      }
     }
 
     const sort = MongooseQueryUtils.sort(orderBy || "createdAt_DESC");
@@ -246,6 +275,42 @@ export default class StoreRepository {
     );
 
     return this._fillFileDownloadUrls(record);
+  }
+
+  static async unfreeze(id, options: IRepositoryOptions) {
+    const currentUser = MongooseRepository.getCurrentUser(options);
+
+    const record = await Store(options.database).findById(id);
+
+    if (!record) {
+      throw new Error400(options.language, "store.errors.notFound");
+    }
+
+    const session = MongooseRepository.getSession(options)
+      ? { session: MongooseRepository.getSession(options) }
+      : {};
+
+    await Store(options.database).updateOne(
+      { _id: id },
+      {
+        frozen: false,
+        unfrozenAt: new Date(),
+        updatedBy: currentUser.id,
+      },
+      session
+    );
+
+    await AuditLogRepository.log(
+      {
+        entityName: "store",
+        entityId: id,
+        action: AuditLogRepository.UPDATE,
+        values: { frozen: false },
+      },
+      options
+    );
+
+    return this.findById(id, options);
   }
 
   static async updateStatus(id, status, options: IRepositoryOptions) {
@@ -344,6 +409,7 @@ export default class StoreRepository {
 
     const emptyStats = {
       waitingForDeliveryCount: 0,
+      waitingForDeliveryAmount: 0,
       cumulativeOrderQty: 0,
       todayTotalSales: 0,
       totalSales: 0,
@@ -363,6 +429,11 @@ export default class StoreRepository {
       return { store: null, accountBalance, ...emptyStats };
     }
 
+    // Aggregation pipelines bypass Mongoose's automatic string->ObjectId
+    // casting (unlike .find()), so $match needs real ObjectIds here.
+    const storeObjectId = new mongoose.Types.ObjectId(store.id);
+    const tenantObjectId = new mongoose.Types.ObjectId(currentTenant.id);
+
     // A pending automat order counts as "waiting for delivery" only until a
     // shipment request has been opened for it - mirrors the platform's
     // "Waiting for delivery" tab (pending automat orders not yet shipped).
@@ -373,15 +444,45 @@ export default class StoreRepository {
       options
     );
 
-    const waitingForDeliveryCount = await MongooseRepository.wrapWithSessionIfExists(
-      AutomatOrder(options.database).countDocuments({
-        store: store.id,
-        tenant: currentTenant.id,
-        status: "pending",
-        _id: { $nin: shippedAutomatOrderIds },
-      }),
+    // Cumulative order qty is the total actual-payment amount (wholesale
+    // price x qty, same formula used at shipment time) still waiting for
+    // delivery - not the number of orders.
+    const [waitingForDeliveryAgg] = await MongooseRepository.wrapWithSessionIfExists(
+      AutomatOrder(options.database).aggregate([
+        {
+          $match: {
+            store: storeObjectId,
+            tenant: tenantObjectId,
+            status: "pending",
+            _id: { $nin: shippedAutomatOrderIds },
+          },
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "product",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+            amount: {
+              $sum: {
+                $multiply: ["$product.price", 1 - WHOLESALE_DISCOUNT, "$quantity"],
+              },
+            },
+          },
+        },
+      ]),
       options
     );
+
+    const waitingForDeliveryCount = waitingForDeliveryAgg?.count || 0;
+    const waitingForDeliveryAmount = round2(waitingForDeliveryAgg?.amount);
 
     const cumulativeOrderQty = await MongooseRepository.wrapWithSessionIfExists(
       StoreListing(options.database).countDocuments({
@@ -393,11 +494,6 @@ export default class StoreRepository {
 
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-
-    // Aggregation pipelines bypass Mongoose's automatic string->ObjectId
-    // casting (unlike .find()), so $match needs real ObjectIds here.
-    const storeObjectId = new mongoose.Types.ObjectId(store.id);
-    const tenantObjectId = new mongoose.Types.ObjectId(currentTenant.id);
 
     const [refundedFacets] = await MongooseRepository.wrapWithSessionIfExists(
       OrderShipment(options.database).aggregate([
@@ -446,6 +542,7 @@ export default class StoreRepository {
       store,
       accountBalance,
       waitingForDeliveryCount,
+      waitingForDeliveryAmount,
       cumulativeOrderQty,
       totalSales: round2(allTime.totalSales),
       salesProfit: round2(allTime.salesProfit),

@@ -44,6 +44,10 @@ const privateRoutes = [
     loader: () => import("src/view/pages/Estore/SiteMessage"),
   },
   {
+    path: "/customer-service",
+    loader: () => import("src/view/pages/Estore/CustomerService"),
+  },
+  {
     path: "/topup",
     loader: () => import("src/view/pages/Estore/Topup"),
   },

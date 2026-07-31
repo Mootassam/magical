@@ -63,6 +63,7 @@ const en = {
   storeListing: {
     errors: {
       noApprovedStore: 'You need an approved store to list products. Please apply and wait for approval first.',
+      storeFrozen: 'Your store is currently frozen. Please contact customer service.',
     },
   },
 
@@ -79,6 +80,7 @@ const en = {
   orderShipment: {
     errors: {
       noApprovedStore: 'You need an approved store to process shipments',
+      storeFrozen: 'Your store is currently frozen. Please contact customer service.',
       notYourOrder: 'This order does not belong to your store',
       notPending: 'This order is no longer waiting for delivery',
       alreadyShipped: 'This order has already been sent for shipment',

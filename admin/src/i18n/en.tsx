@@ -1914,6 +1914,8 @@ const en = {
       loadingStores: 'Loading stores...',
       loadingProducts: 'Loading products...',
       noProductsInStore: 'This store has no listed products',
+      noStoresFound: 'No stores found',
+      searchStorePlaceholder: 'Search by store ID or name',
       customerNamePlaceholder: 'Enter or generate a customer name',
       list: {
         title: 'Automat Order Management',
@@ -2324,8 +2326,10 @@ const en = {
       fields: {
         user: 'Applicant',
         storeName: 'Store Name',
+        storeId: 'Store ID',
         contact: 'Contact',
         idNumber: 'ID Number',
+        invitationcode: 'Invitation Code',
         mainBusiness: 'Main Business',
         address: 'Address',
         storePhoto: 'Store Photo',
@@ -2351,20 +2355,23 @@ const en = {
           sports_outdoors: 'Sports & Outdoors',
           toys_hobbies: 'Toys & Hobbies',
           food_beverages: 'Food & Beverages',
-          other: 'Other',
+          all: 'All',
         },
       },
       actions: {
         accept: 'Accept',
         reject: 'Reject',
         edit: 'Edit',
+        unfreeze: 'Unfreeze',
       },
       editModal: {
         title: 'Edit Store Details',
       },
       filters: {
         allStatuses: 'All statuses',
+        searchPlaceholder: 'Search by store name or store ID',
       },
+      frozen: 'Frozen',
     },
 
     deliveryAddress: {

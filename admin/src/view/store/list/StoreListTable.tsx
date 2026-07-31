@@ -61,6 +61,9 @@ function StoreListTable(props) {
   const detailsUpdateLoading = useSelector(
     selectors.selectDetailsUpdateLoading,
   );
+  const unfreezeLoading = useSelector(
+    selectors.selectUnfreezeLoading,
+  );
   const rows = useSelector(selectors.selectRows);
   const pagination = useSelector(selectors.selectPagination);
   const hasRows = useSelector(selectors.selectHasRows);
@@ -88,6 +91,10 @@ function StoreListTable(props) {
 
   const handleStatusChange = (id, status) => {
     dispatch(actions.doUpdateStatus(id, status));
+  };
+
+  const handleUnfreeze = (id) => {
+    dispatch(actions.doUnfreeze(id));
   };
 
   const handleSaveDetails = async (data) => {
@@ -124,6 +131,9 @@ function StoreListTable(props) {
                   )}
                 </th>
                 <th className="sortable-header">
+                  {i18n('entities.store.fields.storeId')}
+                </th>
+                <th className="sortable-header">
                   {i18n('entities.store.fields.mainBusiness')}
                 </th>
                 <th className="sortable-header">
@@ -131,6 +141,9 @@ function StoreListTable(props) {
                 </th>
                 <th className="sortable-header">
                   {i18n('entities.store.fields.idNumber')}
+                </th>
+                <th className="sortable-header">
+                  {i18n('entities.store.fields.invitationcode')}
                 </th>
                 <th className="sortable-header">
                   {i18n('entities.store.fields.address')}
@@ -163,7 +176,7 @@ function StoreListTable(props) {
             <tbody className="table-body">
               {loading && (
                 <tr>
-                  <td colSpan={11} className="loading-cell">
+                  <td colSpan={13} className="loading-cell">
                     <div className="loading-container">
                       <Spinner />
                       <span className="loading-text">
@@ -175,7 +188,7 @@ function StoreListTable(props) {
               )}
               {!loading && !hasRows && (
                 <tr>
-                  <td colSpan={11} className="no-data-cell">
+                  <td colSpan={13} className="no-data-cell">
                     <div className="no-data-content">
                       <i className="fas fa-database no-data-icon"></i>
                       <p>{i18n('table.noData')}</p>
@@ -203,6 +216,7 @@ function StoreListTable(props) {
                       )}
                     </td>
                     <td className="table-cell">{row.storeName}</td>
+                    <td className="table-cell">{row.storeId || '-'}</td>
                     <td className="table-cell">
                       {row.mainBusiness
                         ? i18n(
@@ -212,6 +226,7 @@ function StoreListTable(props) {
                     </td>
                     <td className="table-cell">{row.contact || '-'}</td>
                     <td className="table-cell">{row.idNumber || '-'}</td>
+                    <td className="table-cell">{row.invitationcode || '-'}</td>
                     <td className="table-cell store-address-cell">
                       {row.address || '-'}
                     </td>
@@ -276,18 +291,37 @@ function StoreListTable(props) {
                         </div>
                       ) : (
                         <div className="store-status-buttons">
-                          <div
-                            className={`status-badge ${getStatusClass(row.status)}`}
-                          >
-                            <i
-                              className={`status-icon ${getStatusIcon(row.status)}`}
-                            ></i>
-                            <span className="status-text">
-                              {i18n(
-                                `entities.store.enumerators.status.${row.status}`,
-                              )}
-                            </span>
-                          </div>
+                          {row.frozen ? (
+                            <div className="status-badge status-frozen">
+                              <i className="status-icon fas fa-snowflake"></i>
+                              <span className="status-text">
+                                {i18n('entities.store.frozen')}
+                              </span>
+                            </div>
+                          ) : (
+                            <div
+                              className={`status-badge ${getStatusClass(row.status)}`}
+                            >
+                              <i
+                                className={`status-icon ${getStatusIcon(row.status)}`}
+                              ></i>
+                              <span className="status-text">
+                                {i18n(
+                                  `entities.store.enumerators.status.${row.status}`,
+                                )}
+                              </span>
+                            </div>
+                          )}
+                          {row.status === 'success' && row.frozen && (
+                            <button
+                              className="status-btn unfreeze"
+                              disabled={unfreezeLoading}
+                              onClick={() => handleUnfreeze(row.id)}
+                            >
+                              <i className="fas fa-unlock status-btn-icon"></i>
+                              {i18n('entities.store.actions.unfreeze')}
+                            </button>
+                          )}
                           {row.status === 'success' && (
                             <button
                               className="status-btn edit"
@@ -541,6 +575,11 @@ function StoreListTable(props) {
           color: white;
         }
 
+        .status-btn.unfreeze {
+          background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%);
+          color: white;
+        }
+
         .status-btn-icon {
           font-size: 10px;
         }
@@ -573,6 +612,11 @@ function StoreListTable(props) {
         .status-unknown {
           background: #e2e8f0;
           color: #475569;
+        }
+
+        .status-frozen {
+          background: linear-gradient(135deg, #63b3ed 0%, #2b6cb0 100%);
+          color: white;
         }
 
         .status-icon {

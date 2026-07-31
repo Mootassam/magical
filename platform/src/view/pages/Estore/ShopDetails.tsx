@@ -93,7 +93,7 @@ function ShopDetails() {
                 </div>
                 <div className="stat-card">
                   <div className="stat-icon">📦</div>
-                  <div className="stat-value">{dashboard.cumulativeOrderQty}</div>
+                  <div className="stat-value">{formatPrice(dashboard.waitingForDeliveryAmount)}</div>
                   <div className="stat-label">Cumulative order qty</div>
                 </div>
 

@@ -18,6 +18,14 @@ const HOME_CATEGORY_COUNT = 4;
 const PROMO_DISCOUNTS = [50, 30, 40, 25];
 const PROMO_ROTATE_MS = 4000;
 
+// Same idea for the flash-deals strip and the "Just For You" grid: the
+// catalog has no discount/rating/sold-count fields yet, so these pools are
+// purely decorative and just cycle across whatever products land there.
+const FLASH_DISCOUNTS = [45, 35, 50, 30];
+const RATING_POOL = [4.8, 4.9, 4.7, 4.6, 4.9, 4.8];
+const SOLD_POOL = ["1.2k sold", "860 sold", "2.1k sold", "540 sold", "3.4k sold", "720 sold"];
+const BADGE_POOL = ["NEW", "HOT", null, null, null, null];
+
 function Home() {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -92,16 +100,20 @@ function Home() {
   // customer base skews US/general audience, not this kind of item.
   const PROMO_EXCLUDE_PATTERN = /ramadan|\beid\b|islamic|muslim|hijab|niqab/i;
 
-  // The real catalog is fetched once (newest first); the first 4 eligible
-  // products drive the promo carousel and the rest fills the grid, so the
-  // same product isn't shown twice on the page.
-  const promoItems = products
-    .filter((product: any) => !PROMO_EXCLUDE_PATTERN.test(product.title || ""))
-    .slice(0, 4);
-  const promoIds = new Set(promoItems.map((product: any) => product.id));
-  const justForYou = products
-    .filter((product: any) => !promoIds.has(product.id))
-    .slice(0, 6);
+  // The real catalog is fetched once (newest first); the first few eligible
+  // products drive the hero carousel, the next few the flash-deals strip,
+  // and the rest fills the grid, so the same product isn't shown twice.
+  const eligibleProducts = products.filter(
+    (product: any) => !PROMO_EXCLUDE_PATTERN.test(product.title || ""),
+  );
+  const promoItems = eligibleProducts.slice(0, 3);
+  const flashDeals = eligibleProducts.slice(3, 7);
+  const usedIds = new Set(
+    [...promoItems, ...flashDeals].map((product: any) => product.id),
+  );
+  const justForYou = eligibleProducts.filter(
+    (product: any) => !usedIds.has(product.id),
+  );
   const isLoading = categoriesLoading || productsLoading;
 
   const [promoIndex, setPromoIndex] = useState(0);
@@ -157,7 +169,7 @@ function Home() {
 
           <div className="section" style={{ paddingTop: "18px" }}>
             <div className="section-head">
-              <h2>Promotions</h2>
+              <h2>Top Picks</h2>
               <Link to="/classification" className="see-all">See all ›</Link>
             </div>
 
@@ -180,10 +192,11 @@ function Home() {
                     {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
                     <div className="promo-overlay" />
                     <div className="promo-content">
-                      <span className="promo-badge">
-                        -{PROMO_DISCOUNTS[index % PROMO_DISCOUNTS.length]}% OFF
-                      </span>
+                      <span className="promo-eyebrow">✨ Estore Exclusive</span>
                       <div className="promo-title">{product.title}</div>
+                      <span className="promo-badge">
+                        UP TO <b>{PROMO_DISCOUNTS[index % PROMO_DISCOUNTS.length]}%</b> OFF
+                      </span>
                       <div className="promo-price">
                         ${typeof product.price === "number" ? product.price.toFixed(2) : product.price}
                       </div>
@@ -238,6 +251,42 @@ function Home() {
             </div>
           )}
 
+          {flashDeals.length > 0 && (
+            <div className="section" style={{ paddingTop: "22px" }}>
+              <div className="section-head">
+                <h2>Flash Deals</h2>
+                <span className="timer">⏱ Limited time</span>
+              </div>
+              <div className="deal-scroll">
+                {flashDeals.map((product: any, index: number) => {
+                  const discount = FLASH_DISCOUNTS[index % FLASH_DISCOUNTS.length];
+                  const price = typeof product.price === "number" ? product.price : Number(product.price) || 0;
+                  const oldPrice = price / (1 - discount / 100);
+
+                  return (
+                    <div
+                      className="deal-card"
+                      key={product.id}
+                      onClick={() => goToProduct(product.id)}
+                    >
+                      <div className="deal-thumb">
+                        {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
+                        <span className="off-tag">-{discount}%</span>
+                      </div>
+                      <div className="deal-info">
+                        <div className="deal-name">{product.title}</div>
+                        <div className="deal-price-row">
+                          <span className="deal-price">${price.toFixed(2)}</span>
+                          <span className="deal-old">${oldPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="section" style={{ paddingTop: "22px" }}>
             <div className="section-head">
               <h2>Just For You</h2>
@@ -247,29 +296,34 @@ function Home() {
 
           {!isLoading && justForYou.length > 0 && (
             <div className="grid">
-              {justForYou.map((product: any) => (
-                <div
-                  className="prod-card"
-                  key={product.id}
-                  onClick={() => goToProduct(product.id)}
-                >
-                  <div className="prod-thumb">
-                    {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
-                  </div>
-                  <div className="prod-info">
-                    <div className="prod-name">{product.title}</div>
-                    {product.category?.name && (
-                      <div className="prod-meta">{product.category.name}</div>
-                    )}
-                    <div className="prod-price-row">
-                      <span className="prod-price">
-                        ${typeof product.price === "number" ? product.price.toFixed(2) : product.price}
-                      </span>
-                      <button className="add-btn" onClick={(event) => doQuickAdd(event, product)}>+</button>
+              {justForYou.map((product: any, index: number) => {
+                const badge = BADGE_POOL[index % BADGE_POOL.length];
+
+                return (
+                  <div
+                    className="prod-card"
+                    key={product.id}
+                    onClick={() => goToProduct(product.id)}
+                  >
+                    <div className="prod-thumb">
+                      {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
+                      {badge && <span className={`prod-badge ${badge === "HOT" ? "hot" : "new"}`}>{badge}</span>}
+                    </div>
+                    <div className="prod-info">
+                      <div className="prod-name">{product.title}</div>
+                      <div className="prod-meta">
+                        ⭐ {RATING_POOL[index % RATING_POOL.length]} · {SOLD_POOL[index % SOLD_POOL.length]}
+                      </div>
+                      <div className="prod-price-row">
+                        <span className="prod-price">
+                          ${typeof product.price === "number" ? product.price.toFixed(2) : product.price}
+                        </span>
+                        <button className="add-btn" onClick={(event) => doQuickAdd(event, product)}>+</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -290,6 +344,7 @@ function Home() {
           --card-bg:#ffffff;
           --grey-text:#6b7590;
           --gold:#ffb020;
+          --pink:#ff5470;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -298,6 +353,11 @@ function Home() {
           font-family:'Segoe UI', Roboto, Arial, sans-serif;
           background:var(--page-bg);
           margin:0;
+        }
+
+        @keyframes fadeSlideUp{
+          from{ opacity:0; transform:translateY(10px); }
+          to{ opacity:1; transform:translateY(0); }
         }
 
         .phone{
@@ -322,9 +382,11 @@ function Home() {
         .scroll-area::-webkit-scrollbar{ display:none; }
 
         .app-header{
-          background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright));
-          padding:14px 18px 22px;
+          background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright) 65%, #4fa8ff);
+          padding:14px 18px 26px;
           color:#fff;
+          border-radius:0 0 26px 26px;
+          box-shadow:0 14px 30px rgba(11,26,74,0.22);
         }
 
         .header-top{
@@ -334,7 +396,7 @@ function Home() {
           margin-bottom:14px;
         }
 
-        .greeting .title{ font-size:16px; font-weight:700; }
+        .greeting .title{ font-size:17px; font-weight:800; letter-spacing:0.2px; }
         .greeting .sub{ font-size:12px; opacity:0.85; margin-top:2px; }
 
         .header-top .right-cluster{ display:flex; align-items:flex-start; gap:10px; }
@@ -342,25 +404,29 @@ function Home() {
         .bell, .cart-icon{
           width:34px; height:34px;
           border-radius:50%;
-          background:rgba(255,255,255,0.15);
+          background:rgba(255,255,255,0.16);
+          backdrop-filter:blur(2px);
           display:flex; align-items:center; justify-content:center;
           font-size:16px;
           position:relative;
           text-decoration:none;
           color:#fff;
+          transition:transform 0.15s ease, background 0.15s ease;
         }
+        .bell:hover, .cart-icon:hover{ background:rgba(255,255,255,0.28); transform:translateY(-1px); }
         .bell::after{
           content:"";
           position:absolute; top:6px; right:7px;
           width:7px; height:7px;
-          background:#ff4d4f; border-radius:50%;
+          background:var(--pink); border-radius:50%;
           border:1.5px solid var(--blue-deep);
         }
         .cart-icon .dot{
           position:absolute; top:-4px; right:-6px;
           min-width:16px; height:16px; padding:0 3px;
-          background:#ff4d4f; color:#fff; border-radius:8px;
+          background:var(--pink); color:#fff; border-radius:8px;
           font-size:9px; font-weight:800; line-height:16px; text-align:center;
+          box-shadow:0 0 0 2px var(--blue-deep);
         }
 
         .search-row{
@@ -369,8 +435,11 @@ function Home() {
           gap:10px;
           background:#fff;
           border-radius:14px;
-          padding:10px 14px;
+          padding:11px 14px;
+          box-shadow:0 10px 24px rgba(6,16,48,0.18);
+          transition:box-shadow 0.15s ease;
         }
+        .search-row:focus-within{ box-shadow:0 10px 24px rgba(6,16,48,0.28), 0 0 0 2px rgba(255,255,255,0.5); }
         .search-row input{
           border:none; outline:none; flex:1;
           font-size:14px; color:var(--navy); background:transparent;
@@ -378,17 +447,23 @@ function Home() {
         .search-row input::placeholder{ color:#9aa4c0; }
         .search-icon{ font-size:16px; color:var(--blue-mid); }
 
-        .categories{ display:flex; justify-content:space-between; padding:20px 18px 6px; gap:8px; }
+        .categories{ display:flex; justify-content:space-between; padding:22px 18px 6px; gap:8px; }
         .cat-item{ display:flex; flex-direction:column; align-items:center; gap:8px; width:22%; cursor:pointer; }
         .cat-icon{
           width:60px; height:60px; border-radius:18px;
           overflow:hidden;
           box-shadow:0 8px 18px rgba(20,40,100,0.12);
           border:2px solid #fff;
+          transition:transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .cat-item:hover .cat-icon, .cat-item:active .cat-icon{
+          transform:translateY(-3px) scale(1.04);
+          box-shadow:0 12px 22px rgba(20,40,100,0.2);
         }
         .icon-cat-icon{
           display:flex; align-items:center; justify-content:center;
-          background:#fff; font-size:26px;
+          background:linear-gradient(150deg, #eef4ff, #dfe9fc);
+          font-size:26px;
         }
         .cat-label{
           font-size:11px; color:var(--navy); font-weight:600; text-align:center;
@@ -403,17 +478,22 @@ function Home() {
           color:var(--grey-text); font-size:12.5px; padding:10px 0; text-align:center; width:100%;
         }
 
-        .section{ padding:22px 18px 6px; }
+        .section{ padding:22px 18px 6px; animation:fadeSlideUp 0.4s ease both; }
         .section-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
         .section-head h2{ font-size:16px; color:var(--navy); font-weight:800; }
         .section-head .see-all{ font-size:12px; color:var(--blue-mid); font-weight:600; text-decoration:none; }
+        .section-head .timer{
+          font-size:11px; color:var(--pink); font-weight:700;
+          background:#ffeaee; padding:4px 10px; border-radius:10px;
+        }
 
         .promo-carousel{
           position:relative;
-          height:190px;
-          border-radius:22px;
+          height:210px;
+          border-radius:24px;
           overflow:hidden;
           background:#dfe6f5;
+          box-shadow:0 16px 32px rgba(11,26,74,0.18);
         }
 
         .promo-slide{
@@ -431,53 +511,98 @@ function Home() {
         }
         .promo-overlay{
           position:absolute; inset:0;
-          background:linear-gradient(120deg, rgba(11,26,74,0.88) 20%, rgba(22,86,201,0.55) 70%, rgba(47,141,255,0.25) 100%);
+          background:linear-gradient(120deg, rgba(11,26,74,0.9) 20%, rgba(22,86,201,0.6) 70%, rgba(47,141,255,0.3) 100%);
         }
         .promo-content{
           position:relative;
           height:100%;
-          padding:18px 60px 18px 18px;
+          padding:20px 64px 22px 20px;
           display:flex;
           flex-direction:column;
           justify-content:flex-end;
         }
-        .promo-badge{
-          align-self:flex-start;
-          background:var(--gold); color:var(--navy); font-weight:800; font-size:12px;
-          padding:5px 10px; border-radius:8px; margin-bottom:10px;
+        .promo-eyebrow{
+          font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+          font-weight:700; opacity:0.85; margin-bottom:6px;
         }
         .promo-title{
-          font-size:16px; font-weight:800; line-height:1.25;
+          font-size:19px; font-weight:800; line-height:1.22;
           overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
           -webkit-line-clamp:2; -webkit-box-orient:vertical;
+          margin-bottom:10px;
         }
-        .promo-price{ font-size:15px; font-weight:700; margin-top:6px; opacity:0.95; }
+        .promo-badge{
+          align-self:flex-start;
+          background:var(--gold); color:var(--navy); font-weight:700; font-size:11.5px;
+          padding:6px 11px; border-radius:9px;
+          box-shadow:0 6px 14px rgba(0,0,0,0.18);
+        }
+        .promo-badge b{ font-size:14px; }
+        .promo-price{ font-size:15px; font-weight:700; margin-top:8px; opacity:0.95; }
 
         .promo-dots{
-          position:absolute; bottom:12px; right:14px; z-index:1;
+          position:absolute; bottom:14px; right:16px; z-index:1;
           display:flex; gap:6px;
         }
         .promo-dots span{
           width:6px; height:6px; border-radius:50%;
           background:rgba(255,255,255,0.5); cursor:pointer;
+          transition:width 0.2s ease;
         }
         .promo-dots span.active{ background:#fff; width:16px; border-radius:4px; }
+
+        .deal-scroll{
+          display:flex; gap:12px; overflow-x:auto; padding:2px 2px 8px; scrollbar-width:none;
+        }
+        .deal-scroll::-webkit-scrollbar{ display:none; }
+        .deal-card{
+          flex:0 0 auto; width:130px;
+          background:var(--card-bg); border-radius:16px; overflow:hidden;
+          box-shadow:0 8px 20px rgba(20,40,100,0.1);
+          cursor:pointer;
+          transition:transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .deal-card:hover{ transform:translateY(-3px); box-shadow:0 12px 24px rgba(20,40,100,0.18); }
+        .deal-thumb{ width:100%; height:112px; position:relative; background:#eef2fb; }
+        .deal-thumb img{ width:100%; height:100%; object-fit:cover; }
+        .deal-thumb .off-tag{
+          position:absolute; top:6px; left:6px;
+          background:var(--pink); color:#fff; font-size:9px; font-weight:800;
+          padding:3px 6px; border-radius:6px;
+        }
+        .deal-info{ padding:9px 10px 11px; }
+        .deal-name{
+          font-size:12px; font-weight:700; color:var(--navy);
+          overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        }
+        .deal-price-row{ display:flex; align-items:baseline; gap:6px; margin-top:5px; }
+        .deal-price{ font-size:13px; font-weight:800; color:var(--blue-deep); }
+        .deal-old{ font-size:10px; color:#b7c0d8; text-decoration:line-through; }
 
         .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:6px 18px 24px; }
         .prod-card{
           background:var(--card-bg); border-radius:16px; overflow:hidden;
           box-shadow:0 8px 20px rgba(20,40,100,0.08);
           cursor:pointer;
+          transition:transform 0.15s ease, box-shadow 0.15s ease;
         }
+        .prod-card:hover{ transform:translateY(-3px); box-shadow:0 14px 26px rgba(20,40,100,0.16); }
         .prod-thumb{ width:100%; height:140px; position:relative; background:#eef2fb; }
         .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
+        .prod-badge{
+          position:absolute; top:8px; left:8px;
+          font-size:9px; font-weight:800; letter-spacing:0.3px;
+          padding:3px 7px; border-radius:6px; color:#fff;
+        }
+        .prod-badge.new{ background:rgba(14,27,69,0.8); }
+        .prod-badge.hot{ background:var(--pink); }
         .prod-info{ padding:10px 12px 12px; }
         .prod-name{
           font-size:13px; font-weight:700; color:var(--navy);
           overflow:hidden; text-overflow:ellipsis; display:-webkit-box;
           -webkit-line-clamp:2; -webkit-box-orient:vertical;
         }
-        .prod-meta{ font-size:11px; color:var(--grey-text); margin-top:2px; }
+        .prod-meta{ font-size:11px; color:var(--grey-text); margin-top:3px; }
         .prod-price-row{ display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
         .prod-price{ font-size:14px; font-weight:800; color:var(--blue-deep); }
         .add-btn{
@@ -487,7 +612,9 @@ function Home() {
           display:flex; align-items:center; justify-content:center;
           cursor:pointer;
           box-shadow:0 6px 14px rgba(47,141,255,0.4);
+          transition:transform 0.15s ease;
         }
+        .add-btn:hover{ transform:scale(1.1); }
 
 
       `}</style>

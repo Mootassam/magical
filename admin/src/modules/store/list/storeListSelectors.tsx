@@ -17,6 +17,11 @@ const selectDetailsUpdateLoading = createSelector(
   (raw) => Boolean(raw.detailsUpdateLoading),
 );
 
+const selectUnfreezeLoading = createSelector(
+  [selectRaw],
+  (raw) => Boolean(raw.unfreezeLoading),
+);
+
 const selectRows = createSelector(
   [selectRaw],
   (raw) => raw.rows,
@@ -96,6 +101,7 @@ const storeListSelectors = {
   selectLoading,
   selectStatusUpdateLoading,
   selectDetailsUpdateLoading,
+  selectUnfreezeLoading,
   selectRows,
   selectCount,
   selectOrderBy,

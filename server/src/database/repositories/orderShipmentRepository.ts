@@ -35,6 +35,10 @@ export default class OrderShipmentRepository {
       throw new Error400(options.language, "orderShipment.errors.noApprovedStore");
     }
 
+    if (store.frozen) {
+      throw new Error400(options.language, "orderShipment.errors.storeFrozen");
+    }
+
     const automatOrder = await MongooseRepository.wrapWithSessionIfExists(
       AutomatOrder(options.database)
         .findOne({ _id: automatOrderId, tenant: currentTenant.id })

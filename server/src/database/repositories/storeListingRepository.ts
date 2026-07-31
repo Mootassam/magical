@@ -28,6 +28,10 @@ export default class StoreListingRepository {
       throw new Error400(options.language, "storeListing.errors.noApprovedStore");
     }
 
+    if (store.frozen) {
+      throw new Error400(options.language, "storeListing.errors.storeFrozen");
+    }
+
     const product = await MongooseRepository.wrapWithSessionIfExists(
       Product(options.database).findById(data.product),
       options
@@ -125,11 +129,13 @@ export default class StoreListingRepository {
     ];
 
     if (search) {
+      const regex = {
+        $regex: MongooseQueryUtils.escapeRegExp(search),
+        $options: "i",
+      };
+
       criteriaAnd.push({
-        storeName: {
-          $regex: MongooseQueryUtils.escapeRegExp(search),
-          $options: "i",
-        },
+        $or: [{ storeName: regex }, { storeId: regex }],
       });
     }
 

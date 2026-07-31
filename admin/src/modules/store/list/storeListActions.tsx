@@ -24,6 +24,10 @@ const storeListActions = {
   DETAILS_UPDATE_SUCCESS: `${prefix}_DETAILS_UPDATE_SUCCESS`,
   DETAILS_UPDATE_ERROR: `${prefix}_DETAILS_UPDATE_ERROR`,
 
+  UNFREEZE_STARTED: `${prefix}_UNFREEZE_STARTED`,
+  UNFREEZE_SUCCESS: `${prefix}_UNFREEZE_SUCCESS`,
+  UNFREEZE_ERROR: `${prefix}_UNFREEZE_ERROR`,
+
   doReset: () => async (dispatch) => {
     dispatch({
       type: storeListActions.RESETED,
@@ -114,6 +118,30 @@ const storeListActions = {
 
       dispatch({
         type: storeListActions.STATUS_UPDATE_ERROR,
+      });
+    }
+  },
+
+  doUnfreeze: (id) => async (dispatch) => {
+    try {
+      dispatch({
+        type: storeListActions.UNFREEZE_STARTED,
+      });
+
+      await StoreService.unfreeze(id);
+
+      dispatch({
+        type: storeListActions.UNFREEZE_SUCCESS,
+      });
+
+      Message.success(i18n('entities.store.update.success'));
+
+      dispatch(storeListActions.doFetchCurrentFilter());
+    } catch (error) {
+      Errors.handle(error);
+
+      dispatch({
+        type: storeListActions.UNFREEZE_ERROR,
       });
     }
   },

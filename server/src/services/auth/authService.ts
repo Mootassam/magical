@@ -19,11 +19,8 @@ class AuthService {
     email,
     password,
     phoneNumber,
-    withdrawPassword,
-    invitationcode,
     invitationToken,
     tenantId,
-    gender,
     options: any = {},
     req
   ) {
@@ -40,22 +37,6 @@ class AuthService {
       const filter = {};
 
       // const countUser = await UserRepository.CountUser(options);
-
-      // Invitation code is optional now - only validate it if the caller
-      // actually supplied one (e.g. via a referral link). No code means no
-      // referrer is linked, and the user's own invitationcode field falls
-      // back to the schema default.
-      if (invitationcode) {
-        const checkrefCode = await UserRepository.checkRefcode(
-          invitationcode,
-          options
-        );
-
-        if (!checkrefCode) {
-          throw new Error400(options.language, "auth.invitationCode");
-        }
-      }
-
 
       // The user may already exist on the database in case it was invided.
       if (existingUser) {
@@ -137,9 +118,6 @@ class AuthService {
           password: hashedPassword,
           email: email,
           phoneNumber: phoneNumber,
-          withdrawPassword: withdrawPassword,
-          invitationcode: invitationcode,
-          gender: gender,
           req
         },
         {
@@ -206,9 +184,6 @@ class AuthService {
     password,
     username,
     phoneNumber,
-    withdrawPassword,
-    invitationcode,
-    gender,
     invitationToken,
     tenantId,
     options: any = {},
@@ -227,17 +202,6 @@ class AuthService {
       const filter = {};
 
       // const countUser = await UserRepository.CountUser(options);
-
-
-      // const checkrefCode = await UserRepository.checkRefcode(
-      //   invitationcode,
-      //   options
-      // );
-
-      // if (!checkrefCode) {
-      //   throw new Error400(options.language, "auth.invitationCode");
-      // }
-
 
       // The user may already exist on the database in case it was invided.
       if (existingUser) {
@@ -320,7 +284,6 @@ class AuthService {
           email: email,
           username: username,
           phoneNumber: phoneNumber,
-          withdrawPassword: withdrawPassword,
           req
         },
         {
@@ -784,7 +747,12 @@ class AuthService {
   static async changeWithdrawPassword(oldWithdrawPassword, newWithdrawPassword, options) {
     const currentUser = options.currentUser;
 
-    if (currentUser.withdrawPassword !== oldWithdrawPassword) {
+    // First-time setup: no old password to confirm yet. Once a transaction
+    // password is set, it must be confirmed to change it.
+    if (
+      currentUser.withdrawPassword &&
+      currentUser.withdrawPassword !== oldWithdrawPassword
+    ) {
       throw new Error400(
         options.language,
         "validation.inValidWithdrawPassword"

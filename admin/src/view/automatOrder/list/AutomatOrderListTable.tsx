@@ -82,7 +82,7 @@ function AutomatOrderListTable(props) {
                 rows.map((row: any) => (
                   <tr key={row.id} className="table-row">
                     <td className="table-cell">{row.store?.storeName || '-'}</td>
-                    <td className="table-cell store-id-cell">{row.store?.id || '-'}</td>
+                    <td className="table-cell store-id-cell">{row.store?.storeId || '-'}</td>
                     <td className="table-cell">{row.customerName}</td>
                     <td className="table-cell">
                       <div className="product-cell">

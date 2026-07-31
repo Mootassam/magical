@@ -11,9 +11,7 @@ import selectors from "src/modules/auth/authSelectors";
 import yupFormSchemas from "src/modules/shared/yup/yupFormSchemas";
 import { i18n } from "../../../i18n";
 import InputFormItem from "src/shared/form/InputFormItem";
-import SelectFormItem from "src/shared/form/SelectFormItem";
 import ButtonIcon from "src/shared/ButtonIcon";
-import userEnumerators from "src/modules/user/userEnumerators";
 import CsPage from "./CsPage";
 
 // ✅ Validation Schema
@@ -30,13 +28,6 @@ const schema = yup.object().shape({
     })
     .oneOf([yup.ref("password")], i18n("auth.passwordChange.mustMatch")),
   phoneNumber: yupFormSchemas.string(i18n("user.fields.phoneNumber"), {
-    required: true,
-  }),
-  withdrawPassword: yupFormSchemas.string(
-    i18n("user.fields.withdrawPassword"),
-    { required: true }
-  ),
-  invitationcode: yupFormSchemas.string(i18n("user.fields.invitationcode"), {
     required: true,
   }),
   rememberMe: yupFormSchemas.boolean(i18n("user.fields.rememberMe")),
@@ -57,9 +48,6 @@ function Signup() {
     email: "",
     password: "",
     phoneNumber: "",
-    withdrawPassword: "",
-    invitationcode: "",
-    gender: '',
     rememberMe: true,
   });
 
@@ -145,15 +133,13 @@ function Signup() {
     email,
     password,
     phoneNumber,
-    withdrawPassword,
   }) => {
     const fullPhoneNumber = `${selectedCountry?.value || "+1"}${phoneNumber}`;
     dispatch(
       actions.doRegisterEmailAndPassword(
         email,
         password,
-        fullPhoneNumber,
-        withdrawPassword
+        fullPhoneNumber
       )
     );
   };
@@ -261,13 +247,6 @@ function Signup() {
 
             <InputFormItem
               type="password"
-              name="withdrawPassword"
-              placeholder={i18n("user.fields.withdrawPassword")}
-              className="auth__input"
-            />
-
-            <InputFormItem
-              type="password"
               name="password"
               placeholder={i18n("user.fields.password")}
               className="auth__input"
@@ -281,23 +260,6 @@ function Signup() {
               className="auth__input"
             />
 
-            <SelectFormItem
-              name="gender"
-              placeholder={i18n("user.fields.gender")}
-              options={userEnumerators.genre.map((value) => ({
-                value,
-                label: i18n(`user.enumerators.gender.${value}`),
-              }))}
-              required
-            />
-
-            <InputFormItem
-              type="text"
-              name="invitationcode"
-              placeholder={i18n("user.fields.invitationcode")}
-              className="auth__input"
-              externalErrorMessage={externalErrorMessage}
-            />
           </div>
 
           <div className="auth__bottom">
