@@ -2,7 +2,7 @@
 
 const it = {
     app: {
-        title: "The Light Cinema"
+        title: "Zalando"
     },
     inputs: {
         username: "Nome utente",

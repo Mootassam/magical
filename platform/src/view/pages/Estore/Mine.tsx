@@ -44,7 +44,7 @@ function Mine() {
                 <div className="approved-title">Store Frozen</div>
                 <div className="approved-sub">Your seller account has been temporarily frozen.</div>
               </div>
-              <Link to="/customer-service" className="approved-link">Contact Customer Service</Link>
+              <a href="/customer-service" className="approved-link">Contact Customer Service</a>
             </div>
           )}
 
@@ -170,6 +170,11 @@ function Mine() {
               <div className="menu-text">Service Center</div>
               <span className="menu-arrow">›</span>
             </Link>
+            <a href="/customer-service" className="menu-item">
+              <div className="menu-icon" style={{ background: '#e6f7ff' }}>💬</div>
+              <div className="menu-text">Live Chat</div>
+              <span className="menu-arrow">›</span>
+            </a>
             <Link to="/wallet-management" className="menu-item">
               <div className="menu-icon" style={{ background: '#eafaf1' }}>👛</div>
               <div className="menu-text">Wallet Management</div>

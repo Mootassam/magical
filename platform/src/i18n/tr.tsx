@@ -4,7 +4,7 @@ import Withdraw from "src/view/pages/withdraw/Withdraw";
 
 const tr = {
   app: {
-    title: "E-clicks Digital"
+    title: "Zalando"
   },
   inputs: {
     username: "Kullanıcı Adı",

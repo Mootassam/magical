@@ -78,6 +78,22 @@ const languages: {
     dictionary: null,
   },
 
+  nl: {
+    id: 'nl',
+    label: 'Nederlands',
+    flag: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2260%22%20height%3D%2240%22%3E%3Crect%20width%3D%2260%22%20height%3D%2240%22%20fill%3D%22%23AE1C28%22%2F%3E%3Crect%20y%3D%2213.33%22%20width%3D%2260%22%20height%3D%2226.67%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Crect%20y%3D%2226.67%22%20width%3D%2260%22%20height%3D%2213.33%22%20fill%3D%22%2321468B%22%2F%3E%3C%2Fsvg%3E',
+    dateFns: null,
+    dictionary: null,
+  },
+
+  hi: {
+    id: 'hi',
+    label: 'हिन्दी',
+    flag: 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2260%22%20height%3D%2240%22%3E%3Crect%20width%3D%2260%22%20height%3D%2240%22%20fill%3D%22%23FF9933%22%2F%3E%3Crect%20y%3D%2213.33%22%20width%3D%2260%22%20height%3D%2226.67%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Crect%20y%3D%2226.67%22%20width%3D%2260%22%20height%3D%2213.33%22%20fill%3D%22%23138808%22%2F%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2220%22%20r%3D%225%22%20fill%3D%22none%22%20stroke%3D%22%23000080%22%20stroke-width%3D%221%22%2F%3E%3C%2Fsvg%3E',
+    dateFns: null,
+    dictionary: null,
+  },
+
 };
 
 export async function init() {
@@ -112,7 +128,12 @@ export async function init() {
   if (currentLanguageCode === 'it') {
     await initIt();
   }
-
+  if (currentLanguageCode === 'nl') {
+    await initNl();
+  }
+  if (currentLanguageCode === 'hi') {
+    await initHi();
+  }
 
 }
 
@@ -245,6 +266,60 @@ async function initIt() {
   ).default;
 
   moment.locale('it', momentLocale);
+
+  if (language.dictionary.validation) {
+    setYupLocale(language.dictionary.validation);
+  }
+
+  return language;
+}
+
+async function initNl() {
+  const language = languages['nl'];
+
+  // @ts-ignore
+  const momentLocale = (await import('moment/locale/nl'))
+    .default;
+
+  language.dateFns = (
+    await import('date-fns/locale/nl')
+  ).default;
+
+  registerLocale('nl', language.dateFns);
+  setDefaultLocale('nl');
+
+  language.dictionary = (
+    await import('./nl')
+  ).default;
+
+  moment.locale('nl', momentLocale);
+
+  if (language.dictionary.validation) {
+    setYupLocale(language.dictionary.validation);
+  }
+
+  return language;
+}
+
+async function initHi() {
+  const language = languages['hi'];
+
+  // @ts-ignore
+  const momentLocale = (await import('moment/locale/hi'))
+    .default;
+
+  language.dateFns = (
+    await import('date-fns/locale/hi')
+  ).default;
+
+  registerLocale('hi', language.dateFns);
+  setDefaultLocale('hi');
+
+  language.dictionary = (
+    await import('./hi')
+  ).default;
+
+  moment.locale('hi', momentLocale);
 
   if (language.dictionary.validation) {
     setYupLocale(language.dictionary.validation);

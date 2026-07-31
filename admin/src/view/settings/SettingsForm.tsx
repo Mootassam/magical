@@ -10,6 +10,7 @@ import FormWrapper from 'src/view/shared/styles/FormWrapper';
 import * as yup from 'yup';
 import settingsEnumerators from 'src/modules/settings/settingsEnumerators';
 import ImagesFormItem from '../shared/form/items/ImagesFormItem';
+import TextAreaFormItem from '../shared/form/items/TextAreaFormItem';
 import Storage from 'src/security/storage';
 import yupFormSchemas from 'src/modules/shared/yup/yupFormSchemas';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -36,6 +37,7 @@ const schema = yup.object().shape({
       max: 1,
     },
   ),
+  tawkToCode: yup.string().nullable(true).trim(),
 });
 
 function SettingsForm(props) {
@@ -109,6 +111,13 @@ function SettingsForm(props) {
                   Storage.values.settingsBackgroundImages
                 }
                 max={1}
+              />
+            </div>
+            <div className="col-lg-7 col-md-8 col-12">
+              <TextAreaFormItem
+                name="tawkToCode"
+                label={i18n('settings.fields.tawkToCode')}
+                hint={i18n('settings.hints.tawkToCode')}
               />
             </div>
           </div>

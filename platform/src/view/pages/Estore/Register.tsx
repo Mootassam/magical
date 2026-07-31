@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "axios";
 import actions from "src/modules/auth/authActions";
 import selectors from "src/modules/auth/authSelectors";
 import yupFormSchemas from "src/modules/shared/yup/yupFormSchemas";
@@ -38,90 +37,27 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const dropdownRef = useRef(null);
-
   const [initialValues] = useState({
     email: "",
+    otp: "",
     password: "",
     phoneNumber: "",
     rememberMe: true,
   });
 
   useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await axios.get(
-          "https://restcountries.com/v3.1/all?fields=name,flags,idd,cca2"
-        );
-
-        const countriesData = response.data
-          .filter((c) => c.idd?.root)
-          .map((country) => {
-            let dialCode = country.idd.root;
-
-            const rootOnlyCountries = ["US", "CA", "RU", "KZ", "AU"];
-            if (rootOnlyCountries.includes(country.cca2)) {
-              dialCode = country.idd.root;
-            } else if (country.idd.suffixes && country.idd.suffixes.length > 0) {
-              dialCode = country.idd.root + (country.idd.suffixes[0] || "");
-            }
-
-            return {
-              value: dialCode,
-              label: country.name.common,
-              code: country.cca2,
-              flag: country.flags.svg,
-            };
-          })
-          .sort((a, b) => a.label.localeCompare(b.label));
-
-        setCountries(countriesData);
-
-        try {
-          const ipResponse = await axios.get("https://ip2c.org/s");
-          const countryCode = ipResponse.data.split(";")[1];
-          const defaultCountry = countriesData.find(
-            (c) => c.code === countryCode
-          );
-          setSelectedCountry(defaultCountry || countriesData[0]);
-        } catch {
-          setSelectedCountry(countriesData[0]);
-        }
-      } catch (error) {
-        console.error("Error fetching countries:", error);
-      }
-    };
-
-    fetchCountries();
     dispatch(actions.doClearErrorMessage());
   }, [dispatch]);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current?.contains(e.target)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const filteredCountries = countries.filter(
-    (country) =>
-      country.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      country.value.includes(searchTerm) ||
-      country.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const form = useForm({
     resolver: yupResolver(schema),
     mode: "onSubmit",
     defaultValues: initialValues,
   });
+
+  // Formal placeholder only - wiring this up to actually send/verify an
+  // email OTP is a follow-up task.
+  const handleGetOtp = () => {};
 
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -136,12 +72,11 @@ function Register() {
     password,
     phoneNumber,
   }) => {
-    const fullPhoneNumber = `${selectedCountry?.value || "+1"}${phoneNumber}`;
     dispatch(
       actions.doRegisterEmailAndPassword(
         email,
         password,
-        fullPhoneNumber
+        phoneNumber
       )
     );
   };
@@ -154,30 +89,7 @@ function Register() {
           <button type="button" className="back-btn" onClick={() => window.history.back()} aria-label="Go back">←</button>
         </div>
 
-        <div className="logo-wrap">
-          <div className="logo-badge">
-            <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#1e5fd6" />
-                  <stop offset="100%" stopColor="#3fb0ff" />
-                </linearGradient>
-              </defs>
-              <path d="M60 40 h70 a10 10 0 0 1 10 10 v110 a10 10 0 0 1 -10 10 h-70 a10 10 0 0 1 -10 -10 v-110 a10 10 0 0 1 10 -10 z" fill="#0e1b45" />
-              <path d="M78 40 v-8 a17 17 0 0 1 34 0 v8" fill="none" stroke="#0e1b45" strokeWidth="8" />
-              <path d="M78 40 v-8 a17 17 0 0 1 34 0 v8" fill="none" stroke="#f7faff" strokeWidth="3" />
-              <rect x="20" y="95" width="35" height="6" rx="3" fill="url(#blueGrad)" />
-              <rect x="10" y="112" width="45" height="6" rx="3" fill="url(#blueGrad)" />
-              <path d="M95 75 h55 l-12 18 h-33 v14 h30 l-10 16 h-20 v16 h35 l-12 18 h-53 a8 8 0 0 1 -8 -8 v-58 a8 8 0 0 1 8 -8 z" fill="url(#blueGrad)" />
-              <circle cx="82" cy="182" r="7" fill="#0e1b45" />
-              <circle cx="118" cy="182" r="7" fill="#0e1b45" />
-            </svg>
-          </div>
-          <div className="brand-name">
-            <span className="e">E</span>
-            <span className="rest">store</span>
-          </div>
-        </div>
+<img src="/images/home/logo.webp" alt="" style={{ width: '60%', display: 'block', margin: '0 auto 12px' }} />
 
         <div className="form-title">Create your account</div>
         <div className="form-sub">Join Estore and start shopping smarter</div>
@@ -185,86 +97,31 @@ function Register() {
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <label className="field-label" htmlFor="email">Email</label>
+            <div className="otp-row">
+              <InputFormItem
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                externalErrorMessage={externalErrorMessage}
+              />
+              <button type="button" className="otp-btn" onClick={handleGetOtp}>
+                Get OTP
+              </button>
+            </div>
+
+            <label className="field-label" htmlFor="otp">Verification Code</label>
             <InputFormItem
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              externalErrorMessage={externalErrorMessage}
+              type="text"
+              name="otp"
+              placeholder="Enter the OTP sent to your email"
             />
 
             <label className="field-label">Phone Number</label>
-            <div className="phone-input-wrapper">
-              <div
-                className={`phone-input-container ${dropdownOpen ? "dropdown-open" : ""}`}
-                ref={dropdownRef}
-              >
-                <div className="phone-input-inner">
-                  <div
-                    className="country-selector"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  >
-                    {selectedCountry && (
-                      <div className="country-selected">
-                        <img
-                          src={selectedCountry.flag}
-                          alt={selectedCountry.label}
-                          className="country-flag"
-                        />
-                        <span className="country-code">{selectedCountry.value}</span>
-                        <span className="dropdown-arrow">▾</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="phone-number-input">
-                    <InputFormItem
-                      type="tel"
-                      name="phoneNumber"
-                      placeholder="Phone number"
-                    />
-                  </div>
-                </div>
-
-                {dropdownOpen && (
-                  <div className="country-dropdown">
-                    <div className="dropdown-search">
-                      <input
-                        type="text"
-                        placeholder="Search countries"
-                        className="search-input"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="dropdown-list">
-                      {filteredCountries.map((country) => (
-                        <div
-                          key={country.code}
-                          className={`country-option ${selectedCountry?.code === country.code ? "selected" : ""}`}
-                          onClick={() => {
-                            setSelectedCountry(country);
-                            setDropdownOpen(false);
-                            setSearchTerm("");
-                          }}
-                        >
-                          <img
-                            src={country.flag}
-                            alt={country.label}
-                            className="country-flag"
-                          />
-                          <span className="country-name">{country.label}</span>
-                          <span className="country-dial-code">{country.value}</span>
-                        </div>
-                      ))}
-                      {filteredCountries.length === 0 && (
-                        <div className="no-results">No countries found</div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <InputFormItem
+              type="tel"
+              name="phoneNumber"
+              placeholder="Phone number"
+            />
 
             <label className="field-label" htmlFor="password">Password</label>
             <div className="field-wrap">
@@ -294,7 +151,6 @@ function Register() {
           </form>
         </FormProvider>
 
-        <div className="terms-note">By registering, you agree to Estore's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
 
         <div className="login-note">Already have an account? <Link to="/auth/signin">Log in</Link></div>
 
@@ -443,6 +299,36 @@ function Register() {
           margin-top:4px;
         }
 
+        .otp-row{
+          display:flex;
+          gap:10px;
+          align-items:flex-start;
+        }
+        .otp-row .form-group{
+          flex:1;
+          min-width:0;
+        }
+
+        .otp-btn{
+          flex:0 0 auto;
+          height:46px;
+          padding:0 16px;
+          border-radius:12px;
+          border:1.5px solid var(--blue-bright);
+          background:#fff;
+          color:var(--blue-bright);
+          font-size:12.5px;
+          font-weight:700;
+          white-space:nowrap;
+          cursor:pointer;
+          transition:background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+        }
+        .otp-btn:hover{
+          background:var(--blue-bright);
+          color:#fff;
+        }
+        .otp-btn:active{ transform:scale(0.96); }
+
         .toggle-eye{
           position:absolute;
           right:14px;
@@ -498,174 +384,6 @@ function Register() {
         }
         .login-note a{ color:var(--blue-mid); font-weight:700; text-decoration:none; }
 
-        /* ---------- Phone input with country selector ---------- */
-        .phone-input-wrapper {
-          margin-bottom: 1rem;
-        }
-
-        .phone-input-container {
-          position: relative;
-          border: 1px solid var(--field-border);
-          border-radius: 12px;
-          background: var(--field-bg);
-          transition: all 0.2s ease;
-        }
-
-        .phone-input-container:focus-within,
-        .phone-input-container.dropdown-open {
-          border-color: var(--blue-bright);
-          box-shadow: 0 0 0 3px rgba(47,141,255,0.15);
-        }
-
-        .phone-input-inner {
-          display: flex;
-          align-items: stretch;
-          min-height: 48px;
-        }
-
-        .country-selector {
-          flex: 0 0 auto;
-          border-right: 1px solid var(--field-border);
-          border-radius: 12px 0 0 12px;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-        }
-
-        .country-selector:hover {
-          background: #e9eefc;
-        }
-
-        .country-selected {
-          display: flex;
-          align-items: center;
-          padding: 0 12px;
-          height: 100%;
-          min-width: 100px;
-        }
-
-        .country-flag {
-          width: 20px;
-          height: 15px;
-          object-fit: cover;
-          border-radius: 2px;
-          margin-right: 8px;
-        }
-
-        .country-code {
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: var(--navy);
-          margin-right: 8px;
-        }
-
-        .dropdown-arrow {
-          color: var(--grey-text);
-          font-size: 12px;
-          transition: transform 0.2s ease;
-        }
-
-        .phone-input-container.dropdown-open .dropdown-arrow {
-          transform: rotate(180deg);
-        }
-
-        .phone-number-input {
-          flex: 1;
-        }
-
-        .phone-number-input input{
-          border: none !important;
-          border-radius: 0 12px 12px 0 !important;
-          background: transparent !important;
-          height: 100% !important;
-          box-shadow: none !important;
-        }
-
-        .country-dropdown {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          background: white;
-          border: 1px solid var(--field-border);
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          z-index: 1000;
-          margin-top: 4px;
-          max-height: 260px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .dropdown-search {
-          padding: 10px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 8px 12px;
-          border: 1px solid var(--field-border);
-          border-radius: 8px;
-          font-size: 0.85rem;
-        }
-
-        .search-input:focus {
-          outline: none;
-          border-color: var(--blue-bright);
-        }
-
-        .dropdown-list {
-          flex: 1;
-          overflow-y: auto;
-          max-height: 220px;
-        }
-
-        .country-option {
-          display: flex;
-          align-items: center;
-          padding: 8px 12px;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-          border-bottom: 1px solid #f5f5f5;
-        }
-
-        .country-option:last-child {
-          border-bottom: none;
-        }
-
-        .country-option:hover {
-          background: #f8f9fa;
-        }
-
-        .country-option.selected {
-          background: #e3f2fd;
-        }
-
-        .country-option .country-flag {
-          margin-right: 10px;
-          flex-shrink: 0;
-        }
-
-        .country-option .country-name {
-          flex: 1;
-          font-size: 0.85rem;
-          color: var(--navy);
-        }
-
-        .country-option .country-dial-code {
-          font-size: 0.8rem;
-          color: var(--grey-text);
-          font-weight: 500;
-          margin-left: 8px;
-        }
-
-        .no-results {
-          padding: 12px;
-          text-align: center;
-          color: var(--grey-text);
-          font-style: italic;
-        }
       `}</style>
     </>
   );

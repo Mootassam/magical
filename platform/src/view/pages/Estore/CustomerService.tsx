@@ -1,6 +1,64 @@
-import React from "react";
+import React, { useEffect } from "react";
+import settingsService from "src/modules/settings/settingsService";
+
+// The div Tawk.to renders the chat into instead of its default floating
+// corner bubble - see Tawk_API.embedded below.
+const TAWK_CONTAINER_ID = "tawk-chat-embed";
+
+// The admin pastes the full Tawk.to embed snippet (comments + <script> tags
+// included) into Settings - this pulls out just the inline JS so it can be
+// run as a real script (setting .text and appending it, rather than
+// dangerouslySetInnerHTML, is what actually executes it).
+function extractScriptBody(rawCode) {
+  if (!rawCode) {
+    return "";
+  }
+
+  const withoutComments = rawCode.replace(/<!--[\s\S]*?-->/g, "");
+  const match = withoutComments.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+
+  return match ? match[1] : withoutComments;
+}
 
 function CustomerService() {
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const settings = await settingsService.find();
+        const code = extractScriptBody(settings?.tawkToCode);
+
+        if (!code || cancelled) {
+          return;
+        }
+
+        const win = window as any;
+
+        // Must be set before the widget script below finishes loading -
+        // this is what tells Tawk.to to render inline into our container
+        // instead of a floating bubble in the corner of the screen.
+        win.Tawk_API = win.Tawk_API || {};
+        win.Tawk_API.embedded = TAWK_CONTAINER_ID;
+
+        if (!win.__tawkScriptInjected) {
+          const script = document.createElement("script");
+          script.type = "text/javascript";
+          script.text = code;
+          document.body.appendChild(script);
+          win.__tawkScriptInjected = true;
+        }
+      } catch (error) {
+        // No widget configured yet (or the request failed) - the page just
+        // falls back to the empty state below.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <>
       <div className="phone">
@@ -13,8 +71,10 @@ function CustomerService() {
         </div>
 
         <div className="scroll-area">
-          <div className="empty-state">
-            Our support team will get back to you shortly.
+          <div id={TAWK_CONTAINER_ID} className="tawk-embed">
+            <div className="empty-state">
+              Our support team will get back to you shortly.
+            </div>
           </div>
         </div>
 
@@ -77,9 +137,17 @@ function CustomerService() {
     flex:1;
     overflow-y:auto;
     scrollbar-width:none;
-    padding:14px 14px 24px;
+    display:flex;
+    flex-direction:column;
   }
   .scroll-area::-webkit-scrollbar{ display:none; }
+
+  .tawk-embed{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+  }
 
   .empty-state{
     text-align:center;

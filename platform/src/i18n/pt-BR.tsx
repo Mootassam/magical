@@ -2,7 +2,7 @@
 
 const ptBR = {
   app: {
-    title: "E-clicks Digital"
+    title: "Zalando"
   },
   inputs: {
     username: "Nome de Usuário",

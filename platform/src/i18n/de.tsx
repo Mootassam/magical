@@ -3,7 +3,7 @@ import Withdraw from "src/view/pages/withdraw/Withdraw";
 
 const de = {
   app: {
-    title: "E-clicks Digital"
+    title: "Zalando"
   },
   inputs: {
     username: "Benutzername",

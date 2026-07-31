@@ -12,6 +12,7 @@ export default (database) => {
   const SettingsSchema = new Schema(
     {
       theme: { type: String },
+      tawkToCode: { type: String },
       backgroundImages: [FileSchema],
       logos: [FileSchema],
       tenant: {

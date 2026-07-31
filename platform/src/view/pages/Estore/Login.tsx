@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import actions from "src/modules/auth/authActions";
+import layoutActions from "src/modules/layout/layoutActions";
 import selectors from "src/modules/auth/authSelectors";
 import yupFormSchemas from "src/modules/shared/yup/yupFormSchemas";
-import { i18n } from "../../../i18n";
+import { i18n, getLanguages, getLanguageCode } from "../../../i18n";
 import InputFormItem from "src/shared/form/InputFormItem";
 import ButtonIcon from "src/shared/ButtonIcon";
 
@@ -27,6 +28,28 @@ function Login() {
   const externalErrorMessage = useSelector(selectors.selectErrorMessage);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef(null);
+
+  const languages = getLanguages();
+  const currentLanguage = languages.find(
+    (language) => language.id === getLanguageCode()
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (langRef.current && !langRef.current?.contains(e.target)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const doChangeLanguage = (languageId) => {
+    setLangOpen(false);
+    layoutActions.doChangeLanguage(languageId);
+  };
 
   const [initialValues] = useState({
     email: "",
@@ -58,37 +81,41 @@ function Login() {
         <div className="topbar">
           <button type="button" className="back-btn" onClick={() => window.history.back()} aria-label="Go back">←</button>
           <h1>Login</h1>
-          <div className="lang">🌐 English ▾</div>
+          <div className="lang-wrap" ref={langRef}>
+            <div className="lang" onClick={() => setLangOpen(!langOpen)}>
+              🌐 {currentLanguage?.label || "English"} ▾
+            </div>
+
+            {langOpen && (
+              <div className="lang-dropdown">
+                {languages.map((language) => (
+                  <div
+                    key={language.id}
+                    className={`lang-option ${
+                      language.id === getLanguageCode() ? "selected" : ""
+                    }`}
+                    onClick={() => doChangeLanguage(language.id)}
+                  >
+                    <img
+                      src={language.flag}
+                      alt={language.label}
+                      className="lang-flag"
+                    />
+                    <span>{language.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="logo-wrap">
-          <div className="logo-badge">
-            {/* Estore logo (simplified inline SVG matching provided artwork) */}
-            <svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#1e5fd6" />
-                  <stop offset="100%" stopColor="#3fb0ff" />
-                </linearGradient>
-              </defs>
-              {/* bag */}
-              <path d="M60 40 h70 a10 10 0 0 1 10 10 v110 a10 10 0 0 1 -10 10 h-70 a10 10 0 0 1 -10 -10 v-110 a10 10 0 0 1 10 -10 z" fill="#0e1b45" />
-              <path d="M78 40 v-8 a17 17 0 0 1 34 0 v8" fill="none" stroke="#0e1b45" strokeWidth="8" />
-              <path d="M78 40 v-8 a17 17 0 0 1 34 0 v8" fill="none" stroke="#f7faff" strokeWidth="3" />
-              {/* speed lines */}
-              <rect x="20" y="95" width="35" height="6" rx="3" fill="url(#blueGrad)" />
-              <rect x="10" y="112" width="45" height="6" rx="3" fill="url(#blueGrad)" />
-              {/* E shape */}
-              <path d="M95 75 h55 l-12 18 h-33 v14 h30 l-10 16 h-20 v16 h35 l-12 18 h-53 a8 8 0 0 1 -8 -8 v-58 a8 8 0 0 1 8 -8 z" fill="url(#blueGrad)" />
-              {/* wheels */}
-              <circle cx="82" cy="182" r="7" fill="#0e1b45" />
-              <circle cx="118" cy="182" r="7" fill="#0e1b45" />
-            </svg>
-          </div>
-          <div className="brand-name">
-            <span className="e">E</span>
-            <span className="rest">store</span>
-          </div>
+
+          {/* Estore logo (simplified inline SVG matching provided artwork) */}
+          <img src="/images/home/logo.webp" alt="" style={{ width: '60%' }} />
+
+
+
           <div className="tagline">Shop More, Live Better</div>
         </div>
 
@@ -115,12 +142,12 @@ function Login() {
             </div>
 
             <div className="links-row">
-              <a href="#">Merchant onboarding</a>
               <a href="#">Forgot Password</a>
-            </div>
-            <div className="no-account">
+                  <div className="no-account">
               No account? <Link to="/auth/signup">Sign up</Link>
             </div>
+            </div>
+        
 
             <button className="login-btn" disabled={loading} type="submit">
               <ButtonIcon loading={loading} />
@@ -129,9 +156,7 @@ function Login() {
           </form>
         </FormProvider>
 
-        <div className="divider">or continue with</div>
-        <div className="footer-note">By logging in you agree to Estore's Terms & Privacy Policy</div>
-      </div>
+           </div>
 
 
       <style>{`
@@ -207,13 +232,63 @@ function Login() {
           letter-spacing:0.5px;
         }
 
-        .topbar .lang{
+        .lang-wrap{
+          position:relative;
           flex-shrink:0;
+        }
+
+        .topbar .lang{
           display:flex;
           align-items:center;
           gap:6px;
           color:var(--grey-text);
           font-size:13px;
+          cursor:pointer;
+          padding:4px 6px;
+          border-radius:8px;
+          transition:background-color 0.2s ease;
+          white-space:nowrap;
+        }
+        .topbar .lang:hover{ background:var(--field-bg); }
+
+        .lang-dropdown{
+          position:absolute;
+          top:calc(100% + 6px);
+          right:0;
+          min-width:170px;
+          max-height:260px;
+          overflow-y:auto;
+          background:#fff;
+          border:1px solid var(--field-border);
+          border-radius:12px;
+          box-shadow:0 12px 30px rgba(20,40,100,0.15);
+          z-index:1000;
+          padding:6px;
+        }
+
+        .lang-option{
+          display:flex;
+          align-items:center;
+          gap:10px;
+          padding:9px 10px;
+          border-radius:8px;
+          cursor:pointer;
+          font-size:13.5px;
+          color:var(--navy);
+          transition:background-color 0.15s ease;
+        }
+        .lang-option:hover{ background:var(--field-bg); }
+        .lang-option.selected{
+          background:rgba(47,141,255,0.12);
+          font-weight:700;
+        }
+
+        .lang-flag{
+          width:20px;
+          height:14px;
+          object-fit:cover;
+          border-radius:2px;
+          flex-shrink:0;
         }
 
         .logo-wrap{
@@ -322,7 +397,6 @@ function Login() {
         .links-row a:hover{ text-decoration:underline; }
 
         .no-account{
-          margin-top:6px;
           font-size:13px;
           color:var(--grey-text);
         }

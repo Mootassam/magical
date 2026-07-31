@@ -27,12 +27,12 @@ export default [
   },
   {
     id: '0',
-    path: '/category',
+    path: '/settings',
     exact: true,
-    icon: 'fab fa-whatsapp',
-    label: i18n('dashboard.check'),
+    icon: 'fas fa-gear',
+    label: i18n('settings.menu'),
     className: 'menu-li side-menue',
-    permissionRequired: permissions.userRead,
+    permissionRequired: permissions.settingsEdit,
   },
 
   {

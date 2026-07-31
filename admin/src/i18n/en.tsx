@@ -3164,6 +3164,11 @@ const en = {
       theme: 'Theme',
       logos: 'Logo',
       backgroundImages: 'Background Image',
+      tawkToCode: 'Tawk.to Live Chat Code',
+    },
+    hints: {
+      tawkToCode:
+        'Paste the full embed script from your Tawk.to dashboard.',
     },
     colors: {
       default: 'Dark',

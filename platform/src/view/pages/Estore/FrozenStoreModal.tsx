@@ -14,9 +14,9 @@ function FrozenStoreModal() {
               was left waiting for delivery for too long. You can't access
               the seller dashboard until this is resolved.
             </div>
-            <Link to="/customer-service" className="frozen-modal-btn primary">
+            <a href="/customer-service" className="frozen-modal-btn primary">
               Contact Customer Service
-            </Link>
+            </a>
             <Link to="/mine" className="frozen-modal-btn secondary">
               Back
             </Link>

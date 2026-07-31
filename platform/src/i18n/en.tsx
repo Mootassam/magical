@@ -44,7 +44,7 @@ const en = {
   },
 
   app: {
-    title: "E-clicks Digital",
+    title: "Zalando",
   },
 
   api: {
