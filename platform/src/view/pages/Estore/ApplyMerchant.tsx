@@ -361,19 +361,19 @@ function ApplyMerchant() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --field-border:#dde4f2;
-          --red:#ff3b30;
-          --green:#12b886;
-          --amber:#ffb020;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --field-border:#E7E7E7;
+          --red:#DC2626;
+          --green:#22C55E;
+          --amber:#F59E0B;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -457,9 +457,9 @@ function ApplyMerchant() {
           text-align:center;
           margin-bottom:18px;
         }
-        .status-card.pending{ background:#fff6e5; }
-        .status-card.success{ background:#e8f9f1; }
-        .status-card.rejected{ background:#ffeaea; }
+        .status-card.pending{ background:#FEF5E7; }
+        .status-card.success{ background:#E9F9EF; }
+        .status-card.rejected{ background:#FCE9E9; }
         .status-icon{ font-size:32px; }
         .status-title{ font-size:15px; font-weight:800; color:var(--navy); margin-top:8px; }
         .status-text{ font-size:12px; color:var(--grey-text); margin-top:6px; line-height:1.6; }
@@ -468,7 +468,7 @@ function ApplyMerchant() {
         .summary-card{
           background:var(--card-bg);
           border-radius:14px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           padding:14px 16px;
         }
         .summary-row{
@@ -494,11 +494,11 @@ function ApplyMerchant() {
           width:96px; height:96px;
           border-radius:50%;
           background:#fff;
-          border:1.6px dashed #c7d1ea;
+          border:1.6px dashed #E7E7E7;
           display:flex;
           align-items:center;
           justify-content:center;
-          color:#b6c1e0;
+          color:#888888;
           font-size:30px;
           cursor:pointer;
           overflow:hidden;
@@ -525,10 +525,10 @@ function ApplyMerchant() {
           outline:none;
           background:#fff;
         }
-        .text-input::placeholder, .textarea-input::placeholder{ color:#a9b3cf; }
+        .text-input::placeholder, .textarea-input::placeholder{ color:#888888; }
         .text-input:focus, .textarea-input:focus{
           border-color:var(--blue-bright);
-          box-shadow:0 0 0 3px rgba(47,141,255,0.12);
+          box-shadow:0 0 0 3px rgba(209,69,31,0.12);
         }
         .textarea-input{ min-height:90px; resize:none; font-family:inherit; }
 
@@ -536,7 +536,7 @@ function ApplyMerchant() {
         .id-card-row{ display:flex; gap:14px; }
         .upload-box{
           flex:1;
-          border:1.6px dashed #c7d1ea;
+          border:1.6px dashed #E7E7E7;
           border-radius:14px;
           padding:26px 10px;
           display:flex;
@@ -544,8 +544,8 @@ function ApplyMerchant() {
           align-items:center;
           justify-content:center;
           gap:10px;
-          color:#a9b3cf;
-          background:#fbfcff;
+          color:#888888;
+          background:#FAFAFA;
           cursor:pointer;
           overflow:hidden;
           min-height:110px;
@@ -590,7 +590,7 @@ function ApplyMerchant() {
           font-weight:800;
           letter-spacing:0.3px;
           cursor:pointer;
-          box-shadow:0 10px 22px rgba(47,141,255,0.4);
+          box-shadow:0 10px 22px rgba(209,69,31,0.4);
           text-align:center;
           text-decoration:none;
           display:block;

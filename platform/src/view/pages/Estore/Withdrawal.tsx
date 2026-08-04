@@ -283,17 +283,17 @@ function Withdrawal() {
 
       <style>{`
   :root{
-    --navy:#0e1b45;
-    --blue-bright:#2f8dff;
-    --blue-mid:#1656c9;
-    --blue-deep:#0b3fae;
-    --white:#ffffff;
-    --page-bg:#f4f7fd;
-    --card-bg:#ffffff;
-    --grey-text:#6b7590;
-    --grey-light:#eef2fa;
-    --field-border:#dde4f2;
-    --red:#ff5470;
+    --navy:#111111;
+    --blue-bright:#D1451F;
+    --blue-mid:#B93C1A;
+    --blue-deep:#7F2B15;
+    --white:#FFFFFF;
+    --page-bg:#FAFAFA;
+    --card-bg:#FFFFFF;
+    --grey-text:#555555;
+    --grey-light:#F4F4F4;
+    --field-border:#E7E7E7;
+    --red:#DC2626;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -351,7 +351,7 @@ function Withdrawal() {
   .form-card{
     background:var(--card-bg);
     border-radius:18px;
-    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    box-shadow:0 8px 20px rgba(0,0,0,0.07);
     padding:18px 16px;
   }
 
@@ -407,14 +407,14 @@ function Withdrawal() {
     display:flex;
     flex-direction:column;
     gap:8px;
-    background:#f0f7ff;
-    border:1px solid #d6e8ff;
+    background:#FAFAFA;
+    border:1px solid #E7E7E7;
     border-radius:12px;
     padding:12px 14px;
   }
   .receive-summary.danger{
-    background:#fff1f1;
-    border-color:#ffd2d2;
+    background:#FCE9E9;
+    border-color:#FCE9E9;
   }
   .summary-row{
     display:flex;
@@ -424,9 +424,9 @@ function Withdrawal() {
   }
   .summary-row.sub{
     padding-top:8px;
-    border-top:1px dashed #d6e8ff;
+    border-top:1px dashed #E7E7E7;
   }
-  .receive-summary.danger .summary-row.sub{ border-top-color:#ffd2d2; }
+  .receive-summary.danger .summary-row.sub{ border-top-color:#FCE9E9; }
   .receive-label{ font-size:12.5px; font-weight:700; color:var(--navy); }
   .receive-value{ font-size:13px; font-weight:800; color:var(--blue-mid); text-align:right; }
   .receive-summary.danger .receive-value{ color:var(--red); }
@@ -443,8 +443,8 @@ function Withdrawal() {
     color:var(--navy);
     outline:none;
   }
-  .text-input::placeholder{ color:#a9b3cf; }
-  .text-input:focus{ border-color:var(--blue-bright); box-shadow:0 0 0 3px rgba(47,141,255,0.12); }
+  .text-input::placeholder{ color:#888888; }
+  .text-input:focus{ border-color:var(--blue-bright); box-shadow:0 0 0 3px rgba(209,69,31,0.12); }
 
   .balance-line{
     margin-top:16px;
@@ -455,7 +455,7 @@ function Withdrawal() {
 
   .notice{
     margin-top:14px;
-    background:#f6f9ff;
+    background:#FAFAFA;
     border-radius:12px;
     padding:12px 14px;
     font-size:11.5px;
@@ -476,7 +476,7 @@ function Withdrawal() {
     font-weight:800;
     letter-spacing:0.3px;
     cursor:pointer;
-    box-shadow:0 10px 22px rgba(47,141,255,0.4);
+    box-shadow:0 10px 22px rgba(209,69,31,0.4);
   }
   .submit-btn:disabled{
     opacity:0.6;

@@ -103,16 +103,16 @@ function LoginPassword() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --field-border:#dde4f2;
-          --red:#ff5470;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --field-border:#E7E7E7;
+          --red:#DC2626;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -167,7 +167,7 @@ function LoginPassword() {
         .form-card{
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           padding:18px 16px;
         }
 
@@ -189,8 +189,8 @@ function LoginPassword() {
           color:var(--navy);
           outline:none;
         }
-        .text-input::placeholder{ color:#a9b3cf; }
-        .text-input:focus{ border-color:var(--blue-bright); box-shadow:0 0 0 3px rgba(47,141,255,0.12); }
+        .text-input::placeholder{ color:#888888; }
+        .text-input:focus{ border-color:var(--blue-bright); box-shadow:0 0 0 3px rgba(209,69,31,0.12); }
         .text-input.__danger{ border-color:var(--red); }
 
         .invalid-feedback{
@@ -212,7 +212,7 @@ function LoginPassword() {
           font-weight:800;
           letter-spacing:0.3px;
           cursor:pointer;
-          box-shadow:0 10px 22px rgba(47,141,255,0.4);
+          box-shadow:0 10px 22px rgba(209,69,31,0.4);
           display:flex;
           align-items:center;
           justify-content:center;

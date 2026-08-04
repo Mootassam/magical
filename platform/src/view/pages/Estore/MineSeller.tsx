@@ -137,22 +137,22 @@ function MineSeller() {
 
           <div className="menu-card">
             <Link to="/wholesale-management" className="menu-item">
-              <div className="menu-icon" style={{ background: '#e8f1ff' }}>🏷️</div>
+              <div className="menu-icon" style={{ background: '#E7E7E7' }}>🏷️</div>
               <div className="menu-text">Wholesale Management</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/shop-details" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fff3e6' }}>🏬</div>
+              <div className="menu-icon" style={{ background: '#FEF5E7' }}>🏬</div>
               <div className="menu-text">Shop Details</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/product-management" className="menu-item">
-              <div className="menu-icon" style={{ background: '#f1edfd' }}>📦</div>
+              <div className="menu-icon" style={{ background: '#E9EFFD' }}>📦</div>
               <div className="menu-text">Product Management</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/orders" className="menu-item">
-              <div className="menu-icon" style={{ background: '#eafaf1' }}>🧾</div>
+              <div className="menu-icon" style={{ background: '#E9F9EF' }}>🧾</div>
               <div className="menu-text">Orders</div>
               {waitingForDeliveryCount > 0 && (
                 <span className="menu-count-badge">{waitingForDeliveryCount} waiting for delivery</span>
@@ -160,42 +160,42 @@ function MineSeller() {
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/withdrawal-record" className="menu-item">
-              <div className="menu-icon" style={{ background: '#e8f1ff' }}>💳</div>
+              <div className="menu-icon" style={{ background: '#E7E7E7' }}>💳</div>
               <div className="menu-text">Billing records</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/delivery-address" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fdeef4' }}>📍</div>
+              <div className="menu-icon" style={{ background: '#FCE9E9' }}>📍</div>
               <div className="menu-text">Delivery address</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/shop-collection" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fff3e6' }}>❤️</div>
+              <div className="menu-icon" style={{ background: '#FEF5E7' }}>❤️</div>
               <div className="menu-text">Shop Collection</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/site-message" className="menu-item">
-              <div className="menu-icon" style={{ background: '#f1edfd' }}>🎧</div>
+              <div className="menu-icon" style={{ background: '#E9EFFD' }}>🎧</div>
               <div className="menu-text">Service Center</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/wallet-management" className="menu-item">
-              <div className="menu-icon" style={{ background: '#eafaf1' }}>👛</div>
+              <div className="menu-icon" style={{ background: '#E9F9EF' }}>👛</div>
               <div className="menu-text">Wallet Management</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/login-password" className="menu-item">
-              <div className="menu-icon" style={{ background: '#e8f1ff' }}>🔒</div>
+              <div className="menu-icon" style={{ background: '#E7E7E7' }}>🔒</div>
               <div className="menu-text">Login Password</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/payment-password" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fdeef4' }}>🔑</div>
+              <div className="menu-icon" style={{ background: '#FCE9E9' }}>🔑</div>
               <div className="menu-text">Payment Password</div>
               <span className="menu-arrow">›</span>
             </Link>
             <Link to="/seller/set-up" className="menu-item">
-              <div className="menu-icon" style={{ background: '#eafaf1' }}>⚙️</div>
+              <div className="menu-icon" style={{ background: '#E9F9EF' }}>⚙️</div>
               <div className="menu-text">Set up</div>
               <span className="menu-arrow">›</span>
             </Link>
@@ -209,17 +209,17 @@ function MineSeller() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --gold:#ffb020;
-          --green:#12b886;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --gold:#F59E0B;
+          --green:#22C55E;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -273,17 +273,17 @@ function MineSeller() {
           align-items:center;
           gap:12px;
           background:var(--card-bg);
-          border:1.4px solid #d9e6ff;
+          border:1.4px solid #E7E7E7;
           border-radius:16px;
           padding:13px 14px;
           margin-bottom:14px;
           text-decoration:none;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
         }
         .switch-icon{
           width:36px; height:36px;
           border-radius:10px;
-          background:#e8f1ff;
+          background:#E7E7E7;
           display:flex; align-items:center; justify-content:center;
           font-size:16px;
           flex-shrink:0;
@@ -291,13 +291,13 @@ function MineSeller() {
         .switch-text{ flex:1; }
         .switch-title{ font-size:12.5px; font-weight:800; color:var(--navy); }
         .switch-sub{ font-size:11px; color:var(--grey-text); margin-top:2px; }
-        .switch-arrow{ font-size:16px; color:#c3cbe0; }
+        .switch-arrow{ font-size:16px; color:#888888; }
 
         /* ---------- Profile card ---------- */
         .profile-card{
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 10px 26px rgba(20,40,100,0.1);
+          box-shadow:0 10px 26px rgba(0,0,0,0.1);
           padding:16px;
           display:flex;
           align-items:center;
@@ -323,14 +323,14 @@ function MineSeller() {
         .profile-name{ font-size:15.5px; font-weight:800; color:var(--navy); }
         .profile-email{ font-size:11.5px; color:var(--grey-text); margin-top:3px; }
         .profile-id{ font-size:11px; color:var(--grey-text); margin-top:2px; }
-        .profile-arrow{ font-size:16px; color:#c3cbe0; }
+        .profile-arrow{ font-size:16px; color:#888888; }
 
         /* ---------- Stats row ---------- */
         .stats-row{
           display:flex;
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           margin-top:12px;
           padding:16px 4px;
         }
@@ -343,7 +343,7 @@ function MineSeller() {
         .orders-card{
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           margin-top:12px;
           padding:14px 6px;
         }
@@ -374,7 +374,7 @@ function MineSeller() {
           flex:1;
           background:var(--card-bg);
           border-radius:14px;
-          box-shadow:0 8px 18px rgba(20,40,100,0.06);
+          box-shadow:0 8px 18px rgba(0,0,0,0.06);
           padding:12px 6px;
           text-align:center;
           text-decoration:none;
@@ -388,7 +388,7 @@ function MineSeller() {
           background:var(--card-bg);
           margin-top:12px;
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           overflow:hidden;
         }
         .menu-item{
@@ -409,8 +409,8 @@ function MineSeller() {
         }
         .menu-text{ flex:1; font-size:13px; font-weight:600; color:var(--navy); }
         .menu-count-badge{
-          background:#fff0eb;
-          color:#ff5470;
+          background:#FCE9E9;
+          color:#DC2626;
           font-size:10.5px;
           font-weight:700;
           padding:3px 9px;
@@ -418,18 +418,18 @@ function MineSeller() {
           white-space:nowrap;
           margin-right:6px;
         }
-        .menu-arrow{ color:#c3cbe0; font-size:13px; }
+        .menu-arrow{ color:#888888; font-size:13px; }
 
         .logout-btn{
           margin-top:16px;
           background:var(--card-bg);
           border-radius:16px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           padding:13px;
           text-align:center;
           font-size:13px;
           font-weight:700;
-          color:#ff5470;
+          color:#DC2626;
           cursor:pointer;
         }
       `}</style>

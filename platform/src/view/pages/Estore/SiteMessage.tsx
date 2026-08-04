@@ -5,17 +5,17 @@ import listSelectors from "src/modules/notification/list/notificationListSelecto
 import formActions from "src/modules/notification/form/notificationFormActions";
 
 const ICONS = {
-  deposit_success: { icon: "💰", bg: "#eafaf1" },
-  deposit_canceled: { icon: "⚠️", bg: "#fff3e6" },
-  withdraw_success: { icon: "💸", bg: "#eafaf1" },
-  withdraw_canceled: { icon: "⚠️", bg: "#fff3e6" },
-  system: { icon: "⚙️", bg: "#e8f1ff" },
-  alert: { icon: "🔔", bg: "#fdeef4" },
-  admin: { icon: "📣", bg: "#e8f1ff" },
+  deposit_success: { icon: "💰", bg: "#E9F9EF" },
+  deposit_canceled: { icon: "⚠️", bg: "#FEF5E7" },
+  withdraw_success: { icon: "💸", bg: "#E9F9EF" },
+  withdraw_canceled: { icon: "⚠️", bg: "#FEF5E7" },
+  system: { icon: "⚙️", bg: "#E7E7E7" },
+  alert: { icon: "🔔", bg: "#FCE9E9" },
+  admin: { icon: "📣", bg: "#E7E7E7" },
 };
 
 function getIcon(type) {
-  return ICONS[type] || { icon: "🔔", bg: "#f1edfd" };
+  return ICONS[type] || { icon: "🔔", bg: "#E9EFFD" };
 }
 
 function getTitle(notification) {
@@ -166,16 +166,16 @@ function SiteMessage() {
 
       <style>{`
   :root{
-    --navy:#0e1b45;
-    --blue-bright:#2f8dff;
-    --blue-mid:#1656c9;
-    --blue-deep:#0b3fae;
-    --white:#ffffff;
-    --page-bg:#f4f7fd;
-    --card-bg:#ffffff;
-    --grey-text:#6b7590;
-    --grey-light:#eef2fa;
-    --red:#ff4d4f;
+    --navy:#111111;
+    --blue-bright:#D1451F;
+    --blue-mid:#B93C1A;
+    --blue-deep:#7F2B15;
+    --white:#FFFFFF;
+    --page-bg:#FAFAFA;
+    --card-bg:#FFFFFF;
+    --grey-text:#555555;
+    --grey-light:#F4F4F4;
+    --red:#DC2626;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -243,7 +243,7 @@ function SiteMessage() {
     gap:12px;
     background:var(--card-bg);
     border-radius:16px;
-    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    box-shadow:0 8px 20px rgba(0,0,0,0.07);
     padding:14px;
     margin-bottom:12px;
     position:relative;

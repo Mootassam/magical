@@ -333,7 +333,9 @@ class ProductRepository {
 
       if (filter.category) {
         criteriaAnd.push({
-          category: filter.category,
+          category: Array.isArray(filter.category)
+            ? { $in: filter.category }
+            : filter.category,
         });
       }
 
@@ -404,7 +406,9 @@ class ProductRepository {
 
       if (filter.category) {
         criteriaAnd.push({
-          category: filter.category,
+          category: Array.isArray(filter.category)
+            ? { $in: filter.category }
+            : filter.category,
         });
       }
 

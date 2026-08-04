@@ -30,7 +30,7 @@ export function SummarySkeleton() {
         .skeleton-bar{
           display:inline-block;
           border-radius:4px;
-          background: linear-gradient(90deg, #eef2fa 25%, #e2e8f5 37%, #eef2fa 63%);
+          background: linear-gradient(90deg, #F4F4F4 25%, #E7E7E7 37%, #F4F4F4 63%);
           background-size: 400% 100%;
           animation: skeleton-shimmer 1.4s ease infinite;
         }
@@ -72,7 +72,7 @@ function RecordListSkeleton({ rows = 6 }: { rows?: number }) {
         .skeleton-bar{
           display:inline-block;
           border-radius:4px;
-          background: linear-gradient(90deg, #eef2fa 25%, #e2e8f5 37%, #eef2fa 63%);
+          background: linear-gradient(90deg, #F4F4F4 25%, #E7E7E7 37%, #F4F4F4 63%);
           background-size: 400% 100%;
           animation: skeleton-shimmer 1.4s ease infinite;
         }

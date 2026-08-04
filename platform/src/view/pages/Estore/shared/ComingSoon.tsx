@@ -20,12 +20,12 @@ function ComingSoon({ title, icon }: { title: string; icon: string }) {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --page-bg:#f4f7fd;
-          --grey-text:#6b7590;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --page-bg:#FAFAFA;
+          --grey-text:#555555;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}

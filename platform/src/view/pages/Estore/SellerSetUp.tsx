@@ -250,12 +250,12 @@ function SellerSetUp() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-deep:#0b3fae;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --border:#eceff5;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-deep:#7F2B15;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --border:#F4F4F4;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -345,7 +345,7 @@ function SellerSetUp() {
         .logo-circle{
           width:76px; height:76px;
           border-radius:50%;
-          background:#14141c;
+          background:#111111;
           color:#fff;
           display:flex;
           align-items:center;
@@ -395,8 +395,8 @@ function SellerSetUp() {
         }
         .field-input:focus{ outline:none; border-color:var(--blue-bright); }
         .field-input.field-disabled{
-          background:#f7f8fb;
-          color:#9aa4c0;
+          background:#FAFAFA;
+          color:#888888;
           cursor:not-allowed;
         }
         .field-textarea{
@@ -410,7 +410,7 @@ function SellerSetUp() {
           resize:vertical;
         }
         .field-textarea:focus{ outline:none; border-color:var(--blue-bright); }
-        .field-textarea::placeholder{ color:#b7c0d8; }
+        .field-textarea::placeholder{ color:#888888; }
 
         .field-row{
           display:flex;
@@ -419,16 +419,16 @@ function SellerSetUp() {
         .field-col{ flex:1; min-width:0; }
 
         .banner-box{
-          border:1.5px dashed #d6dcec;
+          border:1.5px dashed #E7E7E7;
           border-radius:12px;
-          background:#f7f9fc;
+          background:#FAFAFA;
           height:110px;
           display:flex;
           align-items:center;
           justify-content:center;
           overflow:hidden;
         }
-        .banner-placeholder{ font-size:13px; color:#9aa4c0; }
+        .banner-placeholder{ font-size:13px; color:#888888; }
         .banner-preview{ width:100%; height:100%; object-fit:cover; }
 
         .save-btn{

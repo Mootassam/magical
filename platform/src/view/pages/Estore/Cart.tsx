@@ -92,15 +92,15 @@ function Cart() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -157,7 +157,7 @@ function Cart() {
           margin:14px 14px 0;
           background:var(--card-bg);
           border-radius:16px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           overflow:hidden;
         }
 
@@ -223,7 +223,7 @@ function Cart() {
 
         .remove-btn{
           font-size:13px;
-          color:#b7c0d8;
+          color:#888888;
           cursor:pointer;
           padding:4px;
           flex-shrink:0;
@@ -233,7 +233,7 @@ function Cart() {
         .checkout-bar{
           flex-shrink:0;
           background:#fff;
-          box-shadow:0 -6px 18px rgba(20,40,100,0.08);
+          box-shadow:0 -6px 18px rgba(0,0,0,0.08);
           border-top:1px solid var(--grey-light);
           padding:12px 16px;
           z-index:20;
@@ -261,7 +261,7 @@ function Cart() {
           font-weight:800;
           letter-spacing:0.3px;
           cursor:pointer;
-          box-shadow:0 10px 22px rgba(47,141,255,0.4);
+          box-shadow:0 10px 22px rgba(209,69,31,0.4);
         }
 
       `}</style>

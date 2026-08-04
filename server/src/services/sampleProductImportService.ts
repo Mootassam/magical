@@ -1,11 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { parse } from "csv-parse";
-import XLSX from "xlsx";
 import MongooseRepository from "../database/repositories/mongooseRepository";
 import ProductCategoryRepository from "../database/repositories/productCategoryRepository";
 import AuditLogRepository from "../database/repositories/auditLogRepository";
 import SampleProductImportRun from "../database/models/sampleProductImportRun";
+import {
+  TARGET_CATEGORIES,
+  classifyUkDataRow,
+  classifyFashionRow,
+} from "./fashionCategoryClassifier";
 
 // Sample product data ships as static files read straight off the server's
 // own disk instead of being fetched from Hugging Face / DummyJSON / Fake
@@ -18,7 +22,6 @@ const DEFAULT_DATA_DIR = path.resolve(__dirname, "../../data");
 const DATA_DIR = process.env.SAMPLE_PRODUCTS_DATA_DIR || DEFAULT_DATA_DIR;
 
 const FASHION_CSV = path.join(DATA_DIR, "fashion.csv");
-const LAPTOPS_XLSX = path.join(DATA_DIR, "Laptops.xlsx");
 const UK_DATA_CSV = path.join(DATA_DIR, "UK_data.csv");
 
 const BATCH_SIZE = 500;
@@ -212,47 +215,6 @@ async function importCsvFile(
   return { created, skipped, rowsProcessed };
 }
 
-async function importXlsxFile(filePath, Product, mapRow, batchSize = BATCH_SIZE) {
-  const workbook = XLSX.readFile(filePath);
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: null });
-
-  let created = 0;
-  let skipped = 0;
-  let batch: any[] = [];
-
-  for (const record of rows) {
-    let doc;
-
-    try {
-      doc = await mapRow(record);
-    } catch (error) {
-      continue;
-    }
-
-    if (!doc) {
-      continue;
-    }
-
-    batch.push(doc);
-
-    if (batch.length >= batchSize) {
-      const result = await insertBatch(Product, batch);
-      created += result.created;
-      skipped += result.skipped;
-      batch = [];
-    }
-  }
-
-  if (batch.length) {
-    const result = await insertBatch(Product, batch);
-    created += result.created;
-    skipped += result.skipped;
-  }
-
-  return { created, skipped };
-}
-
 function baseFields(ctx, price, categoryId) {
   return {
     price,
@@ -266,8 +228,9 @@ function baseFields(ctx, price, categoryId) {
 }
 
 // fashion.csv columns: ProductId,Gender,Category,SubCategory,ProductType,
-// Colour,Usage,ProductTitle,Image,ImageURL - categorized by Gender
-// (Men/Women/Boys/Girls) as requested.
+// Colour,Usage,ProductTitle,Image,ImageURL - Gender (Men/Women/Boys/Girls)
+// and Category (Apparel/Footwear) map directly onto one of the 11 target
+// fashion categories; rows that don't resolve to one are skipped.
 async function mapFashionRow(record, ctx) {
   const title = (record.ProductTitle || "").toString().trim();
 
@@ -275,7 +238,13 @@ async function mapFashionRow(record, ctx) {
     return null;
   }
 
-  const categoryId = await ctx.categoryResolver.resolve(record.Gender);
+  const targetCategory = classifyFashionRow(record.Gender, record.Category);
+
+  if (!targetCategory) {
+    return null;
+  }
+
+  const categoryId = await ctx.categoryResolver.resolve(targetCategory);
   const description = [record.ProductType, record.Colour, record.Usage]
     .filter(Boolean)
     .join(" - ");
@@ -290,34 +259,13 @@ async function mapFashionRow(record, ctx) {
   };
 }
 
-// Laptops.xlsx columns: Product Name,ProductID,Product image,Actual price,
-// Discount price,Stars,Rating,Reviews,Description,Link - single "Laptops"
-// category, priced from the discount (falling back to the list price).
-async function mapLaptopRow(record, ctx) {
-  const title = (record["Product Name"] || "").toString().trim();
-
-  if (!title) {
-    return null;
-  }
-
-  const categoryId = await ctx.categoryResolver.resolve("Laptops");
-  const price =
-    toPositiveNumber(record["Discount price"]) ||
-    toPositiveNumber(record["Actual price"]) ||
-    randomPrice();
-
-  return {
-    title: title.slice(0, 500),
-    description: (record["Description"] || "").toString().slice(0, 2000),
-    image: toHttpUrl(record["Product image"]),
-    importHash: `import:laptops-xlsx:${record.ProductID}`,
-    ...baseFields(ctx, price, categoryId),
-  };
-}
-
 // UK_data.csv columns: asin,title,imgUrl,productURL,stars,reviews,price,
-// isBestSeller,boughtInLastMonth,categoryName - categorized directly by the
-// dataset's own categoryName column (e.g. "Hi-Fi Speakers").
+// isBestSeller,boughtInLastMonth,categoryName - the dataset's own
+// categoryName is Amazon's full general-merchandise taxonomy (electronics,
+// home, garden, etc), so each row is classified from its title text down to
+// one of the 11 target fashion categories; rows that don't belong to any of
+// them (electronics, home goods, generic "Sports & Outdoors" gear, etc) are
+// skipped rather than imported.
 async function mapUkDataRow(record, ctx) {
   const title = (record.title || "").toString().trim();
 
@@ -325,7 +273,13 @@ async function mapUkDataRow(record, ctx) {
     return null;
   }
 
-  const categoryId = await ctx.categoryResolver.resolve(record.categoryName);
+  const targetCategory = classifyUkDataRow(title, record.categoryName || null);
+
+  if (!targetCategory) {
+    return null;
+  }
+
+  const categoryId = await ctx.categoryResolver.resolve(targetCategory);
   const price = toPositiveNumber(record.price) || randomPrice();
 
   return {
@@ -341,7 +295,7 @@ class SampleProductImportService {
   static async run(options) {
     if (!fs.existsSync(DATA_DIR)) {
       throw new Error(
-        `Sample product data directory not found at ${DATA_DIR}. Set the SAMPLE_PRODUCTS_DATA_DIR environment variable, or place fashion.csv, Laptops.xlsx and UK_data.csv there.`
+        `Sample product data directory not found at ${DATA_DIR}. Set the SAMPLE_PRODUCTS_DATA_DIR environment variable, or place fashion.csv and UK_data.csv there.`
       );
     }
 
@@ -350,6 +304,13 @@ class SampleProductImportService {
     const Product = options.database.model("product");
     const categoryResolver = new CategoryResolver(options);
     const ctx = { categoryResolver, currentTenant, currentUser };
+
+    // Ensure all 11 target categories exist up front, even ones no row ends
+    // up mapping to (e.g. "Global Purchase" has no matching source data) -
+    // so the storefront always has the full fixed category list to show.
+    for (const name of TARGET_CATEGORIES) {
+      await categoryResolver.resolve(name);
+    }
 
     const datasetSummaries: any[] = [];
     let productsCreated = 0;
@@ -364,17 +325,6 @@ class SampleProductImportService {
       productsCreated += created;
       productsSkipped += skipped;
       datasetSummaries.push({ dataset: "fashion.csv", imported: created });
-    }
-
-    if (fs.existsSync(LAPTOPS_XLSX)) {
-      const { created, skipped } = await importXlsxFile(
-        LAPTOPS_XLSX,
-        Product,
-        (record) => mapLaptopRow(record, ctx)
-      );
-      productsCreated += created;
-      productsSkipped += skipped;
-      datasetSummaries.push({ dataset: "Laptops.xlsx", imported: created });
     }
 
     let backgroundImport: any = null;

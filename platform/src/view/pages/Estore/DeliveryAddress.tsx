@@ -250,17 +250,17 @@ function DeliveryAddress() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --field-border:#dde4f2;
-          --red:#ff3b30;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --field-border:#E7E7E7;
+          --red:#DC2626;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -317,7 +317,7 @@ function DeliveryAddress() {
         .address-card{
           background:var(--card-bg);
           border-radius:16px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           min-height:140px;
           display:flex;
           flex-direction:column;
@@ -365,7 +365,7 @@ function DeliveryAddress() {
           font-weight:800;
           letter-spacing:0.3px;
           cursor:pointer;
-          box-shadow:0 10px 22px rgba(47,141,255,0.4);
+          box-shadow:0 10px 22px rgba(209,69,31,0.4);
         }
         .add-btn .plus{ margin-right:6px; }
 
@@ -373,7 +373,7 @@ function DeliveryAddress() {
         .modal-overlay{
           position:fixed;
           inset:0;
-          background:rgba(14,27,69,0.35);
+          background:rgba(17,17,17,0.35);
           display:flex;
           align-items:center;
           justify-content:center;
@@ -419,10 +419,10 @@ function DeliveryAddress() {
           outline:none;
           background:#fff;
         }
-        .text-input::placeholder{ color:#a9b3cf; }
+        .text-input::placeholder{ color:#888888; }
         .text-input:focus{
           border-color:var(--blue-bright);
-          box-shadow:0 0 0 3px rgba(47,141,255,0.12);
+          box-shadow:0 0 0 3px rgba(209,69,31,0.12);
         }
 
         .phone-input-row{
@@ -461,7 +461,7 @@ function DeliveryAddress() {
           font-weight:800;
           letter-spacing:0.3px;
           cursor:pointer;
-          box-shadow:0 10px 22px rgba(47,141,255,0.4);
+          box-shadow:0 10px 22px rgba(209,69,31,0.4);
         }
         .submit-btn:disabled{ opacity:0.6; cursor:not-allowed; }
 
@@ -469,7 +469,7 @@ function DeliveryAddress() {
           width:44px;
           height:5px;
           border-radius:3px;
-          background:#c7d1ea;
+          background:#E7E7E7;
           margin:12px auto 0;
         }
 
@@ -481,7 +481,7 @@ function DeliveryAddress() {
           border-radius:16px;
           padding:22px 20px;
           text-align:center;
-          box-shadow:0 20px 40px rgba(20,40,100,0.25);
+          box-shadow:0 20px 40px rgba(0,0,0,0.25);
         }
         .confirm-title{ font-size:15px; font-weight:800; color:var(--navy); }
         .confirm-text{ font-size:12.5px; color:var(--grey-text); margin-top:8px; line-height:1.5; }

@@ -1,13 +1,13 @@
     :root {
-      --navy: #0e1b45;
-      --blue-bright: #2f8dff;
-      --blue-mid: #1656c9;
-      --blue-deep: #0b3fae;
+      --navy: #111111;
+      --blue-bright: #D1451F;
+      --blue-mid: #B93C1A;
+      --blue-deep: #7F2B15;
       --white: #ffffff;
-      --page-bg: #f4f7fd;
+      --page-bg: #FAFAFA;
       --card-bg: #ffffff;
-      --grey-text: #6b7590;
-      --gold: #ffb020;
+      --grey-text: #555555;
+      --gold: #F59E0B;
     }
 
     * {
@@ -37,8 +37,8 @@
       justify-content: space-around;
       align-items: center;
       padding: 12px 10px calc(14px + env(safe-area-inset-bottom));
-      box-shadow: 0 -10px 26px rgba(20, 40, 100, 0.12);
-      border-top: 1px solid #eef2fa;
+      box-shadow: 0 -10px 26px rgba(0, 0, 0, 0.12);
+      border-top: 1px solid #EEEEEE;
       z-index: 20;
     }
 
@@ -47,7 +47,7 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      color: #a6afc8;
+      color: #888888;
       font-size: 11px;
       font-weight: 600;
       position: relative;
@@ -81,7 +81,7 @@
       position: absolute;
       top: -4px;
       right: 2px;
-      background: #ff4d4f;
+      background: #DC2626;
       color: #fff;
       font-size: 9px;
       font-weight: 700;
@@ -106,6 +106,6 @@
       justify-content: center;
       color: #fff;
       font-size: 22px;
-      box-shadow: 0 10px 24px rgba(47, 141, 255, 0.45);
+      box-shadow: 0 10px 24px rgba(209, 69, 31, 0.45);
       z-index: 15;
     }

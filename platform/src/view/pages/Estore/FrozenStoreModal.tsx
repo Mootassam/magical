@@ -26,11 +26,11 @@ function FrozenStoreModal() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-deep:#0b3fae;
-          --page-bg:#f4f7fd;
-          --grey-text:#6b7590;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-deep:#7F2B15;
+          --page-bg:#FAFAFA;
+          --grey-text:#555555;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -54,7 +54,7 @@ function FrozenStoreModal() {
         .frozen-modal-overlay{
           position:absolute;
           inset:0;
-          background:rgba(14,27,69,0.55);
+          background:rgba(0,0,0,0.55);
           display:flex;
           align-items:center;
           justify-content:center;
@@ -67,7 +67,7 @@ function FrozenStoreModal() {
           border-radius:20px;
           padding:28px 22px 22px;
           text-align:center;
-          box-shadow:0 20px 50px rgba(20,40,100,0.25);
+          box-shadow:0 20px 50px rgba(0,0,0,0.25);
         }
 
         .frozen-modal-icon{ font-size:40px; margin-bottom:12px; }
@@ -103,7 +103,7 @@ function FrozenStoreModal() {
         }
 
         .frozen-modal-btn.secondary{
-          background:#f1f5f9;
+          background:#F4F4F4;
           color:var(--navy);
           margin-bottom:0;
         }

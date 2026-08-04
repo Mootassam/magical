@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import authSelectors from "src/modules/auth/authSelectors";
@@ -8,9 +8,15 @@ import shopCategoryActions from "src/modules/shop/shopCategoryActions";
 import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
-import categoryIcon, { FALLBACK_CATEGORY_ICON } from "src/view/pages/Estore/shared/categoryIcon";
+import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
+import categoryIconImage from "src/view/pages/PC/categoryIconImage";
+import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
 
 const HOME_CATEGORY_COUNT = 4;
+
+// Mirrors PC/Home.tsx - this is a women's-fashion storefront, so the phone
+// home feed (Flash Deals / Just For You) is women's-clothing only too.
+const WOMEN_CATEGORY_NAMES = ["Women Clothing"];
 
 // Decorative "% off" badges for the promo carousel - the catalog has no
 // real discount/sale-price field yet, so these are cosmetic only and just
@@ -42,10 +48,37 @@ function Home() {
 
   useEffect(() => {
     dispatch(shopCategoryActions.doFetch(true));
-    dispatch(
-      shopProductActions.doFetch(undefined, undefined, undefined, undefined, true),
-    );
   }, [dispatch]);
+
+  // Same as PC/Home.tsx: wait for the real category ids before filtering to
+  // Women Clothing, then pull 3 pages (30 products) so the phone home feed
+  // carries the same total product count as the PC homepage instead of
+  // running dry after the first page of 10.
+  const hasFetchedProducts = useRef(false);
+
+  useEffect(() => {
+    if (hasFetchedProducts.current || categoriesLoading || categories.length === 0) {
+      return;
+    }
+
+    const womenCategoryIds = categories
+      .filter((category: any) => WOMEN_CATEGORY_NAMES.includes(category.name))
+      .map((category: any) => category.id);
+
+    if (womenCategoryIds.length === 0) {
+      return;
+    }
+
+    hasFetchedProducts.current = true;
+
+    (async () => {
+      await dispatch(
+        shopProductActions.doFetch(womenCategoryIds, undefined, undefined, undefined, true) as any,
+      );
+      await dispatch(shopProductActions.doFetchMore() as any);
+      await dispatch(shopProductActions.doFetchMore() as any);
+    })();
+  }, [dispatch, categories, categoriesLoading]);
 
   const greetingName =
     currentUser?.firstName || currentUser?.fullName || currentUser?.email;
@@ -69,30 +102,12 @@ function Home() {
     dispatch(cartActions.doAddItem(product, 1));
   };
 
-  // Prefer categories that resolve to a real icon (over the generic
-  // fallback tag), picking one per distinct icon so the row reads as a
-  // varied set rather than four near-duplicates.
-  const homeCategories = useMemo(() => {
-    const seenIcons = new Set<string>();
-    const iconic: any[] = [];
-
-    for (const category of categories) {
-      const icon = categoryIcon(category.name);
-
-      if (icon === FALLBACK_CATEGORY_ICON || seenIcons.has(icon)) {
-        continue;
-      }
-
-      seenIcons.add(icon);
-      iconic.push(category);
-
-      if (iconic.length === HOME_CATEGORY_COUNT) {
-        break;
-      }
-    }
-
-    return iconic.length > 0 ? iconic : categories.slice(0, HOME_CATEGORY_COUNT);
-  }, [categories]);
+  // Same priority order as the PC site (Women categories first) so the
+  // phone home row and the PC nav/sidebars always agree.
+  const homeCategories = useMemo(
+    () => sortCategoriesByPriority(categories as any[]).slice(0, HOME_CATEGORY_COUNT),
+    [categories],
+  );
 
   // Keep the homepage promo carousel broadly appealing rather than
   // spotlighting culturally/religiously specific items that happened to
@@ -238,7 +253,11 @@ function Home() {
                 onClick={() => goToCategory(category.id)}
               >
                 <div className="cat-icon icon-cat-icon">
-                  <span>{categoryIcon(category.name)}</span>
+                  {categoryIconImage(category.name) ? (
+                    <img src={categoryIconImage(category.name)!} alt="" loading="lazy" />
+                  ) : (
+                    <span>{categoryIcon(category.name)}</span>
+                  )}
                 </div>
                 <div className="cat-label">{category.name}</div>
               </div>
@@ -335,16 +354,16 @@ function Home() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --gold:#ffb020;
-          --pink:#ff5470;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --gold:#F59E0B;
+          --pink:#DC2626;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -382,11 +401,11 @@ function Home() {
         .scroll-area::-webkit-scrollbar{ display:none; }
 
         .app-header{
-          background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright) 65%, #4fa8ff);
+          background:linear-gradient(135deg, var(--blue-deep), var(--blue-bright) 65%, #E28E71);
           padding:14px 18px 26px;
           color:#fff;
           border-radius:0 0 26px 26px;
-          box-shadow:0 14px 30px rgba(11,26,74,0.22);
+          box-shadow:0 14px 30px rgba(0,0,0,0.22);
         }
 
         .header-top{
@@ -436,15 +455,15 @@ function Home() {
           background:#fff;
           border-radius:14px;
           padding:11px 14px;
-          box-shadow:0 10px 24px rgba(6,16,48,0.18);
+          box-shadow:0 10px 24px rgba(0,0,0,0.18);
           transition:box-shadow 0.15s ease;
         }
-        .search-row:focus-within{ box-shadow:0 10px 24px rgba(6,16,48,0.28), 0 0 0 2px rgba(255,255,255,0.5); }
+        .search-row:focus-within{ box-shadow:0 10px 24px rgba(0,0,0,0.28), 0 0 0 2px rgba(255,255,255,0.5); }
         .search-row input{
           border:none; outline:none; flex:1;
           font-size:14px; color:var(--navy); background:transparent;
         }
-        .search-row input::placeholder{ color:#9aa4c0; }
+        .search-row input::placeholder{ color:#888888; }
         .search-icon{ font-size:16px; color:var(--blue-mid); }
 
         .categories{ display:flex; justify-content:space-between; padding:22px 18px 6px; gap:8px; }
@@ -452,18 +471,21 @@ function Home() {
         .cat-icon{
           width:60px; height:60px; border-radius:18px;
           overflow:hidden;
-          box-shadow:0 8px 18px rgba(20,40,100,0.12);
+          box-shadow:0 8px 18px rgba(0,0,0,0.12);
           border:2px solid #fff;
           transition:transform 0.15s ease, box-shadow 0.15s ease;
         }
         .cat-item:hover .cat-icon, .cat-item:active .cat-icon{
           transform:translateY(-3px) scale(1.04);
-          box-shadow:0 12px 22px rgba(20,40,100,0.2);
+          box-shadow:0 12px 22px rgba(0,0,0,0.2);
         }
         .icon-cat-icon{
           display:flex; align-items:center; justify-content:center;
-          background:linear-gradient(150deg, #eef4ff, #dfe9fc);
+          background:linear-gradient(150deg, #FAFAFA, #E7E7E7);
           font-size:26px;
+        }
+        .icon-cat-icon img{
+          width:34px; height:34px; object-fit:contain;
         }
         .cat-label{
           font-size:11px; color:var(--navy); font-weight:600; text-align:center;
@@ -484,7 +506,7 @@ function Home() {
         .section-head .see-all{ font-size:12px; color:var(--blue-mid); font-weight:600; text-decoration:none; }
         .section-head .timer{
           font-size:11px; color:var(--pink); font-weight:700;
-          background:#ffeaee; padding:4px 10px; border-radius:10px;
+          background:#FCE9E9; padding:4px 10px; border-radius:10px;
         }
 
         .promo-carousel{
@@ -492,8 +514,8 @@ function Home() {
           height:210px;
           border-radius:24px;
           overflow:hidden;
-          background:#dfe6f5;
-          box-shadow:0 16px 32px rgba(11,26,74,0.18);
+          background:#E7E7E7;
+          box-shadow:0 16px 32px rgba(0,0,0,0.18);
         }
 
         .promo-slide{
@@ -511,7 +533,7 @@ function Home() {
         }
         .promo-overlay{
           position:absolute; inset:0;
-          background:linear-gradient(120deg, rgba(11,26,74,0.9) 20%, rgba(22,86,201,0.6) 70%, rgba(47,141,255,0.3) 100%);
+          background:linear-gradient(120deg, rgba(17,17,17,0.9) 20%, rgba(185,60,26,0.6) 70%, rgba(209,69,31,0.3) 100%);
         }
         .promo-content{
           position:relative;
@@ -558,12 +580,12 @@ function Home() {
         .deal-card{
           flex:0 0 auto; width:130px;
           background:var(--card-bg); border-radius:16px; overflow:hidden;
-          box-shadow:0 8px 20px rgba(20,40,100,0.1);
+          box-shadow:0 8px 20px rgba(0,0,0,0.1);
           cursor:pointer;
           transition:transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .deal-card:hover{ transform:translateY(-3px); box-shadow:0 12px 24px rgba(20,40,100,0.18); }
-        .deal-thumb{ width:100%; height:112px; position:relative; background:#eef2fb; }
+        .deal-card:hover{ transform:translateY(-3px); box-shadow:0 12px 24px rgba(0,0,0,0.18); }
+        .deal-thumb{ width:100%; height:112px; position:relative; background:#F4F4F4; }
         .deal-thumb img{ width:100%; height:100%; object-fit:cover; }
         .deal-thumb .off-tag{
           position:absolute; top:6px; left:6px;
@@ -577,24 +599,24 @@ function Home() {
         }
         .deal-price-row{ display:flex; align-items:baseline; gap:6px; margin-top:5px; }
         .deal-price{ font-size:13px; font-weight:800; color:var(--blue-deep); }
-        .deal-old{ font-size:10px; color:#b7c0d8; text-decoration:line-through; }
+        .deal-old{ font-size:10px; color:#888888; text-decoration:line-through; }
 
         .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:6px 18px 24px; }
         .prod-card{
           background:var(--card-bg); border-radius:16px; overflow:hidden;
-          box-shadow:0 8px 20px rgba(20,40,100,0.08);
+          box-shadow:0 8px 20px rgba(0,0,0,0.08);
           cursor:pointer;
           transition:transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .prod-card:hover{ transform:translateY(-3px); box-shadow:0 14px 26px rgba(20,40,100,0.16); }
-        .prod-thumb{ width:100%; height:140px; position:relative; background:#eef2fb; }
+        .prod-card:hover{ transform:translateY(-3px); box-shadow:0 14px 26px rgba(0,0,0,0.16); }
+        .prod-thumb{ width:100%; height:140px; position:relative; background:#F4F4F4; }
         .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
         .prod-badge{
           position:absolute; top:8px; left:8px;
           font-size:9px; font-weight:800; letter-spacing:0.3px;
           padding:3px 7px; border-radius:6px; color:#fff;
         }
-        .prod-badge.new{ background:rgba(14,27,69,0.8); }
+        .prod-badge.new{ background:rgba(17,17,17,0.8); }
         .prod-badge.hot{ background:var(--pink); }
         .prod-info{ padding:10px 12px 12px; }
         .prod-name{
@@ -611,7 +633,7 @@ function Home() {
           color:#fff; border:none; font-size:16px;
           display:flex; align-items:center; justify-content:center;
           cursor:pointer;
-          box-shadow:0 6px 14px rgba(47,141,255,0.4);
+          box-shadow:0 6px 14px rgba(209,69,31,0.4);
           transition:transform 0.15s ease;
         }
         .add-btn:hover{ transform:scale(1.1); }

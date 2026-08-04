@@ -6,6 +6,8 @@ import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
+import categoryIconImage from "src/view/pages/PC/categoryIconImage";
+import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -15,6 +17,7 @@ function Classification() {
   const location = useLocation<{ categoryId?: string; search?: string }>();
 
   const categories = useSelector(shopCategorySelectors.selectRows);
+  const orderedCategories = sortCategoriesByPriority(categories as any[]);
   const categoriesLoading = useSelector(shopCategorySelectors.selectLoading);
   const products = useSelector(shopProductSelectors.selectRows);
   const productsLoading = useSelector(shopProductSelectors.selectLoading);
@@ -37,10 +40,10 @@ function Classification() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!selectedCategoryId && categories.length > 0) {
-      setSelectedCategoryId(categories[0].id);
+    if (!selectedCategoryId && orderedCategories.length > 0) {
+      setSelectedCategoryId(orderedCategories[0].id);
     }
-  }, [categories, selectedCategoryId]);
+  }, [orderedCategories, selectedCategoryId]);
 
   // Debounce the search box so we're not firing a request on every
   // keystroke - the actual filtering happens server-side (paginated), not
@@ -123,14 +126,18 @@ function Classification() {
             )}
 
             {!categoriesLoading &&
-              categories.map((category: any) => (
+              orderedCategories.map((category: any) => (
                 <div
                   key={category.id}
                   className={`side-item${category.id === selectedCategoryId ? " active" : ""}`}
                   onClick={() => setSelectedCategoryId(category.id)}
                 >
                   <div className="thumb icon-thumb">
-                    <span>{categoryIcon(category.name)}</span>
+                    {categoryIconImage(category.name) ? (
+                      <img src={categoryIconImage(category.name)!} alt="" loading="lazy" />
+                    ) : (
+                      <span>{categoryIcon(category.name)}</span>
+                    )}
                   </div>
                   <span>{category.name}</span>
                 </div>
@@ -218,16 +225,16 @@ function Classification() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --sidebar-bg:#eef2fb;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --gold:#ffb020;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --sidebar-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --gold:#F59E0B;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -270,7 +277,7 @@ function Classification() {
           border:none; outline:none; flex:1;
           font-size:14px; color:var(--navy); background:transparent;
         }
-        .search-row input::placeholder{ color:#9aa4c0; }
+        .search-row input::placeholder{ color:#888888; }
         .search-icon{ font-size:16px; color:var(--blue-mid); }
 
         /* ---------- Body split ---------- */
@@ -325,6 +332,9 @@ function Classification() {
           background:#fff;
           font-size:20px;
         }
+        .icon-thumb img{
+          width:26px; height:26px; object-fit:contain;
+        }
 
         .side-item.active{
           background:var(--page-bg);
@@ -378,7 +388,7 @@ function Classification() {
           background:var(--card-bg);
           border-radius:16px;
           overflow:hidden;
-          box-shadow:0 8px 20px rgba(20,40,100,0.08);
+          box-shadow:0 8px 20px rgba(0,0,0,0.08);
           cursor:pointer;
         }
         .prod-thumb{ width:100%; height:120px; position:relative; background:var(--sidebar-bg); }
@@ -397,7 +407,7 @@ function Classification() {
           color:#fff; border:none; font-size:15px;
           display:flex; align-items:center; justify-content:center;
           cursor:pointer;
-          box-shadow:0 6px 14px rgba(47,141,255,0.4);
+          box-shadow:0 6px 14px rgba(209,69,31,0.4);
         }
 
         .load-more-sentinel{
@@ -409,7 +419,7 @@ function Classification() {
 
         .skeleton-card{ pointer-events:none; }
         .skeleton-block, .skeleton-line{
-          background:linear-gradient(90deg, #e7ecf8 25%, #f2f5fc 37%, #e7ecf8 63%);
+          background:linear-gradient(90deg, #E7E7E7 25%, #FAFAFA 37%, #E7E7E7 63%);
           background-size:400% 100%;
           animation:skeleton-pulse 1.4s ease infinite;
           border-radius:6px;

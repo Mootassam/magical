@@ -83,13 +83,17 @@ function Register() {
 
   return (
     <>
+      <div className="auth-page">
       <div className="card">
 
         <div className="topbar">
           <button type="button" className="back-btn" onClick={() => window.history.back()} aria-label="Go back">←</button>
         </div>
 
-<img src="/images/home/logo.webp" alt="" style={{ width: '60%', display: 'block', margin: '0 auto 12px' }} />
+{/* <img src="/images/home/logo.webp" alt="" style={{ width: '60%', display: 'block', margin: '0 auto 12px' }} /> */}
+
+{/* Here we will add the logo later  */}
+
 
         <div className="form-title">Create your account</div>
         <div className="form-sub">Join Estore and start shopping smarter</div>
@@ -155,29 +159,30 @@ function Register() {
         <div className="login-note">Already have an account? <Link to="/auth/signin">Log in</Link></div>
 
       </div>
+      </div>
 
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --field-bg:#f3f6fc;
-          --field-border:#dde4f2;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --field-bg:#FAFAFA;
+          --field-border:#E7E7E7;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
 
-        body{
+        .auth-page{
           font-family:'Segoe UI', Roboto, Arial, sans-serif;
-          background: radial-gradient(circle at 30% 15%, #eaf1ff 0%, var(--page-bg) 55%, #e6ecfa 100%);
+          background: radial-gradient(circle at 30% 15%, #E7E7E7 0%, var(--page-bg) 55%, #E7E7E7 100%);
           min-height:100vh;
           display:flex;
-          align-items:center;
+          align-items:flex-start;
           justify-content:center;
           padding:24px;
         }
@@ -194,7 +199,7 @@ function Register() {
           border:1px solid var(--field-border);
           border-radius:20px;
           padding:36px 28px 30px;
-          box-shadow:0 20px 50px rgba(20,40,100,0.10), 0 0 0 1px rgba(47,141,255,0.03) inset;
+          box-shadow:0 20px 50px rgba(0,0,0,0.10), 0 0 0 1px rgba(209,69,31,0.03) inset;
           animation:cardIn 0.45s ease both;
         }
 
@@ -216,7 +221,7 @@ function Register() {
           cursor:pointer;
           transition:background-color 0.2s ease, transform 0.15s ease;
         }
-        .back-btn:hover{ background:#e9eefc; }
+        .back-btn:hover{ background:#E7E7E7; }
         .back-btn:active{ transform:scale(0.92); }
 
         .logo-wrap{
@@ -230,11 +235,11 @@ function Register() {
           width:100px;
           height:100px;
           border-radius:24px;
-          background:#f7faff;
+          background:#FAFAFA;
           display:flex;
           align-items:center;
           justify-content:center;
-          box-shadow:0 8px 24px rgba(47,141,255,0.18), 0 0 0 1px rgba(47,141,255,0.12);
+          box-shadow:0 8px 24px rgba(209,69,31,0.18), 0 0 0 1px rgba(209,69,31,0.12);
           overflow:hidden;
         }
         .logo-badge svg{ width:74px; height:74px; }
@@ -286,16 +291,16 @@ function Register() {
           outline:none;
           transition:border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        input::placeholder{ color:#a3adc7; }
+        input::placeholder{ color:#888888; }
         input:focus{
           border-color:var(--blue-bright);
-          box-shadow:0 0 0 3px rgba(47,141,255,0.15);
+          box-shadow:0 0 0 3px rgba(209,69,31,0.15);
         }
 
         .invalid-feedback{
           display:block;
           font-size:11.5px;
-          color:#ff3b30;
+          color:#DC2626;
           margin-top:4px;
         }
 
@@ -353,7 +358,7 @@ function Register() {
           font-weight:700;
           letter-spacing:0.3px;
           cursor:pointer;
-          box-shadow:0 10px 25px rgba(47,141,255,0.35);
+          box-shadow:0 10px 25px rgba(209,69,31,0.35);
           transition:transform 0.15s ease, box-shadow 0.15s ease;
           display:flex;
           align-items:center;
@@ -362,7 +367,7 @@ function Register() {
         }
         .register-btn:hover{
           transform:translateY(-2px);
-          box-shadow:0 14px 30px rgba(47,141,255,0.45);
+          box-shadow:0 14px 30px rgba(209,69,31,0.45);
         }
         .register-btn:active{ transform:translateY(0); }
         .register-btn:disabled{ opacity:0.7; cursor:not-allowed; transform:none; }

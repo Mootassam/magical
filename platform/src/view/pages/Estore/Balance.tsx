@@ -54,19 +54,19 @@ function Balance() {
 
           <div className="quick-links">
             <Link to="/recharge-record" className="ql-item">
-              <div className="ql-icon" style={{ background: '#eafaf1' }}>🧾</div>
+              <div className="ql-icon" style={{ background: '#E9F9EF' }}>🧾</div>
               <div className="ql-label">Recharge<br />record</div>
             </Link>
             <Link to="/withdrawal-record" className="ql-item">
-              <div className="ql-icon" style={{ background: '#fff3e6' }}>📤</div>
+              <div className="ql-icon" style={{ background: '#FEF5E7' }}>📤</div>
               <div className="ql-label">Withdrawals<br />record</div>
             </Link>
             <Link to="/wallet-management" className="ql-item">
-              <div className="ql-icon" style={{ background: '#f1edfd' }}>👛</div>
+              <div className="ql-icon" style={{ background: '#E9EFFD' }}>👛</div>
               <div className="ql-label">Wallet<br />management</div>
             </Link>
             <Link to="/bank-card-management" className="ql-item">
-              <div className="ql-icon" style={{ background: '#e8f1ff' }}>💳</div>
+              <div className="ql-icon" style={{ background: '#E7E7E7' }}>💳</div>
               <div className="ql-label">Bank card<br />management</div>
             </Link>
           </div>
@@ -79,15 +79,15 @@ function Balance() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -146,9 +146,9 @@ function Balance() {
           margin:18px 16px 0;
           border-radius:22px;
           padding:22px 20px;
-          background:linear-gradient(135deg, #16265c 0%, #1656c9 55%, #2f8dff 100%);
+          background:linear-gradient(135deg, #7F2B15 0%, #B93C1A 55%, #D1451F 100%);
           color:#fff;
-          box-shadow:0 16px 36px rgba(20,60,150,0.28);
+          box-shadow:0 16px 36px rgba(0,0,0,0.28);
           position:relative;
           overflow:hidden;
         }
@@ -225,7 +225,7 @@ function Balance() {
           margin:18px 16px 0;
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           padding:16px 8px;
         }
         .ql-item{

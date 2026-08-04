@@ -314,16 +314,16 @@ function Topup() {
 
       <style>{`
   :root{
-    --navy:#0e1b45;
-    --blue-bright:#2f8dff;
-    --blue-mid:#1656c9;
-    --blue-deep:#0b3fae;
-    --white:#ffffff;
-    --page-bg:#f4f7fd;
-    --card-bg:#ffffff;
-    --grey-text:#6b7590;
-    --grey-light:#eef2fa;
-    --field-border:#dde4f2;
+    --navy:#111111;
+    --blue-bright:#D1451F;
+    --blue-mid:#B93C1A;
+    --blue-deep:#7F2B15;
+    --white:#FFFFFF;
+    --page-bg:#FAFAFA;
+    --card-bg:#FFFFFF;
+    --grey-text:#555555;
+    --grey-light:#F4F4F4;
+    --field-border:#E7E7E7;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -380,7 +380,7 @@ function Topup() {
   .form-card{
     background:var(--card-bg);
     border-radius:18px;
-    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    box-shadow:0 8px 20px rgba(0,0,0,0.07);
     padding:18px 16px;
   }
 
@@ -452,7 +452,7 @@ function Topup() {
     margin-top:6px;
   }
   .fee-usdt{
-    color:#9aa4c0;
+    color:#888888;
   }
   .unit-tag{
     color:var(--grey-text);
@@ -485,7 +485,7 @@ function Topup() {
     color:var(--navy);
     outline:none;
   }
-  .text-input::placeholder{ color:#a9b3cf; }
+  .text-input::placeholder{ color:#888888; }
 
   /* ---------- Upload box ---------- */
   .upload-wrap{
@@ -495,7 +495,7 @@ function Topup() {
   }
   .upload-box{
     width:130px; height:130px;
-    border:1.6px dashed #c3cbe0;
+    border:1.6px dashed #E7E7E7;
     border-radius:14px;
     display:flex;
     flex-direction:column;
@@ -503,11 +503,11 @@ function Topup() {
     justify-content:center;
     gap:8px;
     color:var(--grey-text);
-    background:#fbfcff;
+    background:#FAFAFA;
     cursor:pointer;
     overflow:hidden;
   }
-  .upload-box .plus{ font-size:28px; color:#c3cbe0; }
+  .upload-box .plus{ font-size:28px; color:#888888; }
   .upload-box .lbl{ font-size:12px; font-weight:600; text-align:center; color:var(--navy); }
   .upload-preview{ width:100%; height:100%; object-fit:cover; }
 
@@ -523,7 +523,7 @@ function Topup() {
     font-weight:800;
     letter-spacing:0.3px;
     cursor:pointer;
-    box-shadow:0 10px 22px rgba(47,141,255,0.4);
+    box-shadow:0 10px 22px rgba(209,69,31,0.4);
   }
   .submit-btn:disabled{
     opacity:0.6;

@@ -138,17 +138,17 @@ function ShopDetails() {
 
       <style>{`
   :root{
-    --navy:#0e1b45;
-    --blue-bright:#2f8dff;
-    --blue-mid:#1656c9;
-    --blue-deep:#0b3fae;
-    --white:#ffffff;
-    --page-bg:#f4f7fd;
-    --card-bg:#ffffff;
-    --grey-text:#6b7590;
-    --grey-light:#eef2fa;
-    --gold:#ffb020;
-    --green:#12b886;
+    --navy:#111111;
+    --blue-bright:#D1451F;
+    --blue-mid:#B93C1A;
+    --blue-deep:#7F2B15;
+    --white:#FFFFFF;
+    --page-bg:#FAFAFA;
+    --card-bg:#FFFFFF;
+    --grey-text:#555555;
+    --grey-light:#F4F4F4;
+    --gold:#F59E0B;
+    --green:#22C55E;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
@@ -209,7 +209,7 @@ function ShopDetails() {
   .profile-card{
     background:var(--card-bg);
     border-radius:20px;
-    box-shadow:0 8px 20px rgba(20,40,100,0.07);
+    box-shadow:0 8px 20px rgba(0,0,0,0.07);
     padding:18px 16px;
     display:flex;
     gap:14px;
@@ -219,7 +219,7 @@ function ShopDetails() {
     border-radius:50%;
     overflow:hidden;
     flex-shrink:0;
-    border:3px solid #eef2fa;
+    border:3px solid #F4F4F4;
   }
   .shop-avatar img{ width:100%; height:100%; object-fit:cover; }
   .shop-avatar-fallback{
@@ -239,8 +239,8 @@ function ShopDetails() {
   }
   .shop-name{ font-size:16px; font-weight:800; color:var(--navy); }
   .level-badge{
-    background:linear-gradient(135deg, #ffe6ac, var(--gold));
-    color:#7a4b00;
+    background:linear-gradient(135deg, #FEF5E7, var(--gold));
+    color:#92400E;
     font-size:10px;
     font-weight:800;
     padding:2px 8px;
@@ -268,7 +268,7 @@ function ShopDetails() {
   .stat-card{
     background:var(--card-bg);
     border-radius:14px;
-    box-shadow:0 8px 18px rgba(20,40,100,0.06);
+    box-shadow:0 8px 18px rgba(0,0,0,0.06);
     padding:14px 6px;
     text-align:center;
   }
@@ -297,20 +297,20 @@ function ShopDetails() {
     font-size:13px;
     font-weight:700;
     cursor:pointer;
-    box-shadow:0 8px 18px rgba(47,141,255,0.35);
+    box-shadow:0 8px 18px rgba(209,69,31,0.35);
   }
 
   /* ---------- Highlight balance strip ---------- */
   .balance-strip{
     margin-top:16px;
-    background:linear-gradient(120deg, #16265c, #1656c9 60%, #2f8dff);
+    background:linear-gradient(120deg, #7F2B15, #B93C1A 60%, #D1451F);
     border-radius:18px;
     padding:16px 18px;
     color:#fff;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    box-shadow:0 14px 30px rgba(20,60,150,0.25);
+    box-shadow:0 14px 30px rgba(0,0,0,0.25);
   }
   .balance-label{ font-size:11.5px; opacity:0.85; }
   .balance-value{ font-size:22px; font-weight:800; margin-top:4px; }

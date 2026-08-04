@@ -7,9 +7,14 @@ import ScreenRoute from "src/view/shared/routes/ScreenRoute";
 import { useSelector } from "react-redux";
 import authSelectors from "src/modules/auth/authSelectors";
 import ProgressBar from "src/view/shared/ProgressBar";
-import { Route, Switch } from "react-router-dom";
+import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import EmptyPermissionsRoute from "src/view/shared/routes/EmptyPermissionsRoute";
 import EstoreRoute from "src/view/shared/routes/EstoreRoute";
+import PCRoute from "src/view/shared/routes/PCRoute";
+import PCPublicRoute from "src/view/shared/routes/PCPublicRoute";
+import PCPrivateRoute from "src/view/shared/routes/PCPrivateRoute";
+import useIsDesktop from "src/view/shared/hooks/useIsDesktop";
+import { getDeviceRedirectPath } from "src/view/shared/routes/deviceRouteMap";
 
 function RoutesComponent() {
   const isInitialMount = useRef(true);
@@ -19,6 +24,8 @@ function RoutesComponent() {
 
   const currentUser = useSelector(authSelectors.selectCurrentUser);
   const currentTenant = useSelector(authSelectors.selectCurrentTenant);
+  const location = useLocation();
+  const isDesktop = useIsDesktop();
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -33,6 +40,13 @@ function RoutesComponent() {
 
   if (loading) {
     return <div />;
+  }
+
+  const deviceRedirectTo = getDeviceRedirectPath(location.pathname, isDesktop);
+  if (deviceRedirectTo && deviceRedirectTo !== location.pathname) {
+    return (
+      <Redirect to={{ pathname: deviceRedirectTo, search: location.search }} />
+    );
   }
 
   return (
@@ -97,6 +111,36 @@ function RoutesComponent() {
           component={lazyRouter({
             loader: route.loader,
           })}
+        />
+      ))}
+      {routes.pcRoutes.map((route) => (
+        <PCRoute
+          key={route.path}
+          exact
+          path={route.path}
+          component={lazyRouter({
+            loader: route.loader,
+          })}
+        />
+      ))}
+      {routes.pcPublicRoutes.map((route) => (
+        <PCPublicRoute
+          exact
+          key={route.path}
+          path={route.path}
+          component={lazyRouter({ loader: route.loader })}
+          currentUser={currentUser}
+          currentTenant={currentTenant}
+        />
+      ))}
+      {routes.pcPrivateRoutes.map((route) => (
+        <PCPrivateRoute
+          exact
+          key={route.path}
+          path={route.path}
+          component={lazyRouter({ loader: route.loader })}
+          currentUser={currentUser}
+          currentTenant={currentTenant}
         />
       ))}
       {routes.simpleRoutes.map((route) => (

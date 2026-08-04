@@ -157,18 +157,18 @@ function DepositRecord() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --red:#ff3b30;
-          --green:#12b886;
-          --amber:#ffb020;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --red:#DC2626;
+          --green:#22C55E;
+          --amber:#F59E0B;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -218,7 +218,7 @@ function DepositRecord() {
           display:flex;
           background:#fff;
           flex-shrink:0;
-          box-shadow:0 4px 12px rgba(20,40,100,0.05);
+          box-shadow:0 4px 12px rgba(0,0,0,0.05);
           padding:14px 10px;
         }
         .summary-item{ flex:1; text-align:center; border-right:1px solid var(--grey-light); }
@@ -254,7 +254,7 @@ function DepositRecord() {
         .record-card{
           background:var(--card-bg);
           border-radius:14px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           padding:14px;
           margin-bottom:12px;
         }
@@ -285,9 +285,9 @@ function DepositRecord() {
           padding:4px 10px;
           border-radius:8px;
         }
-        .status-pill.completed{ background:#e8f9f1; color:var(--green); }
-        .status-pill.processing{ background:#fff6e5; color:#c98a08; }
-        .status-pill.failed{ background:#ffeaea; color:var(--red); }
+        .status-pill.completed{ background:#E9F9EF; color:var(--green); }
+        .status-pill.processing{ background:#FEF5E7; color:#D08609; }
+        .status-pill.failed{ background:#FCE9E9; color:var(--red); }
 
         .proof-link{
           font-size:10.5px;

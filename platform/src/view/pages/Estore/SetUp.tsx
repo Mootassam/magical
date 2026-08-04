@@ -194,14 +194,14 @@ function SetUp() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-deep:#0b3fae;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --border:#eceff5;
-          --purple:#6c2bd9;
-          --crimson:#d81b5c;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-deep:#7F2B15;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --border:#F4F4F4;
+          --purple:#2563EB;
+          --crimson:#DC2626;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -325,8 +325,8 @@ function SetUp() {
         }
         .field-input:focus{ outline:none; border-color:var(--blue-bright); }
         .field-input.field-disabled{
-          background:#f7f8fb;
-          color:#9aa4c0;
+          background:#FAFAFA;
+          color:#888888;
           cursor:not-allowed;
         }
         .field-hint{ margin-top:8px; font-size:11.5px; color:var(--grey-text); }

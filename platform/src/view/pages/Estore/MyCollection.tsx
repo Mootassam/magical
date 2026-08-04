@@ -33,13 +33,13 @@ function MyCollection() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-deep:#0b3fae;
-          --purple:#6c2bd9;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --border:#eceff5;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-deep:#7F2B15;
+          --purple:#2563EB;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --border:#F4F4F4;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -115,7 +115,7 @@ function MyCollection() {
           width:72px; height:72px;
           border-radius:50%;
           background:var(--grey-light);
-          color:#b7c0d8;
+          color:#888888;
           display:flex;
           align-items:center;
           justify-content:center;

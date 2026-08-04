@@ -84,15 +84,15 @@ function MyAccount() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -150,7 +150,7 @@ function MyAccount() {
           background:var(--card-bg);
           margin:16px;
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           overflow:hidden;
         }
 
@@ -176,7 +176,7 @@ function MyAccount() {
           color:var(--blue-mid);
           text-decoration:none;
         }
-        .row-action .chev{ font-size:13px; color:#9fb3e0; }
+        .row-action .chev{ font-size:13px; color:#888888; }
 
         .hint{
           margin:14px 16px 0;

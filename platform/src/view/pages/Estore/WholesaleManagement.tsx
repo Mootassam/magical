@@ -316,17 +316,17 @@ function WholesaleManagement() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --field-border:#dde4f2;
-          --red:#ff3b30;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --field-border:#E7E7E7;
+          --red:#DC2626;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -375,7 +375,7 @@ function WholesaleManagement() {
         .tabs-wrap{
           background:#fff;
           flex-shrink:0;
-          box-shadow:0 4px 12px rgba(20,40,100,0.05);
+          box-shadow:0 4px 12px rgba(0,0,0,0.05);
         }
         .tabs-scroll{
           display:flex;
@@ -404,7 +404,7 @@ function WholesaleManagement() {
         .skeleton-chip{
           width:64px;
           height:26px;
-          background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+          background:linear-gradient(90deg, #F4F4F4 25%, #E7E7E7 37%, #F4F4F4 63%);
           background-size:400% 100%;
           animation:shimmer 1.4s ease infinite;
         }
@@ -426,7 +426,7 @@ function WholesaleManagement() {
           color:var(--navy);
           outline:none;
         }
-        .price-input::placeholder{ color:#a9b3cf; }
+        .price-input::placeholder{ color:#888888; }
         .price-input::-webkit-outer-spin-button,
         .price-input::-webkit-inner-spin-button{
           -webkit-appearance:none;
@@ -442,7 +442,7 @@ function WholesaleManagement() {
           border:none;
           border-radius:10px;
           padding:9px 16px;
-          box-shadow:0 6px 14px rgba(47,141,255,0.35);
+          box-shadow:0 6px 14px rgba(209,69,31,0.35);
           cursor:pointer;
         }
 
@@ -490,10 +490,10 @@ function WholesaleManagement() {
           background:var(--card-bg);
           border-radius:14px;
           overflow:hidden;
-          box-shadow:0 8px 18px rgba(20,40,100,0.07);
+          box-shadow:0 8px 18px rgba(0,0,0,0.07);
           cursor:pointer;
         }
-        .prod-thumb{ width:100%; height:130px; background:#f6f8fd; }
+        .prod-thumb{ width:100%; height:130px; background:#FAFAFA; }
         .prod-thumb img{ width:100%; height:100%; object-fit:cover; }
         .prod-info{ padding:10px 10px 12px; }
         .prod-name{
@@ -517,7 +517,7 @@ function WholesaleManagement() {
           width:30px; height:30px;
           border-radius:9px;
           border:1.4px solid var(--blue-bright);
-          background:#eef5ff;
+          background:#FAFAFA;
           color:var(--blue-mid);
           display:flex; align-items:center; justify-content:center;
           font-size:14px;
@@ -525,9 +525,9 @@ function WholesaleManagement() {
           flex-shrink:0;
         }
         .add-store-btn.listed{
-          border-color:#1ba672;
-          background:#e8f9f1;
-          color:#1ba672;
+          border-color:#22C55E;
+          background:#E9F9EF;
+          color:#22C55E;
           font-weight:800;
         }
 
@@ -537,7 +537,7 @@ function WholesaleManagement() {
           100%{ background-position:0 50%; }
         }
         .skeleton-block{
-          background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+          background:linear-gradient(90deg, #F4F4F4 25%, #E7E7E7 37%, #F4F4F4 63%);
           background-size:400% 100%;
           animation:shimmer 1.4s ease infinite;
         }
@@ -545,7 +545,7 @@ function WholesaleManagement() {
         .skeleton-line{
           height:12px;
           border-radius:6px;
-          background:linear-gradient(90deg, #eef2fa 25%, #e4eaf7 37%, #eef2fa 63%);
+          background:linear-gradient(90deg, #F4F4F4 25%, #E7E7E7 37%, #F4F4F4 63%);
           background-size:400% 100%;
           animation:shimmer 1.4s ease infinite;
         }
@@ -560,7 +560,7 @@ function WholesaleManagement() {
           background:linear-gradient(135deg, var(--blue-bright), var(--blue-deep));
           display:flex; align-items:center; justify-content:center;
           color:#fff; font-size:20px;
-          box-shadow:0 10px 24px rgba(47,141,255,0.45);
+          box-shadow:0 10px 24px rgba(209,69,31,0.45);
           z-index:15;
         }
 
@@ -568,7 +568,7 @@ function WholesaleManagement() {
         .modal-overlay{
           position:fixed;
           inset:0;
-          background:rgba(14,27,69,0.4);
+          background:rgba(0,0,0,0.4);
           display:flex;
           align-items:center;
           justify-content:center;
@@ -580,7 +580,7 @@ function WholesaleManagement() {
           max-width:360px;
           background:#fff;
           border-radius:16px;
-          box-shadow:0 24px 48px rgba(14,27,69,0.3);
+          box-shadow:0 24px 48px rgba(0,0,0,0.3);
           overflow:hidden;
         }
         .listing-modal-header{
@@ -655,7 +655,7 @@ function WholesaleManagement() {
           padding:9px 16px;
           border-radius:10px;
           cursor:pointer;
-          box-shadow:0 8px 18px rgba(47,141,255,0.35);
+          box-shadow:0 8px 18px rgba(209,69,31,0.35);
         }
       `}</style>
     </>

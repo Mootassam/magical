@@ -307,6 +307,158 @@ const estoreRoutes = [
 
 ].filter(Boolean);
 
+const pcRoutes = [
+  {
+    path: "/pc",
+    loader: () => import("src/view/pages/PC/Home"),
+    exact: true,
+  },
+  {
+    path: "/pc/classification",
+    loader: () => import("src/view/pages/PC/Classification"),
+    exact: true,
+  },
+  {
+    path: "/pc/product/:id",
+    loader: () => import("src/view/pages/PC/ProductDetails"),
+    exact: true,
+  },
+  {
+    path: "/pc/cart",
+    loader: () => import("src/view/pages/PC/Cart"),
+    exact: true,
+  },
+  {
+    path: "/pc/checkout",
+    loader: () => import("src/view/pages/PC/Checkout"),
+    exact: true,
+  },
+].filter(Boolean);
+
+const pcPublicRoutes = [
+  {
+    path: "/pc/auth/signin",
+    loader: () => import("src/view/pages/PC/Login"),
+  },
+  {
+    path: "/pc/auth/signup",
+    loader: () => import("src/view/pages/PC/Register"),
+  },
+].filter(Boolean);
+
+const pcPrivateRoutes = [
+  {
+    path: "/pc/mine",
+    loader: () => import("src/view/pages/PC/Mine/Home"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/account",
+    loader: () => import("src/view/pages/PC/Mine/MyAccount"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/orders",
+    loader: () => import("src/view/pages/PC/Mine/MyOrders"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/addresses",
+    loader: () => import("src/view/pages/PC/Mine/Addresses"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/collection",
+    loader: () => import("src/view/pages/PC/Mine/MyCollection"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/browse",
+    loader: () => import("src/view/pages/PC/Mine/MyBrowse"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/balance",
+    loader: () => import("src/view/pages/PC/Mine/Balance"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/deposit",
+    loader: () => import("src/view/pages/PC/Mine/Deposit"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/deposit-record",
+    loader: () => import("src/view/pages/PC/Mine/DepositRecord"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/withdrawal",
+    loader: () => import("src/view/pages/PC/Mine/Withdrawal"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/withdrawal-record",
+    loader: () => import("src/view/pages/PC/Mine/WithdrawalRecord"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/payment-password",
+    loader: () => import("src/view/pages/PC/Mine/PaymentPassword"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/apply-merchant",
+    loader: () => import("src/view/pages/PC/Mine/ApplyMerchant"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/messages",
+    loader: () => import("src/view/pages/PC/Mine/Messages"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/settings",
+    loader: () => import("src/view/pages/PC/Mine/Settings"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine/support",
+    loader: () => import("src/view/pages/PC/Mine/Support"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine-seller",
+    loader: () => import("src/view/pages/PC/MineSeller/Home"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine-seller/shop-details",
+    loader: () => import("src/view/pages/PC/MineSeller/ShopDetails"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine-seller/products",
+    loader: () => import("src/view/pages/PC/MineSeller/ProductManagement"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine-seller/orders",
+    loader: () => import("src/view/pages/PC/MineSeller/Orders"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine-seller/wholesale",
+    loader: () => import("src/view/pages/PC/MineSeller/WholesaleManagement"),
+    exact: true,
+  },
+  {
+    path: "/pc/mine-seller/settings",
+    loader: () => import("src/view/pages/PC/MineSeller/SellerSetUp"),
+    exact: true,
+  },
+].filter(Boolean);
+
 export default {
   privateRoutes,
   publicRoutes,
@@ -314,4 +466,7 @@ export default {
   screenRoutes,
   emptyPermissionsRoutes,
   estoreRoutes,
+  pcRoutes,
+  pcPublicRoutes,
+  pcPrivateRoutes,
 };

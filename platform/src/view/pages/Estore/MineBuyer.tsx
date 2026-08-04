@@ -108,47 +108,47 @@ function MineBuyer() {
 
           <div className="menu-card">
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#e8f1ff' }}>🧾</div>
+              <div className="menu-icon" style={{ background: '#E7E7E7' }}>🧾</div>
               <div className="menu-text">Billing records</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fdeef4' }}>📍</div>
+              <div className="menu-icon" style={{ background: '#FCE9E9' }}>📍</div>
               <div className="menu-text">Delivery address</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fff3e6' }}>❤️</div>
+              <div className="menu-icon" style={{ background: '#FEF5E7' }}>❤️</div>
               <div className="menu-text">My Collection</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#f1edfd' }}>🎧</div>
+              <div className="menu-icon" style={{ background: '#E9EFFD' }}>🎧</div>
               <div className="menu-text">Service Center</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#eafaf1' }}>👛</div>
+              <div className="menu-icon" style={{ background: '#E9F9EF' }}>👛</div>
               <div className="menu-text">Wallet Management</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#e8f1ff' }}>🔒</div>
+              <div className="menu-icon" style={{ background: '#E7E7E7' }}>🔒</div>
               <div className="menu-text">Login Password</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fdeef4' }}>🕘</div>
+              <div className="menu-icon" style={{ background: '#FCE9E9' }}>🕘</div>
               <div className="menu-text">My Browse</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#fff3e6' }}>🔑</div>
+              <div className="menu-icon" style={{ background: '#FEF5E7' }}>🔑</div>
               <div className="menu-text">Payment password</div>
               <span className="menu-arrow">›</span>
             </a>
             <a href="#" className="menu-item">
-              <div className="menu-icon" style={{ background: '#eafaf1' }}>⚙️</div>
+              <div className="menu-icon" style={{ background: '#E9F9EF' }}>⚙️</div>
               <div className="menu-text">Set up</div>
               <span className="menu-arrow">›</span>
             </a>
@@ -162,17 +162,17 @@ function MineBuyer() {
 
       <style>{`
         :root{
-          --navy:#0e1b45;
-          --blue-bright:#2f8dff;
-          --blue-mid:#1656c9;
-          --blue-deep:#0b3fae;
-          --white:#ffffff;
-          --page-bg:#f4f7fd;
-          --card-bg:#ffffff;
-          --grey-text:#6b7590;
-          --grey-light:#eef2fa;
-          --gold:#ffb020;
-          --green:#12b886;
+          --navy:#111111;
+          --blue-bright:#D1451F;
+          --blue-mid:#B93C1A;
+          --blue-deep:#7F2B15;
+          --white:#FFFFFF;
+          --page-bg:#FAFAFA;
+          --card-bg:#FFFFFF;
+          --grey-text:#555555;
+          --grey-light:#F4F4F4;
+          --gold:#F59E0B;
+          --green:#22C55E;
         }
 
         *{box-sizing:border-box; margin:0; padding:0;}
@@ -222,14 +222,14 @@ function MineBuyer() {
 
         /* ---------- Seller approved banner ---------- */
         .approved-banner{
-          background:linear-gradient(120deg, #0e9f6e, #12b886);
+          background:linear-gradient(120deg, #22C55E, #22C55E);
           border-radius:16px;
           padding:14px 16px;
           color:#fff;
           display:flex;
           align-items:center;
           gap:12px;
-          box-shadow:0 10px 24px rgba(18,184,134,0.3);
+          box-shadow:0 10px 24px rgba(34,197,94,0.3);
           margin-bottom:14px;
         }
         .approved-icon{ font-size:24px; flex-shrink:0; }
@@ -238,7 +238,7 @@ function MineBuyer() {
         .approved-sub{ font-size:11px; opacity:0.9; margin-top:2px; }
         .approved-link{
           background:#fff;
-          color:#0e9f6e;
+          color:#22C55E;
           font-size:11px;
           font-weight:800;
           padding:7px 12px;
@@ -252,7 +252,7 @@ function MineBuyer() {
         .profile-card{
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 10px 26px rgba(20,40,100,0.1);
+          box-shadow:0 10px 26px rgba(0,0,0,0.1);
           padding:16px;
           display:flex;
           align-items:center;
@@ -270,14 +270,14 @@ function MineBuyer() {
         .profile-name{ font-size:15.5px; font-weight:800; color:var(--navy); }
         .profile-email{ font-size:11.5px; color:var(--grey-text); margin-top:3px; }
         .profile-id{ font-size:11px; color:var(--grey-text); margin-top:2px; }
-        .profile-arrow{ font-size:16px; color:#c3cbe0; }
+        .profile-arrow{ font-size:16px; color:#888888; }
 
         /* ---------- Stats row ---------- */
         .stats-row{
           display:flex;
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           margin-top:12px;
           padding:16px 4px;
         }
@@ -290,7 +290,7 @@ function MineBuyer() {
         .orders-card{
           background:var(--card-bg);
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.07);
+          box-shadow:0 8px 20px rgba(0,0,0,0.07);
           margin-top:12px;
           padding:14px 6px;
         }
@@ -319,7 +319,7 @@ function MineBuyer() {
           flex:1;
           background:var(--card-bg);
           border-radius:14px;
-          box-shadow:0 8px 18px rgba(20,40,100,0.06);
+          box-shadow:0 8px 18px rgba(0,0,0,0.06);
           padding:12px 6px;
           text-align:center;
           text-decoration:none;
@@ -333,7 +333,7 @@ function MineBuyer() {
           background:var(--card-bg);
           margin-top:12px;
           border-radius:18px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           overflow:hidden;
         }
         .menu-item{
@@ -353,18 +353,18 @@ function MineBuyer() {
           flex-shrink:0;
         }
         .menu-text{ flex:1; font-size:13px; font-weight:600; color:var(--navy); }
-        .menu-arrow{ color:#c3cbe0; font-size:13px; }
+        .menu-arrow{ color:#888888; font-size:13px; }
 
         .logout-btn{
           margin-top:16px;
           background:var(--card-bg);
           border-radius:16px;
-          box-shadow:0 8px 20px rgba(20,40,100,0.06);
+          box-shadow:0 8px 20px rgba(0,0,0,0.06);
           padding:13px;
           text-align:center;
           font-size:13px;
           font-weight:700;
-          color:#ff5470;
+          color:#DC2626;
         }
       `}</style>
     </>
