@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { parse } from "csv-parse";
 import MongooseRepository from "../database/repositories/mongooseRepository";
 import ProductCategoryRepository from "../database/repositories/productCategoryRepository";
@@ -9,6 +10,7 @@ import {
   TARGET_CATEGORIES,
   classifyUkDataRow,
   classifyFashionRow,
+  classifyClothingRow,
 } from "./fashionCategoryClassifier";
 
 // Sample product data ships as static files read straight off the server's
@@ -23,6 +25,8 @@ const DATA_DIR = process.env.SAMPLE_PRODUCTS_DATA_DIR || DEFAULT_DATA_DIR;
 
 const FASHION_CSV = path.join(DATA_DIR, "fashion.csv");
 const UK_DATA_CSV = path.join(DATA_DIR, "UK_data.csv");
+const PERFUME_CSV = path.join(DATA_DIR, "perfume.csv");
+const CLOTHING_CSV = path.join(DATA_DIR, "clothing.csv");
 
 const BATCH_SIZE = 500;
 // UK_data.csv is ~2.2M rows - bigger batches keep the round trips to Mongo
@@ -62,6 +66,14 @@ function toHttpUrl(value) {
   return value && value.toString().startsWith("http")
     ? value.toString()
     : undefined;
+}
+
+// perfume.csv/clothing.csv have no natural per-row id (unlike fashion.csv's
+// ProductId or UK_data.csv's asin), so the title is hashed to build a stable
+// dedupe key instead - the same title always resolves to the same
+// importHash across runs.
+function hashTitle(title) {
+  return crypto.createHash("sha1").update(title).digest("hex").slice(0, 16);
 }
 
 // Resolves a raw category label (e.g. a CSV "Gender"/"categoryName" value)
@@ -291,6 +303,53 @@ async function mapUkDataRow(record, ctx) {
   };
 }
 
+// perfume.csv columns: title,description,imageUrl,price - fragrances map
+// onto "Global Purchase", the same category UK_data.csv's own "Fragrances"
+// rows resolve to (see classifyUkDataRow), so perfumes get their own visible
+// bucket instead of being buried in the much larger Lifestyle category.
+async function mapPerfumeRow(record, ctx) {
+  const title = (record.title || "").toString().trim();
+
+  if (!title) {
+    return null;
+  }
+
+  const categoryId = await ctx.categoryResolver.resolve("Global Purchase");
+  const price = toPositiveNumber(record.price) || randomPrice();
+
+  return {
+    title: title.slice(0, 500),
+    description: (record.description || "").toString().trim().slice(0, 2000),
+    image: toHttpUrl(record.imageUrl),
+    importHash: `import:perfume-csv:${hashTitle(title)}`,
+    ...baseFields(ctx, price, categoryId),
+  };
+}
+
+// clothing.csv columns: title,description,imageUrl,price - the file has no
+// separate gender column, so classifyClothingRow scans the title itself and
+// resolves to one of the existing Women Clothing/Men Clothing/Lifestyle
+// categories (never a new one).
+async function mapClothingRow(record, ctx) {
+  const title = (record.title || "").toString().trim();
+
+  if (!title) {
+    return null;
+  }
+
+  const targetCategory = classifyClothingRow(title);
+  const categoryId = await ctx.categoryResolver.resolve(targetCategory);
+  const price = toPositiveNumber(record.price) || randomPrice();
+
+  return {
+    title: title.slice(0, 500),
+    description: (record.description || "").toString().trim().slice(0, 2000),
+    image: toHttpUrl(record.imageUrl),
+    importHash: `import:clothing-csv:${hashTitle(title)}`,
+    ...baseFields(ctx, price, categoryId),
+  };
+}
+
 class SampleProductImportService {
   static async run(options) {
     if (!fs.existsSync(DATA_DIR)) {
@@ -325,6 +384,28 @@ class SampleProductImportService {
       productsCreated += created;
       productsSkipped += skipped;
       datasetSummaries.push({ dataset: "fashion.csv", imported: created });
+    }
+
+    if (fs.existsSync(PERFUME_CSV)) {
+      const { created, skipped } = await importCsvFile(
+        PERFUME_CSV,
+        Product,
+        (record) => mapPerfumeRow(record, ctx)
+      );
+      productsCreated += created;
+      productsSkipped += skipped;
+      datasetSummaries.push({ dataset: "perfume.csv", imported: created });
+    }
+
+    if (fs.existsSync(CLOTHING_CSV)) {
+      const { created, skipped } = await importCsvFile(
+        CLOTHING_CSV,
+        Product,
+        (record) => mapClothingRow(record, ctx)
+      );
+      productsCreated += created;
+      productsSkipped += skipped;
+      datasetSummaries.push({ dataset: "clothing.csv", imported: created });
     }
 
     let backgroundImport: any = null;

@@ -23,7 +23,6 @@ export type TargetCategory = (typeof TARGET_CATEGORIES)[number];
 
 const BEAUTY_CATEGORY_NAMES = new Set([
   "Skin Care",
-  "Fragrances",
   "Make Up",
   "Manicure & Pedicure Products",
   "Hair Care",
@@ -92,14 +91,19 @@ const SHOE_GENRE_CATEGORY_NAMES = new Set([
   "Snowboard Boots",
 ]);
 
+// Note: these must match UK_data.csv's own categoryName casing verbatim -
+// classifyUkDataRow is called directly with the raw CSV value (mapUkDataRow
+// passes record.categoryName as-is, with no capitalize() pass), unlike the
+// one-time normalizeFashionCategories.ts migration which looked names up via
+// an already-capitalized productCategory document.
 const SCAN_ALLOWLIST = new Set<string>([
   "Men",
   "Women",
   "Handmade Clothing, Shoes & Accessories",
-  "Luggage And Travel Gear",
+  "Luggage and travel gear",
   "Ski Clothing",
-  "Gifts For Her",
-  "Gifts For Him",
+  "Gifts for Her",
+  "Gifts for Him",
   ...SHOE_GENRE_CATEGORY_NAMES,
 ]);
 
@@ -115,6 +119,11 @@ export function classifyUkDataRow(
 ): TargetCategory | null {
   const t = title || "";
 
+  // Fragrances get their own bucket (Global Purchase) rather than being
+  // folded into the generic Lifestyle catch-all, matching perfume.csv rows
+  // (see mapPerfumeRow) so fragrance products aren't buried in Lifestyle.
+  if (rawCategoryName === "Fragrances") return "Global Purchase";
+
   if (rawCategoryName && BEAUTY_CATEGORY_NAMES.has(rawCategoryName)) {
     return "Lifestyle";
   }
@@ -125,7 +134,7 @@ export function classifyUkDataRow(
   const isWomenShoeCategory = /^Women.?s Sports & Outdoor Shoes$/i.test(rawCategoryName || "");
   const isMenShoeCategory = /^Men.?s Sports & Outdoor Shoes$/i.test(rawCategoryName || "");
   const isJewelleryCategory =
-    rawCategoryName === "Handmade Jewellery" || rawCategoryName === "Made In Italy Handmade";
+    rawCategoryName === "Handmade Jewellery" || rawCategoryName === "Made in Italy Handmade";
   const isGiftForHer = rawCategoryName === "Gifts For Her";
   const isGiftForHim = rawCategoryName === "Gifts For Him";
   const isShoeGenreCategory = SHOE_GENRE_CATEGORY_NAMES.has(rawCategoryName || "");
@@ -198,4 +207,19 @@ export function classifyFashionRow(
   if (g === "Women") return isFootwear ? "Women Shoes" : "Women Clothing";
   if (g === "Men") return isFootwear ? "Men Shoes" : "Men Clothing";
   return null;
+}
+
+/**
+ * Classifies a clothing.csv row (title only - the file has no separate
+ * gender column) into Women/Men Clothing by scanning the title for a
+ * gender word, the same way classifyUkDataRow does for UK_data.csv. Every
+ * row in clothing.csv is already a garment, so this never returns null -
+ * titles with no clear gender signal fall back to Lifestyle, matching how
+ * ambiguous fashion items are already handled elsewhere in this file.
+ */
+export function classifyClothingRow(title: string): TargetCategory {
+  const gender = detectGender(title || "");
+  if (gender === "women") return "Women Clothing";
+  if (gender === "men") return "Men Clothing";
+  return "Lifestyle";
 }

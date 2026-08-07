@@ -30,6 +30,9 @@ export default class ShopProductService {
           filter,
           limit,
           offset,
+          // Highest-priced products first across the storefront's category
+          // and search browsing.
+          orderBy: "price_DESC",
         },
       },
     );
@@ -75,6 +78,9 @@ export default class ShopProductService {
           filter,
           limit,
           offset,
+          // Highest-priced products first across the storefront's category
+          // and search browsing.
+          orderBy: "price_DESC",
         },
       },
     );
