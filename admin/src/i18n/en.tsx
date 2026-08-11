@@ -47,6 +47,13 @@ const en = {
     title: 'Company Description',
     faqs: 'Frequently asked questions ',
     TC: 'Terms & Conditions',
+    joinUs: 'Join Us',
+    contactUs: 'Contact Us',
+    merchantAgreement: 'Merchant Agreement',
+    supplierCooperation: 'Supplier Cooperation',
+    strategicManagement: 'Strategic Management',
+    precisionOperation: 'Precision Operation',
+    courseDriven: 'Course Driven',
   },
   app: {
     title: 'Admin Panel',

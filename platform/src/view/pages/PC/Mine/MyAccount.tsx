@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -9,6 +9,8 @@ import InputFormItem from "src/shared/form/InputFormItem";
 import ButtonIcon from "src/shared/ButtonIcon";
 import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
+import storeActions from "src/modules/store/storeActions";
+import storeSelectors from "src/modules/store/storeSelectors";
 import Message from "src/view/shared/message";
 import MineShell from "./MineShell";
 
@@ -46,8 +48,18 @@ function MyAccount() {
   const dispatch = useDispatch();
   const currentUser = useSelector(authSelectors.selectCurrentUser);
   const saveLoading = useSelector(authSelectors.selectLoadingPasswordChange);
+  const store = useSelector(storeSelectors.selectStore);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (currentUser?.store) {
+      dispatch(storeActions.doInit());
+    }
+  }, [dispatch, currentUser?.store]);
+
+  const displayIdLabel = store?.storeId ? "Store ID" : "ID";
+  const displayId = store?.storeId || currentUser?.id;
 
   const form = useForm({
     resolver: yupResolver(schema),
@@ -62,10 +74,10 @@ function MyAccount() {
   };
 
   const doCopyId = () => {
-    if (!currentUser?.id) return;
-    navigator.clipboard?.writeText(currentUser.id);
+    if (!displayId) return;
+    navigator.clipboard?.writeText(displayId);
     setCopied(true);
-    Message.success("ID copied to clipboard");
+    Message.success(`${displayIdLabel} copied to clipboard`);
     setTimeout(() => setCopied(false), 1500);
   };
 
@@ -75,9 +87,9 @@ function MyAccount() {
 
       <div className="pc-card pc-mine__panel">
         <div className="pc-mine__row">
-          <span className="pc-mine__row-label">ID</span>
+          <span className="pc-mine__row-label">{displayIdLabel}</span>
           <span className="pc-mine__row-value">
-            {currentUser?.id}
+            {displayId}
             <button type="button" className="pc-mine__copy-btn" onClick={doCopyId}>
               {copied ? "Copied" : "Copy"}
             </button>

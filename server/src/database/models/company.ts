@@ -33,6 +33,27 @@ export default (database) => {
       faqs: {
         type: String,
       },
+      joinUs: {
+        type: String,
+      },
+      contactUs: {
+        type: String,
+      },
+      merchantAgreement: {
+        type: String,
+      },
+      supplierCooperation: {
+        type: String,
+      },
+      strategicManagement: {
+        type: String,
+      },
+      precisionOperation: {
+        type: String,
+      },
+      courseDriven: {
+        type: String,
+      },
       photo: [FileSchema],
       tenant: {
         type: Schema.Types.ObjectId,

@@ -89,6 +89,48 @@ const privateRoutes = [
     exact: true,
   },
   {
+    path: '/join-us',
+    loader: () => import('src/view/company/JoinUs'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/contact-us',
+    loader: () => import('src/view/company/ContactUs'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/merchant-agreement',
+    loader: () => import('src/view/company/MerchantAgreement'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/supplier-cooperation',
+    loader: () => import('src/view/company/SupplierCooperation'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/strategic-management',
+    loader: () => import('src/view/company/StrategicManagement'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/precision-operation',
+    loader: () => import('src/view/company/PrecisionOperation'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
+    path: '/course-driven',
+    loader: () => import('src/view/company/CourseDriven'),
+    permissionRequired: permissions.categoryRead,
+    exact: true,
+  },
+  {
     path: '/category',
     loader: () =>
       import('src/view/category/list/CategoryListPage'),

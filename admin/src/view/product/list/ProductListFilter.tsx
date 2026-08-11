@@ -12,7 +12,45 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FilterPreview from 'src/view/shared/filter/FilterPreview';
 import filterRenders from 'src/modules/shared/filter/filterRenders';
 import InputFormItem from 'src/view/shared/form/items/InputFormItem';
-import VipAutocompleteFormItem from 'src/view/vip/autocomplete/VipAutocompleteFormItem';
+import AutocompleteInMemoryFormItem from 'src/view/shared/form/items/AutocompleteInMemoryFormItem';
+import ProductCategoryService from 'src/modules/productCategory/productCategoryService';
+
+// Products are filtered by the storefront's product-category taxonomy
+// (Women Clothing, Men Shoes, Global Purchase, ...), not the unrelated
+// `category` entity - so this loads straight from ProductCategoryService
+// instead of reusing CategoryAutocompleteFormItem.
+const fetchProductCategories = async () => {
+  const response = await ProductCategoryService.list(null, 'name_ASC', 100, 0);
+  return response.rows || [];
+};
+
+const productCategoryMapper = {
+  toAutocomplete(originalValue) {
+    if (!originalValue) {
+      return null;
+    }
+
+    const value = originalValue.id || originalValue.value;
+    const label = originalValue.name || originalValue.label;
+
+    return {
+      key: value,
+      value,
+      label,
+    };
+  },
+
+  toValue(originalValue) {
+    if (!originalValue) {
+      return null;
+    }
+
+    return {
+      id: originalValue.value,
+      label: originalValue.label,
+    };
+  },
+};
 
 const schema = yup.object().shape({
   title: yupFilterSchemas.string(
@@ -21,8 +59,8 @@ const schema = yup.object().shape({
   amount: yupFilterSchemas.decimal(
     i18n('entities.product.fields.amount'),
   ),
-  vip: yupFilterSchemas.relationToOne(
-    i18n('entities.product.fields.vip'),
+  category: yupFilterSchemas.relationToMany(
+    i18n('entities.product.fields.category'),
   ),
 
 });
@@ -30,7 +68,7 @@ const schema = yup.object().shape({
 const emptyValues = {
   title: null,
   amount: null,
-  vip: null,
+  category: [],
 };
 
 const previewRenders = {
@@ -42,9 +80,9 @@ const previewRenders = {
     label: i18n('entities.product.fields.amount'),
     render: filterRenders.decimal(),
   },
-  vip: {
-    label: i18n('entities.product.fields.vip'),
-    render: filterRenders.relationToOne(),
+  category: {
+    label: i18n('entities.product.fields.category'),
+    render: filterRenders.relationToMany(),
   },
 
 };
@@ -131,14 +169,17 @@ function CouponsListFilter(props) {
                   />
                 </div>
                 <div className="col-lg-6 col-12">
-                  <VipAutocompleteFormItem
-                    name="vip"
+                  <AutocompleteInMemoryFormItem
+                    name="category"
                     label={i18n(
-                      'entities.product.fields.vip',
+                      'entities.product.fields.category',
                     )}
+                    mode="multiple"
+                    fetchFn={fetchProductCategories}
+                    mapper={productCategoryMapper}
                   />
                 </div>
-          
+
               </div>
 
               <div className="row">

@@ -7,9 +7,25 @@ import shopCategoryActions from "src/modules/shop/shopCategoryActions";
 import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
+import companyListActions from "src/modules/company/list/companyListActions";
+import companyListSelectors from "src/modules/company/list/companyListSelectors";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
 import categoryIconImage from "src/view/pages/PC/categoryIconImage";
 import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
+
+// Maps each PC footer/sidebar info link to the company field the admin
+// fills in under Admin > Company, and the title shown in the info modal.
+const COMPANY_INFO_LINKS: Record<string, { title: string; field: string }> = {
+  aboutUs: { title: "About Us", field: "companydetails" },
+  joinUs: { title: "Join Us", field: "joinUs" },
+  contactUs: { title: "Contact Us", field: "contactUs" },
+  merchantAgreement: { title: "Merchant Agreement", field: "merchantAgreement" },
+  supplierCooperation: { title: "Supplier Cooperation", field: "supplierCooperation" },
+  strategicManagement: { title: "Strategic Management", field: "strategicManagement" },
+  precisionOperation: { title: "Precision Operation", field: "precisionOperation" },
+  courseDriven: { title: "Course Driven", field: "courseDriven" },
+  faqs: { title: "FAQ", field: "faqs" },
+};
 
 const HERO_ROTATE_MS = 6000;
 const FLASH_DISCOUNTS = [45, 35, 50, 30, 25, 40];
@@ -41,10 +57,30 @@ function Home() {
   const categoriesLoading = useSelector(shopCategorySelectors.selectLoading);
   const products = useSelector(shopProductSelectors.selectRows);
   const productsLoading = useSelector(shopProductSelectors.selectLoading);
+  const companyRecord = useSelector(companyListSelectors.selectRows);
+
+  const [activeInfoKey, setActiveInfoKey] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(shopCategoryActions.doFetch(true));
+    dispatch(companyListActions.doFetch());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!activeInfoKey) {
+      return;
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setActiveInfoKey(null);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeInfoKey]);
+
+  const activeInfo = activeInfoKey ? COMPANY_INFO_LINKS[activeInfoKey] : null;
+  const activeInfoContent = activeInfo ? companyRecord?.[0]?.[activeInfo.field] : null;
 
   // Products can only be filtered down to the women's categories once the
   // category list (with real ids) has loaded, so this waits on `categories`
@@ -205,26 +241,69 @@ function Home() {
             <div className="pc-home__sidebar-footer">
               <div className="pc-home__sidebar-footer-group">
                 <div className="pc-home__sidebar-footer-heading">About E-store Fashion</div>
-                <span className="pc-home__sidebar-footer-link">about Us</span>
-                <span className="pc-home__sidebar-footer-link">Join us</span>
-                <span className="pc-home__sidebar-footer-link">Contact Us</span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("aboutUs")}
+                >
+                  about Us
+                </span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("joinUs")}
+                >
+                  Join us
+                </span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("contactUs")}
+                >
+                  Contact Us
+                </span>
               </div>
 
               <div className="pc-home__sidebar-footer-group">
                 <div className="pc-home__sidebar-footer-heading">Exchange and Cooperation</div>
-                <span className="pc-home__sidebar-footer-link">Merchant Agreement</span>
-                <span className="pc-home__sidebar-footer-link">Supplier Cooperation</span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("merchantAgreement")}
+                >
+                  Merchant Agreement
+                </span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("supplierCooperation")}
+                >
+                  Supplier Cooperation
+                </span>
               </div>
 
               <div className="pc-home__sidebar-footer-group">
                 <div className="pc-home__sidebar-footer-heading">Strategic Management</div>
-                <span className="pc-home__sidebar-footer-link">Strategic Management</span>
-                <span className="pc-home__sidebar-footer-link">Precision Operation</span>
-                <span className="pc-home__sidebar-footer-link">Course Driven</span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("strategicManagement")}
+                >
+                  Strategic Management
+                </span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("precisionOperation")}
+                >
+                  Precision Operation
+                </span>
+                <span
+                  className="pc-home__sidebar-footer-link is-clickable"
+                  onClick={() => setActiveInfoKey("courseDriven")}
+                >
+                  Course Driven
+                </span>
               </div>
 
               <div className="pc-home__sidebar-footer-group pc-home__sidebar-footer-group--plain">
-                <span className="pc-home__sidebar-footer-link pc-home__sidebar-footer-link--icon">
+                <span
+                  className="pc-home__sidebar-footer-link pc-home__sidebar-footer-link--icon is-clickable"
+                  onClick={() => setActiveInfoKey("faqs")}
+                >
                   ❓ FAQ
                 </span>
                 <span className="pc-home__sidebar-footer-link pc-home__sidebar-footer-link--icon">
@@ -397,6 +476,39 @@ function Home() {
           </div>
         </div>
       </div>
+
+      {activeInfo && (
+        <div
+          className="pc-info-modal__backdrop"
+          onClick={() => setActiveInfoKey(null)}
+        >
+          <div
+            className="pc-info-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="pc-info-modal__header">
+              <h3>{activeInfo.title}</h3>
+              <button
+                type="button"
+                className="pc-info-modal__close"
+                aria-label="Close"
+                onClick={() => setActiveInfoKey(null)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="pc-info-modal__body">
+              {activeInfoContent ? (
+                <div dangerouslySetInnerHTML={{ __html: activeInfoContent }} />
+              ) : (
+                <p className="pc-info-modal__empty">
+                  This content hasn't been added yet. Please check back soon.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .pc-home {
@@ -968,6 +1080,70 @@ function Home() {
           .pc-home__grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
+        }
+
+        .pc-info-modal__backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(17, 17, 17, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          z-index: 1000;
+        }
+
+        .pc-info-modal {
+          background: var(--pc-surface);
+          border-radius: var(--pc-radius);
+          width: 100%;
+          max-width: 620px;
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .pc-info-modal__header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 22px;
+          border-bottom: 1px solid var(--pc-divider);
+        }
+
+        .pc-info-modal__header h3 {
+          margin: 0;
+          font-size: 17px;
+          font-weight: 700;
+          color: var(--pc-text);
+        }
+
+        .pc-info-modal__close {
+          border: none;
+          background: transparent;
+          font-size: 24px;
+          line-height: 1;
+          color: var(--pc-text-muted);
+          cursor: pointer;
+          padding: 4px 8px;
+        }
+
+        .pc-info-modal__close:hover {
+          color: var(--pc-text);
+        }
+
+        .pc-info-modal__body {
+          padding: 20px 22px 26px;
+          overflow-y: auto;
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--pc-text-secondary);
+        }
+
+        .pc-info-modal__empty {
+          margin: 0;
+          color: var(--pc-text-muted);
         }
       `}</style>
     </>

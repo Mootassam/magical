@@ -23,6 +23,48 @@ function Company() {
       icon: 'fa-solid fa-question',
       title: 'FAQs',
       color: '#8B5CF6'
+    },
+    {
+      path: '/join-us',
+      icon: 'fa-solid fa-user-plus',
+      title: 'Join Us',
+      color: '#0EA5E9'
+    },
+    {
+      path: '/contact-us',
+      icon: 'fa-solid fa-phone',
+      title: 'Contact Us',
+      color: '#EC4899'
+    },
+    {
+      path: '/merchant-agreement',
+      icon: 'fa-solid fa-handshake',
+      title: 'Merchant Agreement',
+      color: '#F97316'
+    },
+    {
+      path: '/supplier-cooperation',
+      icon: 'fa-solid fa-truck-field',
+      title: 'Supplier Cooperation',
+      color: '#14B8A6'
+    },
+    {
+      path: '/strategic-management',
+      icon: 'fa-solid fa-chess',
+      title: 'Strategic Management',
+      color: '#6366F1'
+    },
+    {
+      path: '/precision-operation',
+      icon: 'fa-solid fa-bullseye',
+      title: 'Precision Operation',
+      color: '#EF4444'
+    },
+    {
+      path: '/course-driven',
+      icon: 'fa-solid fa-graduation-cap',
+      title: 'Course Driven',
+      color: '#84CC16'
     }
   ];
 
