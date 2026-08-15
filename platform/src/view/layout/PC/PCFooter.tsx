@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import authSelectors from "src/modules/auth/authSelectors";
+import { i18n } from "../../../i18n";
 
 function PCFooter() {
   const currentUser = useSelector(authSelectors.selectCurrentUser);
@@ -13,43 +14,43 @@ function PCFooter() {
           <div className="pc-footer__col">
             <div className="pc-footer__logo">Estore</div>
             <p className="pc-footer__blurb">
-              Everything you need, delivered to your door.
+              {i18n("estore.pc.footer.blurb")}
             </p>
           </div>
 
           <div className="pc-footer__col">
-            <div className="pc-footer__heading">Shop</div>
-            <Link to="/pc">Home</Link>
-            <Link to="/pc/classification">All Categories</Link>
-            <Link to="/pc/cart">Cart</Link>
+            <div className="pc-footer__heading">{i18n("estore.pc.footer.shopHeading")}</div>
+            <Link to="/pc">{i18n("estore.header.home")}</Link>
+            <Link to="/pc/classification">{i18n("estore.header.allCategories")}</Link>
+            <Link to="/pc/cart">{i18n("estore.header.cart")}</Link>
           </div>
 
           <div className="pc-footer__col">
-            <div className="pc-footer__heading">Account</div>
+            <div className="pc-footer__heading">{i18n("estore.pc.footer.accountHeading")}</div>
             {currentUser ? (
               <>
-                <Link to="/pc/mine/account">My Account</Link>
-                <Link to="/pc/mine/orders">My Orders</Link>
-                <Link to="/pc/mine/addresses">Delivery Addresses</Link>
+                <Link to="/pc/mine/account">{i18n("estore.header.myAccount")}</Link>
+                <Link to="/pc/mine/orders">{i18n("estore.header.myOrders")}</Link>
+                <Link to="/pc/mine/addresses">{i18n("estore.pc.footer.deliveryAddresses")}</Link>
               </>
             ) : (
               <>
-                <Link to="/pc/auth/signin">Login</Link>
-                <Link to="/pc/auth/signup">Create account</Link>
+                <Link to="/pc/auth/signin">{i18n("estore.pc.footer.login")}</Link>
+                <Link to="/pc/auth/signup">{i18n("estore.pc.footer.createAccount")}</Link>
               </>
             )}
           </div>
 
           <div className="pc-footer__col">
-            <div className="pc-footer__heading">Support</div>
-            <span>Help Center</span>
-            <span>Shipping & Delivery</span>
-            <span>Returns</span>
+            <div className="pc-footer__heading">{i18n("estore.pc.footer.supportHeading")}</div>
+            <span>{i18n("estore.pc.footer.helpCenter")}</span>
+            <span>{i18n("estore.pc.footer.shipping")}</span>
+            <span>{i18n("estore.pc.footer.returns")}</span>
           </div>
         </div>
 
         <div className="pc-container pc-footer__bottom">
-          © {new Date().getFullYear()} Estore. All rights reserved.
+          {i18n("estore.pc.footer.rights", new Date().getFullYear())}
         </div>
       </footer>
 

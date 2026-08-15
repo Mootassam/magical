@@ -81,7 +81,7 @@ function Login() {
       <div className="card">
         <div className="topbar">
           <button type="button" className="back-btn" onClick={() => window.history.back()} aria-label="Go back">←</button>
-          <h1>Login</h1>
+          <h1>{i18n("estore.auth.login.title")}</h1>
           <div className="lang-wrap" ref={langRef}>
             <div className="lang" onClick={() => setLangOpen(!langOpen)}>
               🌐 {currentLanguage?.label || "English"} ▾
@@ -117,42 +117,42 @@ function Login() {
 
 {/* Here we will add the logo later  */}
 
-          <div className="tagline">Shop More, Live Better</div>
+          <div className="tagline">{i18n("estore.auth.login.tagline")}</div>
         </div>
 
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <label className="field-label" htmlFor="email">Phone Number / Email</label>
+            <label className="field-label" htmlFor="email">{i18n("estore.auth.login.phoneOrEmail")}</label>
             <div className="field-wrap">
               <InputFormItem
                 type="text"
                 name="email"
-                placeholder="Phone Number / Email"
+                placeholder={i18n("estore.auth.login.phoneOrEmailPlaceholder")}
                 externalErrorMessage={externalErrorMessage}
               />
             </div>
 
-            <label className="field-label" htmlFor="password">Enter Password</label>
+            <label className="field-label" htmlFor="password">{i18n("estore.auth.login.password")}</label>
             <div className="field-wrap">
               <InputFormItem
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Login Password"
+                placeholder={i18n("estore.auth.login.passwordPlaceholder")}
               />
               <button type="button" className="toggle-eye" onClick={togglePassword}>👁</button>
             </div>
 
             <div className="links-row">
-              <a href="#">Forgot Password</a>
+              <a href="#">{i18n("estore.auth.login.forgotPassword")}</a>
                   <div className="no-account">
-              No account? <Link to="/auth/signup">Sign up</Link>
+              {i18n("estore.auth.login.noAccount")} <Link to="/auth/signup">{i18n("estore.auth.login.signUp")}</Link>
             </div>
             </div>
-        
+
 
             <button className="login-btn" disabled={loading} type="submit">
               <ButtonIcon loading={loading} />
-              <span>Login</span>
+              <span>{i18n("estore.auth.login.loginButton")}</span>
             </button>
           </form>
         </FormProvider>

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import settingsService from "src/modules/settings/settingsService";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
+import { i18n } from "../../../../i18n";
 
 const TAWK_CONTAINER_ID = "pc-tawk-chat-embed";
 
@@ -45,14 +46,14 @@ function Support() {
 
   return (
     <MineShell active="support">
-      <h1 className="pc-mine__page-title">Live Chat</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.mine.support.title")}</h1>
 
       <div className="pc-card pc-mine__support-panel">
         <div id={TAWK_CONTAINER_ID} className="pc-mine__tawk-embed">
           <div className="pc-mine__support-empty">
             <div className="pc-mine__empty-icon">🎧</div>
-            <div className="pc-mine__empty-title">Our support team will get back to you shortly</div>
-            <div className="pc-mine__empty-text">Start a conversation and we'll respond as soon as we can.</div>
+            <div className="pc-mine__empty-title">{i18n("estore.pc.mine.support.emptyTitle")}</div>
+            <div className="pc-mine__empty-text">{i18n("estore.pc.mine.support.emptyText")}</div>
           </div>
         </div>
       </div>

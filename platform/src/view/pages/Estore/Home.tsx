@@ -9,6 +9,7 @@ import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
 import categoryIconImage from "src/view/pages/PC/categoryIconImage";
 import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
 
@@ -259,7 +260,7 @@ function Home() {
                     <span>{categoryIcon(category.name)}</span>
                   )}
                 </div>
-                <div className="cat-label">{category.name}</div>
+                <div className="cat-label">{categoryLabel(category.name)}</div>
               </div>
             ))}
           </div>

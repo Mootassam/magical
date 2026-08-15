@@ -6,25 +6,26 @@ import storeActions from "src/modules/store/storeActions";
 import storeSelectors from "src/modules/store/storeSelectors";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
-
-const SHOP_TILES = [
-  { icon: "❤️", label: "My Collection", path: "/pc/mine/collection", bg: "#FAECE9", fg: "#B93C1A" },
-  { icon: "🕓", label: "My Browse", path: "/pc/mine/browse", bg: "#E9EFFD", fg: "#2563EB" },
-];
-
-const ORDER_TILES = [
-  { icon: "💳", label: "Payment Pending", bg: "#FEF5E7", fg: "#D08609" },
-  { icon: "🚚", label: "In Shipping", bg: "#E9EFFD", fg: "#2563EB" },
-  { icon: "📬", label: "Received", bg: "#FAECE9", fg: "#B93C1A" },
-  { icon: "✅", label: "Completed", bg: "#E9F9EF", fg: "#1DA750" },
-  { icon: "↩️", label: "Refund", bg: "#FCE9E9", fg: "#DC2626" },
-];
+import { i18n } from "../../../../i18n";
 
 function Home() {
   const dispatch = useDispatch();
   const currentUser = useSelector(authSelectors.selectCurrentUser);
   const avatar = useSelector(authSelectors.selectCurrentUserAvatar);
   const store = useSelector(storeSelectors.selectStore);
+
+  const SHOP_TILES = [
+    { icon: "❤️", label: i18n("estore.pc.mineHub.myCollection"), path: "/pc/mine/collection", bg: "#FAECE9", fg: "#B93C1A" },
+    { icon: "🕓", label: i18n("estore.pc.mineHub.myBrowse"), path: "/pc/mine/browse", bg: "#E9EFFD", fg: "#2563EB" },
+  ];
+
+  const ORDER_TILES = [
+    { icon: "💳", label: i18n("estore.pc.mineHub.paymentPending"), bg: "#FEF5E7", fg: "#D08609" },
+    { icon: "🚚", label: i18n("estore.pc.mineHub.inShipping"), bg: "#E9EFFD", fg: "#2563EB" },
+    { icon: "📬", label: i18n("estore.pc.mineHub.received"), bg: "#FAECE9", fg: "#B93C1A" },
+    { icon: "✅", label: i18n("estore.pc.mineHub.completed"), bg: "#E9F9EF", fg: "#1DA750" },
+    { icon: "↩️", label: i18n("estore.pc.mineHub.refund"), bg: "#FCE9E9", fg: "#DC2626" },
+  ];
 
   useEffect(() => {
     if (currentUser?.store) {
@@ -40,10 +41,10 @@ function Home() {
         <div className="pc-mine__banner pc-mine__banner--frozen">
           <span className="pc-mine__banner-icon">🚫</span>
           <div className="pc-mine__banner-text">
-            <div className="pc-mine__banner-title">Store Frozen</div>
-            <div className="pc-mine__banner-sub">Your seller account has been temporarily frozen.</div>
+            <div className="pc-mine__banner-title">{i18n("estore.pc.mineHub.storeFrozen")}</div>
+            <div className="pc-mine__banner-sub">{i18n("estore.pc.mineHub.storeFrozenSub")}</div>
           </div>
-          <Link to="/pc/mine/support" className="pc-mine__banner-link">Contact Customer Service</Link>
+          <Link to="/pc/mine/support" className="pc-mine__banner-link">{i18n("estore.pc.mineHub.contactSupport")}</Link>
         </div>
       )}
 
@@ -51,10 +52,10 @@ function Home() {
         <div className="pc-mine__banner">
           <span className="pc-mine__banner-icon">✅</span>
           <div className="pc-mine__banner-text">
-            <div className="pc-mine__banner-title">Store Application Approved!</div>
-            <div className="pc-mine__banner-sub">Your seller account is active.</div>
+            <div className="pc-mine__banner-title">{i18n("estore.pc.mineHub.storeApproved")}</div>
+            <div className="pc-mine__banner-sub">{i18n("estore.pc.mineHub.storeApprovedSub")}</div>
           </div>
-          <Link to="/pc/mine-seller" className="pc-mine__banner-link">Go to Seller Dashboard</Link>
+          <Link to="/pc/mine-seller" className="pc-mine__banner-link">{i18n("estore.pc.mineHub.goToSellerDashboard")}</Link>
         </div>
       )}
 
@@ -76,17 +77,17 @@ function Home() {
 
           <div className="pc-mine__hero-right">
             <div className="pc-mine__hero-balance">
-              <div className="pc-mine__hero-balance-label">Account Balance</div>
+              <div className="pc-mine__hero-balance-label">{i18n("estore.pc.mineHub.accountBalance")}</div>
               <div className="pc-mine__hero-balance-value">${currentUser?.balance?.toFixed(2) || "0.00"}</div>
             </div>
             <Link to="/pc/mine/account" className="pc-btn pc-btn-primary pc-mine__hero-btn">
-              My Account
+              {i18n("estore.pc.mineHub.myAccount")}
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="pc-mine__section-label">My Stuff</div>
+      <div className="pc-mine__section-label">{i18n("estore.pc.mineHub.myStuff")}</div>
       <div className="pc-mine__tile-row pc-mine__tile-row--2">
         {SHOP_TILES.map((tile) => (
           <Link key={tile.label} to={tile.path} className="pc-card pc-mine__tile">
@@ -99,8 +100,8 @@ function Home() {
       </div>
 
       <div className="pc-mine__orders-head">
-        <div className="pc-mine__section-label">My Orders</div>
-        <Link to="/pc/mine/orders" className="pc-mine__link-btn">View All ›</Link>
+        <div className="pc-mine__section-label">{i18n("estore.pc.mineHub.myOrders")}</div>
+        <Link to="/pc/mine/orders" className="pc-mine__link-btn">{i18n("estore.pc.mineHub.viewAll")} ›</Link>
       </div>
       <div className="pc-mine__tile-row pc-mine__tile-row--5">
         {ORDER_TILES.map((tile) => (
@@ -113,22 +114,22 @@ function Home() {
         ))}
       </div>
 
-      <div className="pc-mine__section-label">Quick Actions</div>
+      <div className="pc-mine__section-label">{i18n("estore.pc.mineHub.quickActions")}</div>
       <div className="pc-mine__tile-row pc-mine__tile-row--3">
         <Link to="/pc/mine/deposit" className="pc-card pc-mine__tile">
           <div className="pc-mine__tile-icon" style={{ background: "#E9F9EF", color: "#1DA750" }}>⬆️</div>
-          <div className="pc-mine__tile-label">Top Up</div>
+          <div className="pc-mine__tile-label">{i18n("estore.pc.mineHub.topUp")}</div>
         </Link>
         <Link to="/pc/mine/withdrawal" className="pc-card pc-mine__tile">
           <div className="pc-mine__tile-icon" style={{ background: "#E9EFFD", color: "#2563EB" }}>⬇️</div>
-          <div className="pc-mine__tile-label">Withdrawal</div>
+          <div className="pc-mine__tile-label">{i18n("estore.pc.mineHub.withdrawal")}</div>
         </Link>
         <Link
           to={currentUser?.store ? "/pc/mine-seller" : "/pc/mine/apply-merchant"}
           className="pc-card pc-mine__tile"
         >
           <div className="pc-mine__tile-icon" style={{ background: "#FAECE9", color: "#B93C1A" }}>🏪</div>
-          <div className="pc-mine__tile-label">{currentUser?.store ? "Seller Dashboard" : "Apply Merchant"}</div>
+          <div className="pc-mine__tile-label">{currentUser?.store ? i18n("estore.pc.mineHub.sellerDashboard") : i18n("estore.pc.mineHub.applyMerchant")}</div>
         </Link>
       </div>
 

@@ -3,6 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import cartActions from "src/modules/cart/cartActions";
 import cartSelectors from "src/modules/cart/cartSelectors";
+import { i18n } from "../../../i18n";
 
 function Cart() {
   const dispatch = useDispatch();
@@ -35,22 +36,22 @@ function Cart() {
     <>
       <div className="pc-cart">
         <div className="pc-container">
-          <h1 className="pc-cart__title">My Cart ({count})</h1>
+          <h1 className="pc-cart__title">{i18n("estore.pc.cart.title")} ({count})</h1>
 
           {items.length === 0 ? (
             <div className="pc-cart__empty">
               <div className="pc-cart__empty-icon">🛒</div>
-              <p>Your cart is empty.</p>
-              <Link to="/pc" className="pc-btn pc-btn-primary">Continue Shopping</Link>
+              <p>{i18n("estore.pc.cart.empty")}</p>
+              <Link to="/pc" className="pc-btn pc-btn-primary">{i18n("estore.pc.cart.continueShopping")}</Link>
             </div>
           ) : (
             <div className="pc-cart__layout">
               <div className="pc-cart__list pc-card">
                 <div className="pc-cart__list-head">
-                  <span>Product</span>
-                  <span>Price</span>
-                  <span>Quantity</span>
-                  <span>Subtotal</span>
+                  <span>{i18n("estore.pc.cart.product")}</span>
+                  <span>{i18n("estore.pc.cart.price")}</span>
+                  <span>{i18n("estore.pc.cart.quantity")}</span>
+                  <span>{i18n("estore.pc.cart.subtotal")}</span>
                   <span></span>
                 </div>
 
@@ -71,7 +72,7 @@ function Cart() {
                     <span className="pc-cart__subtotal">
                       ${((Number(item.price) || 0) * item.qty).toFixed(2)}
                     </span>
-                    <button className="pc-cart__remove" onClick={() => doRemove(item.id)} aria-label="Remove">
+                    <button className="pc-cart__remove" onClick={() => doRemove(item.id)} aria-label={i18n("estore.pc.cart.remove")}>
                       ✕
                     </button>
                   </div>
@@ -79,23 +80,23 @@ function Cart() {
               </div>
 
               <div className="pc-cart__summary pc-card">
-                <h2>Order Summary</h2>
+                <h2>{i18n("estore.pc.cart.orderSummary")}</h2>
                 <div className="pc-cart__summary-row">
-                  <span>Items ({count})</span>
+                  <span>{i18n("estore.pc.cart.items")} ({count})</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
                 <div className="pc-cart__summary-row">
-                  <span>Shipping</span>
-                  <span>Calculated at checkout</span>
+                  <span>{i18n("estore.pc.cart.shipping")}</span>
+                  <span>{i18n("estore.pc.cart.calculatedAtCheckout")}</span>
                 </div>
                 <div className="pc-cart__summary-total">
-                  <span>Total</span>
+                  <span>{i18n("estore.pc.cart.total")}</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
                 <button className="pc-btn pc-btn-primary pc-cart__checkout-btn" onClick={doCheckout}>
-                  Proceed to Checkout
+                  {i18n("estore.pc.cart.proceedToCheckout")}
                 </button>
-                <Link to="/pc" className="pc-cart__continue">← Continue Shopping</Link>
+                <Link to="/pc" className="pc-cart__continue">{i18n("estore.pc.cart.continueShoppingArrow")}</Link>
               </div>
             </div>
           )}

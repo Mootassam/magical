@@ -7,6 +7,7 @@ import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import storeListingActions from "src/modules/storeListing/storeListingActions";
 import storeListingSelectors from "src/modules/storeListing/storeListingSelectors";
 import Message from "src/view/shared/message";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
 
 const WHOLESALE_DISCOUNT = 0.2;
 
@@ -147,7 +148,7 @@ function WholesaleManagement() {
                   className={`tab-chip${category.id === selectedCategoryId ? " active" : ""}`}
                   onClick={() => doSelectCategory(category.id)}
                 >
-                  {category.name}
+                  {categoryLabel(category.name)}
                 </div>
               ))}
             {categoriesLoading && (
@@ -187,7 +188,7 @@ function WholesaleManagement() {
               <>
                 Showing <b>{products.length}</b> of <b>{productsCount}</b> item
                 {productsCount === 1 ? "" : "s"}
-                {selectedCategory ? ` in ${selectedCategory.name}` : ""}
+                {selectedCategory ? ` in ${categoryLabel(selectedCategory.name)}` : ""}
               </>
             )}
           </div>

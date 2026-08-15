@@ -4,13 +4,16 @@ import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
 import cartSelectors from "src/modules/cart/cartSelectors";
+import layoutActions from "src/modules/layout/layoutActions";
 import shopCategoryActions from "src/modules/shop/shopCategoryActions";
 import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
 import storeActions from "src/modules/store/storeActions";
 import storeSelectors from "src/modules/store/storeSelectors";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
 import categoryIconImage from "src/view/pages/PC/categoryIconImage";
 import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
+import { i18n, getLanguages, getLanguageCode } from "../../../i18n";
 
 const NAV_CATEGORY_COUNT = 6;
 
@@ -26,7 +29,14 @@ function PCHeader() {
 
   const [searchInput, setSearchInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const langRef = useRef<HTMLDivElement | null>(null);
+
+  const languages = getLanguages();
+  const currentLanguage = languages.find(
+    (language) => language.id === getLanguageCode()
+  );
 
   useEffect(() => {
     dispatch(shopCategoryActions.doFetch(true));
@@ -43,10 +53,18 @@ function PCHeader() {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
       }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setLangOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const doChangeLanguage = (languageId: string) => {
+    setLangOpen(false);
+    layoutActions.doChangeLanguage(languageId);
+  };
 
   const doSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -77,14 +95,45 @@ function PCHeader() {
             <span className="pc-header__search-icon">🔍</span>
             <input
               type="text"
-              placeholder="Search products, brands and categories..."
+              placeholder={i18n("estore.header.searchPlaceholder")}
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
             />
-            <button type="submit">Search</button>
+            <button type="submit">{i18n("estore.header.search")}</button>
           </form>
 
           <div className="pc-header__actions">
+            <div className="pc-header__lang" ref={langRef}>
+              <button
+                type="button"
+                className="pc-header__lang-btn"
+                onClick={() => setLangOpen((value) => !value)}
+              >
+                🌐 {currentLanguage?.label || "English"} ▾
+              </button>
+
+              {langOpen && (
+                <div className="pc-header__lang-dropdown">
+                  {languages.map((language) => (
+                    <div
+                      key={language.id}
+                      className={`pc-header__lang-option ${
+                        language.id === getLanguageCode() ? "selected" : ""
+                      }`}
+                      onClick={() => doChangeLanguage(language.id)}
+                    >
+                      <img
+                        src={language.flag}
+                        alt={language.label}
+                        className="pc-header__lang-flag"
+                      />
+                      <span>{language.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {currentUser?.store && (
               <Link
                 to={{ pathname: "/pc/mine-seller/orders", state: { tab: 0 } }}
@@ -100,7 +149,7 @@ function PCHeader() {
 
             <Link to="/pc/cart" className="pc-header__cart">
               <span className="pc-header__cart-icon">🛒</span>
-              <span>Cart</span>
+              <span>{i18n("estore.header.cart")}</span>
               {cartCount > 0 && <span className="pc-header__cart-badge">{cartCount}</span>}
             </Link>
 
@@ -115,25 +164,25 @@ function PCHeader() {
                     <span className="pc-header__avatar">
                       {(userLabel || "U").slice(0, 1).toUpperCase()}
                     </span>
-                    <span>{userLabel || "Account"}</span>
+                    <span>{userLabel || i18n("estore.header.account")}</span>
                   </button>
                   {menuOpen && (
                     <div className="pc-header__account-menu">
                       <Link to="/pc/mine/account" onClick={() => setMenuOpen(false)}>
-                        My Account
+                        {i18n("estore.header.myAccount")}
                       </Link>
                       <Link to="/pc/mine/orders" onClick={() => setMenuOpen(false)}>
-                        My Orders
+                        {i18n("estore.header.myOrders")}
                       </Link>
                       <button type="button" onClick={doSignout}>
-                        Sign out
+                        {i18n("estore.header.signOut")}
                       </button>
                     </div>
                   )}
                 </>
               ) : (
                 <Link to="/pc/auth/signin" className="pc-header__login">
-                  Login / Register
+                  {i18n("estore.header.loginRegister")}
                 </Link>
               )}
             </div>
@@ -144,7 +193,7 @@ function PCHeader() {
           <div className="pc-container pc-header__nav-inner">
             <div className="pc-header__nav-scroll pc-scroll-x">
               <Link to="/pc" className="pc-header__nav-link">
-                Home
+                {i18n("estore.header.home")}
               </Link>
               {navCategories.map((category: any) => (
                 <button
@@ -160,12 +209,12 @@ function PCHeader() {
                       categoryIcon(category.name)
                     )}
                   </span>
-                  {category.name}
+                  {categoryLabel(category.name)}
                 </button>
               ))}
             </div>
             <Link to="/pc/classification" className="pc-header__nav-all">
-              All Categories <span className="pc-header__nav-all-arrow">›</span>
+              {i18n("estore.header.allCategories")} <span className="pc-header__nav-all-arrow">›</span>
             </Link>
           </div>
         </nav>
@@ -315,6 +364,75 @@ function PCHeader() {
           align-items: center;
           justify-content: center;
           padding: 0 3px;
+        }
+
+        .pc-header__lang {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .pc-header__lang-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--pc-text);
+          padding: 6px 8px;
+          border-radius: 8px;
+          white-space: nowrap;
+          transition: background-color 0.15s ease;
+        }
+
+        .pc-header__lang-btn:hover {
+          background: var(--pc-secondary);
+        }
+
+        .pc-header__lang-dropdown {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          min-width: 180px;
+          max-height: 280px;
+          overflow-y: auto;
+          background: var(--pc-surface);
+          border: 1px solid var(--pc-border);
+          border-radius: var(--pc-radius-sm);
+          box-shadow: 0 12px 30px var(--pc-shadow);
+          z-index: 1000;
+          padding: 6px;
+        }
+
+        .pc-header__lang-option {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 9px 10px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 13.5px;
+          color: var(--pc-text);
+          transition: background-color 0.15s ease;
+        }
+
+        .pc-header__lang-option:hover {
+          background: var(--pc-secondary);
+        }
+
+        .pc-header__lang-option.selected {
+          background: var(--pc-secondary);
+          font-weight: 700;
+        }
+
+        .pc-header__lang-flag {
+          width: 20px;
+          height: 14px;
+          object-fit: cover;
+          border-radius: 2px;
+          flex-shrink: 0;
         }
 
         .pc-header__account {

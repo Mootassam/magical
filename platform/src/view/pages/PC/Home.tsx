@@ -12,19 +12,22 @@ import companyListSelectors from "src/modules/company/list/companyListSelectors"
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
 import categoryIconImage from "src/view/pages/PC/categoryIconImage";
 import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
+import { i18n } from "../../../i18n";
 
 // Maps each PC footer/sidebar info link to the company field the admin
-// fills in under Admin > Company, and the title shown in the info modal.
-const COMPANY_INFO_LINKS: Record<string, { title: string; field: string }> = {
-  aboutUs: { title: "About Us", field: "companydetails" },
-  joinUs: { title: "Join Us", field: "joinUs" },
-  contactUs: { title: "Contact Us", field: "contactUs" },
-  merchantAgreement: { title: "Merchant Agreement", field: "merchantAgreement" },
-  supplierCooperation: { title: "Supplier Cooperation", field: "supplierCooperation" },
-  strategicManagement: { title: "Strategic Management", field: "strategicManagement" },
-  precisionOperation: { title: "Precision Operation", field: "precisionOperation" },
-  courseDriven: { title: "Course Driven", field: "courseDriven" },
-  faqs: { title: "FAQ", field: "faqs" },
+// fills in under Admin > Company, and the i18n key for the title shown in
+// the info modal.
+const COMPANY_INFO_LINKS: Record<string, { titleKey: string; field: string }> = {
+  aboutUs: { titleKey: "estore.pc.home.aboutUs", field: "companydetails" },
+  joinUs: { titleKey: "estore.pc.home.joinUs", field: "joinUs" },
+  contactUs: { titleKey: "estore.pc.home.contactUs", field: "contactUs" },
+  merchantAgreement: { titleKey: "estore.pc.home.merchantAgreement", field: "merchantAgreement" },
+  supplierCooperation: { titleKey: "estore.pc.home.supplierCooperation", field: "supplierCooperation" },
+  strategicManagement: { titleKey: "estore.pc.home.strategicManagement", field: "strategicManagement" },
+  precisionOperation: { titleKey: "estore.pc.home.precisionOperation", field: "precisionOperation" },
+  courseDriven: { titleKey: "estore.pc.home.courseDriven", field: "courseDriven" },
+  faqs: { titleKey: "estore.pc.home.faq", field: "faqs" },
 };
 
 const HERO_ROTATE_MS = 6000;
@@ -39,13 +42,6 @@ const PROMO_EXCLUDE_PATTERN = /ramadan|\beid\b|islamic|muslim|hijab|niqab/i;
 // bags, accessories and lifestyle items are deliberately excluded so every
 // product shown there is actual clothing.
 const WOMEN_CATEGORY_NAMES = ["Women Clothing"];
-
-const TRUST_BADGES = [
-  { icon: "🚚", title: "Free Shipping", text: "On orders over $50" },
-  { icon: "↩️", title: "Easy Returns", text: "30-day return window" },
-  { icon: "🔒", title: "Secure Checkout", text: "Your data stays protected" },
-  { icon: "🎧", title: "24/7 Support", text: "We're here whenever you need us" },
-];
 
 function Home() {
   const dispatch = useDispatch();
@@ -81,6 +77,17 @@ function Home() {
 
   const activeInfo = activeInfoKey ? COMPANY_INFO_LINKS[activeInfoKey] : null;
   const activeInfoContent = activeInfo ? companyRecord?.[0]?.[activeInfo.field] : null;
+  const activeInfoTitle = activeInfo ? i18n(activeInfo.titleKey) : null;
+
+  const trustBadges = useMemo(
+    () => [
+      { icon: "🚚", title: i18n("estore.pc.home.trustShippingTitle"), text: i18n("estore.pc.home.trustShippingText") },
+      { icon: "↩️", title: i18n("estore.pc.home.trustReturnsTitle"), text: i18n("estore.pc.home.trustReturnsText") },
+      { icon: "🔒", title: i18n("estore.pc.home.trustCheckoutTitle"), text: i18n("estore.pc.home.trustCheckoutText") },
+      { icon: "🎧", title: i18n("estore.pc.home.trustSupportTitle"), text: i18n("estore.pc.home.trustSupportText") },
+    ],
+    [],
+  );
 
   // Products can only be filtered down to the women's categories once the
   // category list (with real ids) has loaded, so this waits on `categories`
@@ -121,31 +128,31 @@ function Home() {
     () => [
       {
         image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&h=560&fit=crop&q=80",
-        eyebrow: currentUser ? "Welcome back" : "Welcome, gorgeous",
-        title: greetingName ? `Hi, ${greetingName} 👋` : "Styled For Every Her",
-        text: "Curated dresses, shoes and accessories, handpicked for women who love to shine.",
-        cta: "Shop Women",
+        eyebrow: currentUser ? i18n("estore.pc.home.heroWelcomeBack") : i18n("estore.pc.home.heroWelcomeGuest"),
+        title: greetingName ? i18n("estore.pc.home.heroGreeting", greetingName) : i18n("estore.pc.home.heroDefaultTitle"),
+        text: i18n("estore.pc.home.heroSlide1Text"),
+        cta: i18n("estore.pc.home.heroSlide1Cta"),
       },
       {
         image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1600&h=560&fit=crop&q=80",
-        eyebrow: "Limited time",
-        title: "Up To 50% Off Women's Fashion",
-        text: "Refresh your wardrobe with this season's must-have styles.",
-        cta: "Shop The Sale",
+        eyebrow: i18n("estore.pc.home.heroSlide2Eyebrow"),
+        title: i18n("estore.pc.home.heroSlide2Title"),
+        text: i18n("estore.pc.home.heroSlide2Text"),
+        cta: i18n("estore.pc.home.heroSlide2Cta"),
       },
       {
         image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1600&h=560&fit=crop&q=80",
-        eyebrow: "New arrivals",
-        title: "Jewelry You'll Love",
-        text: "From delicate necklaces to statement bags — finish every look in style.",
-        cta: "Explore Accessories",
+        eyebrow: i18n("estore.pc.home.heroSlide3Eyebrow"),
+        title: i18n("estore.pc.home.heroSlide3Title"),
+        text: i18n("estore.pc.home.heroSlide3Text"),
+        cta: i18n("estore.pc.home.heroSlide3Cta"),
       },
       {
         image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=1600&h=560&fit=crop&q=80",
-        eyebrow: "This week only",
-        title: "Free Shipping On Orders $50+",
-        text: "No code needed — the discount is applied automatically at checkout.",
-        cta: "Start Shopping",
+        eyebrow: i18n("estore.pc.home.heroSlide4Eyebrow"),
+        title: i18n("estore.pc.home.heroSlide4Title"),
+        text: i18n("estore.pc.home.heroSlide4Text"),
+        cta: i18n("estore.pc.home.heroSlide4Cta"),
       },
     ],
     [currentUser, greetingName],
@@ -208,13 +215,13 @@ function Home() {
         <div className="pc-container">
           <div className="pc-home__page-row">
           <aside className="pc-home__cat-sidebar pc-card">
-            <div className="pc-home__cat-sidebar-title">All Categories</div>
+            <div className="pc-home__cat-sidebar-title">{i18n("estore.pc.home.allCategories")}</div>
             <nav className="pc-home__cat-sidebar-list">
               {categoriesLoading && categories.length === 0 && (
-                <div className="pc-home__cat-sidebar-empty">Loading...</div>
+                <div className="pc-home__cat-sidebar-empty">{i18n("estore.pc.home.loading")}</div>
               )}
               {!categoriesLoading && categories.length === 0 && (
-                <div className="pc-home__cat-sidebar-empty">No categories yet.</div>
+                <div className="pc-home__cat-sidebar-empty">{i18n("estore.pc.home.noCategories")}</div>
               )}
               {orderedCategories.map((category: any) => (
                 <button
@@ -230,72 +237,72 @@ function Home() {
                       categoryIcon(category.name)
                     )}
                   </span>
-                  <span className="pc-home__cat-sidebar-label">{category.name}</span>
+                  <span className="pc-home__cat-sidebar-label">{categoryLabel(category.name)}</span>
                 </button>
               ))}
             </nav>
             <Link to="/pc/classification" className="pc-home__cat-sidebar-all">
-              Browse all categories ›
+              {i18n("estore.pc.home.browseAll")} ›
             </Link>
 
             <div className="pc-home__sidebar-footer">
               <div className="pc-home__sidebar-footer-group">
-                <div className="pc-home__sidebar-footer-heading">About E-store Fashion</div>
+                <div className="pc-home__sidebar-footer-heading">{i18n("estore.pc.home.aboutSection")}</div>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("aboutUs")}
                 >
-                  about Us
+                  {i18n("estore.pc.home.aboutUs")}
                 </span>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("joinUs")}
                 >
-                  Join us
+                  {i18n("estore.pc.home.joinUs")}
                 </span>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("contactUs")}
                 >
-                  Contact Us
+                  {i18n("estore.pc.home.contactUs")}
                 </span>
               </div>
 
               <div className="pc-home__sidebar-footer-group">
-                <div className="pc-home__sidebar-footer-heading">Exchange and Cooperation</div>
+                <div className="pc-home__sidebar-footer-heading">{i18n("estore.pc.home.exchangeCooperation")}</div>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("merchantAgreement")}
                 >
-                  Merchant Agreement
+                  {i18n("estore.pc.home.merchantAgreement")}
                 </span>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("supplierCooperation")}
                 >
-                  Supplier Cooperation
+                  {i18n("estore.pc.home.supplierCooperation")}
                 </span>
               </div>
 
               <div className="pc-home__sidebar-footer-group">
-                <div className="pc-home__sidebar-footer-heading">Strategic Management</div>
+                <div className="pc-home__sidebar-footer-heading">{i18n("estore.pc.home.strategicManagementHeading")}</div>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("strategicManagement")}
                 >
-                  Strategic Management
+                  {i18n("estore.pc.home.strategicManagement")}
                 </span>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("precisionOperation")}
                 >
-                  Precision Operation
+                  {i18n("estore.pc.home.precisionOperation")}
                 </span>
                 <span
                   className="pc-home__sidebar-footer-link is-clickable"
                   onClick={() => setActiveInfoKey("courseDriven")}
                 >
-                  Course Driven
+                  {i18n("estore.pc.home.courseDriven")}
                 </span>
               </div>
 
@@ -304,10 +311,10 @@ function Home() {
                   className="pc-home__sidebar-footer-link pc-home__sidebar-footer-link--icon is-clickable"
                   onClick={() => setActiveInfoKey("faqs")}
                 >
-                  ❓ FAQ
+                  ❓ {i18n("estore.pc.home.faq")}
                 </span>
                 <span className="pc-home__sidebar-footer-link pc-home__sidebar-footer-link--icon">
-                  ⬇ Download the app
+                  ⬇ {i18n("estore.pc.home.downloadApp")}
                 </span>
                 <span
                   className={`pc-home__sidebar-footer-link pc-home__sidebar-footer-link--icon${globalPurchaseCategory ? " is-clickable" : ""}`}
@@ -317,7 +324,7 @@ function Home() {
                       : undefined
                   }
                 >
-                  🌍 Global Purchase
+                  🌍 {i18n("estore.pc.home.globalPurchase")}
                 </span>
               </div>
             </div>
@@ -347,7 +354,7 @@ function Home() {
                 type="button"
                 className="pc-home__slide-arrow pc-home__slide-arrow--prev"
                 onClick={() => setHeroIndex((current) => (current - 1 + heroSlides.length) % heroSlides.length)}
-                aria-label="Previous slide"
+                aria-label={i18n("estore.pc.home.previousSlide")}
               >
                 ‹
               </button>
@@ -355,7 +362,7 @@ function Home() {
                 type="button"
                 className="pc-home__slide-arrow pc-home__slide-arrow--next"
                 onClick={() => setHeroIndex((current) => (current + 1) % heroSlides.length)}
-                aria-label="Next slide"
+                aria-label={i18n("estore.pc.home.nextSlide")}
               >
                 ›
               </button>
@@ -372,7 +379,7 @@ function Home() {
             </div>
 
             <div className="pc-home__trust-row">
-              {TRUST_BADGES.map((badge) => (
+              {trustBadges.map((badge) => (
                 <div className="pc-home__trust-item" key={badge.title}>
                   <span className="pc-home__trust-icon">{badge.icon}</span>
                   <div>
@@ -386,8 +393,8 @@ function Home() {
             {flashDeals.length > 0 && (
               <div className="pc-section">
                 <div className="pc-section__head">
-                  <h2>Flash Deals</h2>
-                  <span className="pc-home__timer">⏱ Limited time</span>
+                  <h2>{i18n("estore.pc.home.flashDeals")}</h2>
+                  <span className="pc-home__timer">⏱ {i18n("estore.pc.home.limitedTime")}</span>
                 </div>
                 <div className="pc-home__deals">
                   {flashDeals.map((product: any, index: number) => {
@@ -421,16 +428,16 @@ function Home() {
 
             <div className="pc-section">
               <div className="pc-section__head">
-                <h2>Just For You</h2>
-                <Link to="/pc/classification" className="pc-section__see-all">See all ›</Link>
+                <h2>{i18n("estore.pc.home.justForYou")}</h2>
+                <Link to="/pc/classification" className="pc-section__see-all">{i18n("estore.pc.home.seeAll")} ›</Link>
               </div>
 
               {isLoading && justForYou.length === 0 && (
-                <div className="pc-home__state">Loading...</div>
+                <div className="pc-home__state">{i18n("estore.pc.home.loading")}</div>
               )}
 
               {!isLoading && justForYou.length === 0 && (
-                <div className="pc-home__state">No more products to show right now.</div>
+                <div className="pc-home__state">{i18n("estore.pc.home.noMoreProducts")}</div>
               )}
 
               {!isLoading && justForYou.length > 0 && (
@@ -462,7 +469,7 @@ function Home() {
                               ${typeof product.price === "number" ? product.price.toFixed(2) : product.price}
                             </span>
                             <button className="pc-home__add-btn" onClick={(event) => doQuickAdd(event, product)}>
-                              + Add
+                              + {i18n("estore.pc.home.add")}
                             </button>
                           </div>
                         </div>
@@ -487,11 +494,11 @@ function Home() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="pc-info-modal__header">
-              <h3>{activeInfo.title}</h3>
+              <h3>{activeInfoTitle}</h3>
               <button
                 type="button"
                 className="pc-info-modal__close"
-                aria-label="Close"
+                aria-label={i18n("estore.pc.home.close")}
                 onClick={() => setActiveInfoKey(null)}
               >
                 ×
@@ -502,7 +509,7 @@ function Home() {
                 <div dangerouslySetInnerHTML={{ __html: activeInfoContent }} />
               ) : (
                 <p className="pc-info-modal__empty">
-                  This content hasn't been added yet. Please check back soon.
+                  {i18n("estore.pc.home.infoEmpty")}
                 </p>
               )}
             </div>

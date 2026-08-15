@@ -5,6 +5,7 @@ import storeListingActions from "src/modules/storeListing/storeListingActions";
 import storeListingSelectors from "src/modules/storeListing/storeListingSelectors";
 import MineSellerShell from "./MineSellerShell";
 import { sharedMineStyles } from "src/view/pages/PC/Mine/MyAccount";
+import { i18n } from "../../../../i18n";
 
 function formatPrice(value) {
   return `$${(Number(value) || 0).toFixed(2)}`;
@@ -37,9 +38,9 @@ function ProductManagement() {
   return (
     <MineSellerShell active="products">
       <div className="pc-mine__addr-head">
-        <h1 className="pc-mine__page-title">Product Management</h1>
+        <h1 className="pc-mine__page-title">{i18n("estore.pc.productManagement.title")}</h1>
         <button type="button" className="pc-btn pc-btn-primary" onClick={goToWholesaleManagement}>
-          + Add Product
+          {i18n("estore.pc.productManagement.addProduct")}
         </button>
       </div>
 
@@ -48,17 +49,17 @@ function ProductManagement() {
           <span>🔍</span>
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder={i18n("estore.pc.productManagement.searchPlaceholder")}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
         </div>
         <div className="pc-mine__pm-count">
           {isInitialLoading ? (
-            "Loading your products…"
+            i18n("estore.pc.productManagement.loadingProducts")
           ) : (
             <>
-              Showing <b>{visibleRows.length}</b> of <b>{rows.length}</b> products
+              {i18n("estore.pc.productManagement.showing")} <b>{visibleRows.length}</b> {i18n("estore.pc.productManagement.of")} <b>{rows.length}</b> {i18n("estore.pc.productManagement.products")}
             </>
           )}
         </div>
@@ -80,18 +81,18 @@ function ProductManagement() {
 
       {!isInitialLoading && rows.length === 0 && (
         <div className="pc-card pc-mine__empty">
-          <div className="pc-mine__empty-title">No products listed yet</div>
-          <div className="pc-mine__empty-text">Add products from Wholesale Management to see them here.</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.productManagement.emptyTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.productManagement.emptyText")}</div>
           <button type="button" className="pc-btn pc-btn-primary" onClick={goToWholesaleManagement}>
-            Go to Wholesale Management
+            {i18n("estore.pc.productManagement.goToWholesale")}
           </button>
         </div>
       )}
 
       {!isInitialLoading && rows.length > 0 && visibleRows.length === 0 && (
         <div className="pc-card pc-mine__empty">
-          <div className="pc-mine__empty-title">No matches</div>
-          <div className="pc-mine__empty-text">No products match "{search}".</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.productManagement.noMatchesTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.productManagement.noMatchesText")} "{search}".</div>
         </div>
       )}
 
@@ -106,11 +107,11 @@ function ProductManagement() {
                 <div className="pc-mine__pm-name">{row.title}</div>
                 <div className="pc-mine__pm-price-row">
                   <div>
-                    <span className="pc-mine__pm-price-lbl">Wholesale</span>
+                    <span className="pc-mine__pm-price-lbl">{i18n("estore.pc.productManagement.wholesale")}</span>
                     <span className="pc-mine__pm-price-val">{formatPrice(row.wholesalePrice)}</span>
                   </div>
                   <div>
-                    <span className="pc-mine__pm-price-lbl">Sales</span>
+                    <span className="pc-mine__pm-price-lbl">{i18n("estore.pc.productManagement.sales")}</span>
                     <span className="pc-mine__pm-price-val">{formatPrice(row.salesPrice)}</span>
                   </div>
                 </div>

@@ -9,6 +9,8 @@ import storeListingSelectors from "src/modules/storeListing/storeListingSelector
 import Message from "src/view/shared/message";
 import MineSellerShell from "./MineSellerShell";
 import { sharedMineStyles } from "src/view/pages/PC/Mine/MyAccount";
+import { i18n } from "../../../../i18n";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
 
 const WHOLESALE_DISCOUNT = 0.2;
 
@@ -97,7 +99,7 @@ function WholesaleManagement() {
 
   const doOpenListingModal = (product: any) => {
     if (listedProductIds.has(product.id)) {
-      Message.success("Already added to your wholesale listings.");
+      Message.success(i18n("estore.pc.wholesale.alreadyListed"));
       return;
     }
 
@@ -114,7 +116,7 @@ function WholesaleManagement() {
     );
 
     if (record) {
-      Message.success(`"${listingProduct.title}" added to your wholesale listings.`);
+      Message.success(i18n("estore.pc.wholesale.addedToListings", listingProduct.title));
       setListingProduct(null);
     }
   };
@@ -127,7 +129,7 @@ function WholesaleManagement() {
 
   return (
     <MineSellerShell active="wholesale">
-      <h1 className="pc-mine__page-title">Wholesale Management</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.wholesale.title")}</h1>
 
       <div className="pc-card pc-mine__panel pc-mine__wholesale-toolbar">
         <div className="pc-mine__wholesale-chips">
@@ -135,7 +137,7 @@ function WholesaleManagement() {
             className={`pc-mine__wholesale-chip${!selectedCategoryId ? " active" : ""}`}
             onClick={() => doSelectCategory(null)}
           >
-            All
+            {i18n("estore.pc.wholesale.all")}
           </div>
           {!categoriesLoading &&
             categories.map((category: any) => (
@@ -144,7 +146,7 @@ function WholesaleManagement() {
                 className={`pc-mine__wholesale-chip${category.id === selectedCategoryId ? " active" : ""}`}
                 onClick={() => doSelectCategory(category.id)}
               >
-                {category.name}
+                {categoryLabel(category.name)}
               </div>
             ))}
           {categoriesLoading && (
@@ -160,7 +162,7 @@ function WholesaleManagement() {
           <input
             type="number"
             className="pc-input"
-            placeholder="Lowest Price"
+            placeholder={i18n("estore.pc.wholesale.lowestPrice")}
             value={minPriceInput}
             onChange={(event) => setMinPriceInput(event.target.value)}
           />
@@ -168,24 +170,24 @@ function WholesaleManagement() {
           <input
             type="number"
             className="pc-input"
-            placeholder="Highest Price"
+            placeholder={i18n("estore.pc.wholesale.highestPrice")}
             value={maxPriceInput}
             onChange={(event) => setMaxPriceInput(event.target.value)}
           />
           <button type="button" className="pc-btn pc-btn-primary" onClick={doApplyFilter}>
-            Filter
+            {i18n("estore.pc.wholesale.filter")}
           </button>
         </div>
       </div>
 
       <div className="pc-mine__wholesale-count">
         {isInitialLoading ? (
-          "Loading items…"
+          i18n("estore.pc.wholesale.loadingItems")
         ) : (
           <>
-            Showing <b>{products.length}</b> of <b>{productsCount}</b> item
-            {productsCount === 1 ? "" : "s"}
-            {selectedCategory ? ` in ${selectedCategory.name}` : ""}
+            {i18n("estore.pc.wholesale.showing")} <b>{products.length}</b> {i18n("estore.pc.wholesale.of")} <b>{productsCount}</b>{" "}
+            {productsCount === 1 ? i18n("estore.pc.wholesale.item") : i18n("estore.pc.wholesale.items")}
+            {selectedCategory ? ` ${i18n("estore.pc.wholesale.inCategory", categoryLabel(selectedCategory.name))}` : ""}
           </>
         )}
       </div>
@@ -206,8 +208,8 @@ function WholesaleManagement() {
 
       {!isInitialLoading && products.length === 0 && (
         <div className="pc-card pc-mine__empty">
-          <div className="pc-mine__empty-title">No products match this filter</div>
-          <div className="pc-mine__empty-text">Try a different category or price range.</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.wholesale.emptyTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.wholesale.emptyText")}</div>
         </div>
       )}
 
@@ -239,7 +241,7 @@ function WholesaleManagement() {
                         doOpenListingModal(product);
                       }}
                     >
-                      {isListed ? "✓ Added" : "＋ Add"}
+                      {isListed ? `✓ ${i18n("estore.pc.wholesale.added")}` : `＋ ${i18n("estore.pc.wholesale.add")}`}
                     </button>
                   </div>
                 </div>
@@ -250,9 +252,9 @@ function WholesaleManagement() {
       )}
 
       <div className="pc-mine__wholesale-sentinel" ref={sentinelRef}>
-        {!isInitialLoading && loadingMore && <span>Loading more…</span>}
+        {!isInitialLoading && loadingMore && <span>{i18n("estore.pc.wholesale.loadingMore")}</span>}
         {!isInitialLoading && !loadingMore && !hasMore && products.length > 0 && (
-          <span>You've reached the end.</span>
+          <span>{i18n("estore.pc.wholesale.reachedEnd")}</span>
         )}
       </div>
 
@@ -273,11 +275,11 @@ function WholesaleManagement() {
 
             <div className="pc-mine__wholesale-modal-body">
               <div className="pc-mine__row">
-                <span className="pc-mine__row-label">Sales Price</span>
+                <span className="pc-mine__row-label">{i18n("estore.pc.wholesale.salesPrice")}</span>
                 <span className="pc-mine__row-value">{formatPrice(listingProduct.price)}</span>
               </div>
               <div className="pc-mine__row">
-                <span className="pc-mine__row-label">Wholesale Price</span>
+                <span className="pc-mine__row-label">{i18n("estore.pc.wholesale.wholesalePrice")}</span>
                 <span className="pc-mine__row-value">
                   {formatPrice(toWholesalePrice(listingProduct.price))}
                 </span>
@@ -291,7 +293,7 @@ function WholesaleManagement() {
                 disabled={listingSaveLoading}
                 onClick={doCloseListingModal}
               >
-                Cancel
+                {i18n("estore.pc.wholesale.cancel")}
               </button>
               <button
                 type="button"
@@ -299,7 +301,7 @@ function WholesaleManagement() {
                 disabled={listingSaveLoading}
                 onClick={doConfirmListing}
               >
-                {listingSaveLoading ? "Confirming…" : "Confirm listing"}
+                {listingSaveLoading ? i18n("estore.pc.wholesale.confirming") : i18n("estore.pc.wholesale.confirmListing")}
               </button>
             </div>
           </div>

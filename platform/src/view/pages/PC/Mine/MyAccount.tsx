@@ -34,7 +34,7 @@ const schema = yup.object().shape({
 
 function maskPhoneNumber(phoneNumber) {
   if (!phoneNumber) {
-    return "Not bound";
+    return i18n("estore.pc.myAccount.notBound");
   }
 
   if (phoneNumber.length <= 4) {
@@ -58,7 +58,7 @@ function MyAccount() {
     }
   }, [dispatch, currentUser?.store]);
 
-  const displayIdLabel = store?.storeId ? "Store ID" : "ID";
+  const displayIdLabel = store?.storeId ? i18n("estore.pc.myAccount.storeId") : i18n("estore.pc.myAccount.id");
   const displayId = store?.storeId || currentUser?.id;
 
   const form = useForm({
@@ -77,13 +77,13 @@ function MyAccount() {
     if (!displayId) return;
     navigator.clipboard?.writeText(displayId);
     setCopied(true);
-    Message.success(`${displayIdLabel} copied to clipboard`);
+    Message.success(i18n("estore.pc.myAccount.idCopied", displayIdLabel));
     setTimeout(() => setCopied(false), 1500);
   };
 
   return (
     <MineShell active="account">
-      <h1 className="pc-mine__page-title">My Account</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.myAccount.title")}</h1>
 
       <div className="pc-card pc-mine__panel">
         <div className="pc-mine__row">
@@ -91,28 +91,28 @@ function MyAccount() {
           <span className="pc-mine__row-value">
             {displayId}
             <button type="button" className="pc-mine__copy-btn" onClick={doCopyId}>
-              {copied ? "Copied" : "Copy"}
+              {copied ? i18n("estore.pc.myAccount.copied") : i18n("estore.pc.myAccount.copy")}
             </button>
           </span>
         </div>
 
         <div className="pc-mine__row">
-          <span className="pc-mine__row-label">Username</span>
+          <span className="pc-mine__row-label">{i18n("estore.pc.myAccount.username")}</span>
           <span className="pc-mine__row-value">{currentUser?.fullName || currentUser?.email}</span>
         </div>
 
         <div className="pc-mine__row">
-          <span className="pc-mine__row-label">Phone Number</span>
+          <span className="pc-mine__row-label">{i18n("estore.pc.myAccount.phoneNumber")}</span>
           <span className="pc-mine__row-value">{maskPhoneNumber(currentUser?.phoneNumber)}</span>
         </div>
 
         <div className="pc-mine__row">
-          <span className="pc-mine__row-label">Email</span>
-          <span className="pc-mine__row-value">{currentUser?.email || "Not bound"}</span>
+          <span className="pc-mine__row-label">{i18n("estore.pc.myAccount.email")}</span>
+          <span className="pc-mine__row-value">{currentUser?.email || i18n("estore.pc.myAccount.notBound")}</span>
         </div>
 
         <div className="pc-mine__row">
-          <span className="pc-mine__row-label">Login Password</span>
+          <span className="pc-mine__row-label">{i18n("estore.pc.myAccount.loginPassword")}</span>
           <span className="pc-mine__row-value">
             ••••••
             <button
@@ -120,7 +120,7 @@ function MyAccount() {
               className="pc-mine__link-btn"
               onClick={() => setShowPasswordForm((value) => !value)}
             >
-              Change
+              {i18n("estore.pc.myAccount.change")}
             </button>
           </span>
         </div>
@@ -128,33 +128,33 @@ function MyAccount() {
 
       {showPasswordForm && (
         <div className="pc-card pc-mine__panel pc-mine__password-panel">
-          <h2>Change Login Password</h2>
+          <h2>{i18n("estore.pc.myAccount.changeLoginPassword")}</h2>
           <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-              <label className="pc-mine__field-label">Current Password</label>
+              <label className="pc-mine__field-label">{i18n("estore.pc.myAccount.currentPassword")}</label>
               <InputFormItem
                 type="password"
                 name="oldPassword"
                 autoComplete="current-password"
-                placeholder="Enter your current password"
+                placeholder={i18n("estore.pc.myAccount.currentPasswordPlaceholder")}
                 className="pc-input"
               />
 
-              <label className="pc-mine__field-label">New Password</label>
+              <label className="pc-mine__field-label">{i18n("estore.pc.myAccount.newPassword")}</label>
               <InputFormItem
                 type="password"
                 name="newPassword"
                 autoComplete="new-password"
-                placeholder="At least 6 characters"
+                placeholder={i18n("estore.pc.myAccount.newPasswordPlaceholder")}
                 className="pc-input"
               />
 
-              <label className="pc-mine__field-label">Confirm New Password</label>
+              <label className="pc-mine__field-label">{i18n("estore.pc.myAccount.confirmNewPassword")}</label>
               <InputFormItem
                 type="password"
                 name="newPasswordConfirmation"
                 autoComplete="new-password"
-                placeholder="Re-enter new password"
+                placeholder={i18n("estore.pc.myAccount.confirmNewPasswordPlaceholder")}
                 className="pc-input"
               />
 
@@ -164,11 +164,11 @@ function MyAccount() {
                   className="pc-btn pc-btn-ghost"
                   onClick={() => setShowPasswordForm(false)}
                 >
-                  Cancel
+                  {i18n("estore.pc.myAccount.cancel")}
                 </button>
                 <button className="pc-btn pc-btn-primary" disabled={saveLoading} type="submit">
                   <ButtonIcon loading={saveLoading} />
-                  <span>Save Changes</span>
+                  <span>{i18n("estore.pc.myAccount.saveChanges")}</span>
                 </button>
               </div>
             </form>
@@ -177,7 +177,7 @@ function MyAccount() {
       )}
 
       <p className="pc-mine__hint">
-        Keep your account secure — never share your password or verification codes with anyone.
+        {i18n("estore.pc.myAccount.securityHint")}
       </p>
 
       <style>{sharedMineStyles}</style>

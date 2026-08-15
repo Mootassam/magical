@@ -81,62 +81,62 @@ function Register() {
         >
           <div className="pc-auth__brand-content">
             <Link to="/pc" className="pc-auth__logo">Estore</Link>
-            <h1>Join Estore Today</h1>
-            <p>Create an account to track orders, save addresses, and check out faster.</p>
+            <h1>{i18n("estore.pc.register.brandTitle")}</h1>
+            <p>{i18n("estore.pc.register.brandSubtitle")}</p>
           </div>
         </div>
 
         <div className="pc-auth__panel pc-auth__panel--form">
           <div className="pc-auth__form-wrap pc-auth__form-wrap--wide">
-            <h2 className="pc-auth__title">Create your account</h2>
-            <p className="pc-auth__subtitle">Join Estore and start shopping smarter</p>
+            <h2 className="pc-auth__title">{i18n("estore.pc.register.title")}</h2>
+            <p className="pc-auth__subtitle">{i18n("estore.pc.register.subtitle")}</p>
 
             <FormProvider {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="pc-auth__grid-2">
                   <div>
-                    <label className="pc-auth__label" htmlFor="email">Email</label>
+                    <label className="pc-auth__label" htmlFor="email">{i18n("estore.pc.register.email")}</label>
                     <div className="pc-auth__otp-row">
                       <InputFormItem
                         type="email"
                         name="email"
-                        placeholder="Enter your email"
+                        placeholder={i18n("estore.pc.register.emailPlaceholder")}
                         className="pc-input"
                         externalErrorMessage={externalErrorMessage}
                       />
                       <button type="button" className="pc-btn pc-btn-ghost pc-auth__otp-btn" onClick={handleGetOtp}>
-                        Get OTP
+                        {i18n("estore.pc.register.getOtp")}
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <label className="pc-auth__label" htmlFor="otp">Verification Code</label>
+                    <label className="pc-auth__label" htmlFor="otp">{i18n("estore.pc.register.otp")}</label>
                     <InputFormItem
                       type="text"
                       name="otp"
-                      placeholder="Enter the OTP sent to your email"
+                      placeholder={i18n("estore.pc.register.otpPlaceholder")}
                       className="pc-input"
                     />
                   </div>
                 </div>
 
-                <label className="pc-auth__label" htmlFor="phoneNumber">Phone Number</label>
+                <label className="pc-auth__label" htmlFor="phoneNumber">{i18n("estore.pc.register.phoneNumber")}</label>
                 <InputFormItem
                   type="tel"
                   name="phoneNumber"
-                  placeholder="Phone number"
+                  placeholder={i18n("estore.pc.register.phoneNumberPlaceholder")}
                   className="pc-input"
                 />
 
                 <div className="pc-auth__grid-2">
                   <div>
-                    <label className="pc-auth__label" htmlFor="password">Password</label>
+                    <label className="pc-auth__label" htmlFor="password">{i18n("estore.pc.register.password")}</label>
                     <div className="pc-auth__field-wrap">
                       <InputFormItem
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        placeholder="Create a password"
+                        placeholder={i18n("estore.pc.register.passwordPlaceholder")}
                         className="pc-input"
                       />
                       <button type="button" className="pc-auth__toggle-eye" onClick={togglePassword}>👁</button>
@@ -144,13 +144,13 @@ function Register() {
                   </div>
 
                   <div>
-                    <label className="pc-auth__label" htmlFor="newPasswordConfirmation">Confirm Password</label>
+                    <label className="pc-auth__label" htmlFor="newPasswordConfirmation">{i18n("estore.pc.register.confirmPassword")}</label>
                     <div className="pc-auth__field-wrap">
                       <InputFormItem
                         type={showConfirmPassword ? "text" : "password"}
                         name="newPasswordConfirmation"
                         autoComplete="new-password"
-                        placeholder="Re-enter your password"
+                        placeholder={i18n("estore.pc.register.confirmPasswordPlaceholder")}
                         className="pc-input"
                       />
                       <button type="button" className="pc-auth__toggle-eye" onClick={toggleConfirmPassword}>👁</button>
@@ -160,13 +160,13 @@ function Register() {
 
                 <button className="pc-btn pc-btn-primary pc-auth__submit" disabled={loading} type="submit">
                   <ButtonIcon loading={loading} />
-                  <span>Register</span>
+                  <span>{i18n("estore.pc.register.registerButton")}</span>
                 </button>
               </form>
             </FormProvider>
 
             <div className="pc-auth__login-note">
-              Already have an account? <Link to="/pc/auth/signin">Log in</Link>
+              {i18n("estore.pc.register.haveAccount")} <Link to="/pc/auth/signin">{i18n("estore.pc.register.logIn")}</Link>
             </div>
           </div>
         </div>

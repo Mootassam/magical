@@ -162,7 +162,7 @@ function ApplyMerchant() {
     <MineShell active="apply-merchant">
       <h1 className="pc-mine__page-title">{i18n("pages.applyMerchant.title")}</h1>
 
-      {showLoading && <div className="pc-mine__hint">Loading...</div>}
+      {showLoading && <div className="pc-mine__hint">{i18n("estore.pc.applyMerchant.loading")}</div>}
 
       {!showLoading && store && store.status === "success" && (
         <div className="pc-card pc-mine__status-card pc-mine__status-card--success">
@@ -286,7 +286,7 @@ function ApplyMerchant() {
             </div>
           </div>
 
-          <label className="pc-mine__field-label pc-mine__field-label--sp">ID Card</label>
+          <label className="pc-mine__field-label pc-mine__field-label--sp">{i18n("estore.pc.applyMerchant.idCard")}</label>
           <div className="pc-mine__id-row">
             <UploadBox
               label={i18n("pages.applyMerchant.idCardFront")}
@@ -331,7 +331,7 @@ function ApplyMerchant() {
             disabled={saveLoading}
             onClick={doSubmit}
           >
-            {saveLoading ? "Submitting..." : i18n("pages.applyMerchant.submit")}
+            {saveLoading ? i18n("estore.pc.applyMerchant.submitting") : i18n("pages.applyMerchant.submit")}
           </button>
         </div>
       )}

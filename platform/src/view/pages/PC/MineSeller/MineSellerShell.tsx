@@ -3,25 +3,26 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
 import storeSelectors from "src/modules/store/storeSelectors";
-
-const MENU = [
-  { key: "dashboard", label: "Dashboard", icon: "🏠", path: "/pc/mine-seller" },
-  { key: "wholesale", label: "Wholesale Management", icon: "🏷️", path: "/pc/mine-seller/wholesale" },
-  { key: "shop-details", label: "Shop Details", icon: "🏬", path: "/pc/mine-seller/shop-details" },
-  { key: "products", label: "Product Management", icon: "📦", path: "/pc/mine-seller/products" },
-  { key: "orders", label: "Orders", icon: "🧾", path: "/pc/mine-seller/orders" },
-  { key: "billing", label: "Billing Records", icon: "💳", path: "/pc/mine/withdrawal-record" },
-  { key: "addresses", label: "Delivery Addresses", icon: "📍", path: "/pc/mine/addresses" },
-  { key: "support", label: "Service Center", icon: "🎧", path: "/pc/mine/support" },
-  { key: "login-password", label: "Login Password", icon: "🔒", path: "/pc/mine/account" },
-  { key: "payment-password", label: "Payment Password", icon: "🔑", path: "/pc/mine/payment-password" },
-  { key: "settings", label: "Set Up", icon: "⚙️", path: "/pc/mine-seller/settings" },
-];
+import { i18n } from "../../../../i18n";
 
 function MineSellerShell(props: { active: string; children: React.ReactNode }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const store = useSelector(storeSelectors.selectStore);
+
+  const MENU = [
+    { key: "dashboard", label: i18n("estore.pc.mineSeller.menu.dashboard"), icon: "🏠", path: "/pc/mine-seller" },
+    { key: "wholesale", label: i18n("estore.pc.mineSeller.menu.wholesale"), icon: "🏷️", path: "/pc/mine-seller/wholesale" },
+    { key: "shop-details", label: i18n("estore.pc.mineSeller.menu.shopDetails"), icon: "🏬", path: "/pc/mine-seller/shop-details" },
+    { key: "products", label: i18n("estore.pc.mineSeller.menu.products"), icon: "📦", path: "/pc/mine-seller/products" },
+    { key: "orders", label: i18n("estore.pc.mineSeller.menu.orders"), icon: "🧾", path: "/pc/mine-seller/orders" },
+    { key: "billing", label: i18n("estore.pc.mineSeller.menu.billing"), icon: "💳", path: "/pc/mine/withdrawal-record" },
+    { key: "addresses", label: i18n("estore.pc.mineSeller.menu.addresses"), icon: "📍", path: "/pc/mine/addresses" },
+    { key: "support", label: i18n("estore.pc.mineSeller.menu.support"), icon: "🎧", path: "/pc/mine/support" },
+    { key: "login-password", label: i18n("estore.pc.mineSeller.menu.loginPassword"), icon: "🔒", path: "/pc/mine/account" },
+    { key: "payment-password", label: i18n("estore.pc.mineSeller.menu.paymentPassword"), icon: "🔑", path: "/pc/mine/payment-password" },
+    { key: "settings", label: i18n("estore.pc.mineSeller.menu.settings"), icon: "⚙️", path: "/pc/mine-seller/settings" },
+  ];
 
   const doSignout = () => {
     dispatch(authActions.doSignout());
@@ -40,12 +41,12 @@ function MineSellerShell(props: { active: string; children: React.ReactNode }) {
               <div className="pc-mine__avatar pc-mine__avatar--shop">
                 {storePhoto ? <img src={storePhoto} alt={store?.storeName} /> : initial}
               </div>
-              <div className="pc-mine__name">{store?.storeName || "My Store"}</div>
-              <div className="pc-mine__email">Seller</div>
+              <div className="pc-mine__name">{store?.storeName || i18n("estore.pc.mineSeller.myStore")}</div>
+              <div className="pc-mine__email">{i18n("estore.pc.mineSeller.seller")}</div>
             </div>
 
             <Link to="/pc/mine" className="pc-mine__switch-link">
-              🔄 Switch to buyer account
+              🔄 {i18n("estore.pc.mineSeller.switchToBuyer")}
             </Link>
 
             <nav className="pc-mine__menu pc-scroll-x">
@@ -62,7 +63,7 @@ function MineSellerShell(props: { active: string; children: React.ReactNode }) {
             </nav>
 
             <button type="button" className="pc-mine__logout" onClick={doSignout}>
-              <span>↩</span> Log out
+              <span>↩</span> {i18n("estore.pc.mineSeller.logOut")}
             </button>
           </aside>
 

@@ -5,6 +5,7 @@ import listSelectors from "src/modules/notification/list/notificationListSelecto
 import formActions from "src/modules/notification/form/notificationFormActions";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
+import { i18n } from "../../../../i18n";
 
 const ICONS = {
   deposit_success: { icon: "💰", bg: "#E9F9EF" },
@@ -24,25 +25,25 @@ function getTitle(notification) {
   if (notification.subject) return notification.subject;
   switch (notification.type) {
     case "deposit_success":
-      return "Deposit successful";
+      return i18n("estore.pc.messages.depositSuccess");
     case "deposit_canceled":
-      return "Deposit canceled";
+      return i18n("estore.pc.messages.depositCanceled");
     case "withdraw_success":
-      return "Withdrawal successful";
+      return i18n("estore.pc.messages.withdrawSuccess");
     case "withdraw_canceled":
-      return "Withdrawal canceled";
+      return i18n("estore.pc.messages.withdrawCanceled");
     case "system":
-      return "System notice";
+      return i18n("estore.pc.messages.systemNotice");
     case "alert":
-      return "Alert";
+      return i18n("estore.pc.messages.alert");
     default:
-      return "Notification";
+      return i18n("estore.pc.messages.notification");
   }
 }
 
 function getText(notification) {
   if (notification.message) return notification.message;
-  if (notification.amount) return `Amount: $${notification.amount}`;
+  if (notification.amount) return `${i18n("estore.pc.messages.amount")}: $${notification.amount}`;
   return "";
 }
 
@@ -111,28 +112,28 @@ function Messages() {
   return (
     <MineShell active="messages">
       <div className="pc-mine__addr-head">
-        <h1 className="pc-mine__page-title">Messages</h1>
+        <h1 className="pc-mine__page-title">{i18n("estore.pc.messages.title")}</h1>
         {hasUnread && (
           <button type="button" className="pc-mine__link-btn" onClick={doMarkAllRead}>
-            Mark all read
+            {i18n("estore.pc.messages.markAllRead")}
           </button>
         )}
       </div>
 
       <div className="pc-card pc-mine__panel pc-mine__messages-panel">
-        {loading && rows.length === 0 && <div className="pc-mine__hint">Loading...</div>}
-        {!loading && rows.length === 0 && <div className="pc-mine__hint">No messages yet.</div>}
+        {loading && rows.length === 0 && <div className="pc-mine__hint">{i18n("estore.pc.messages.loading")}</div>}
+        {!loading && rows.length === 0 && <div className="pc-mine__hint">{i18n("estore.pc.messages.empty")}</div>}
 
         {todayRows.length > 0 && (
           <>
-            <div className="day-label">Today</div>
+            <div className="day-label">{i18n("estore.pc.messages.today")}</div>
             {todayRows.map(renderCard)}
           </>
         )}
 
         {earlierRows.length > 0 && (
           <>
-            <div className="day-label">Earlier</div>
+            <div className="day-label">{i18n("estore.pc.messages.earlier")}</div>
             {earlierRows.map(renderCard)}
           </>
         )}

@@ -177,7 +177,7 @@ function Withdrawal() {
           </div>
           {!belowFee && isCrypto && amountNum !== null && (
             <div className="pc-mine__receive-row pc-mine__receive-row--sub">
-              <span>Deducted from balance</span>
+              <span>{i18n("estore.pc.withdrawal.deductedFromBalance")}</span>
               <span>
                 {ratesLoading && !rates
                   ? i18n("pages.withdrawal.fetchingRate")

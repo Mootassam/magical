@@ -5,14 +5,7 @@ import orderActions from "src/modules/order/orderActions";
 import orderSelectors from "src/modules/order/orderSelectors";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
-
-const STATUS_LABEL = {
-  pending: "Pending",
-  confirmed: "Confirmed",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
+import { i18n } from "../../../../i18n";
 
 function formatDate(value) {
   if (!value) return "";
@@ -26,13 +19,21 @@ function MyOrders() {
   const orders = useSelector(orderSelectors.selectRows);
   const loading = useSelector(orderSelectors.selectLoading);
 
+  const STATUS_LABEL = {
+    pending: i18n("estore.pc.myOrders.statusPending"),
+    confirmed: i18n("estore.pc.myOrders.statusConfirmed"),
+    shipped: i18n("estore.pc.myOrders.statusShipped"),
+    delivered: i18n("estore.pc.myOrders.statusDelivered"),
+    cancelled: i18n("estore.pc.myOrders.statusCancelled"),
+  };
+
   useEffect(() => {
     dispatch(orderActions.doFetchMine());
   }, [dispatch]);
 
   return (
     <MineShell active="orders">
-      <h1 className="pc-mine__page-title">My Orders</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.myOrders.title")}</h1>
 
       {loading && (!orders || orders.length === 0) && (
         <div className="pc-card pc-mine__panel">
@@ -51,9 +52,9 @@ function MyOrders() {
       {!loading && (!orders || orders.length === 0) && (
         <div className="pc-card pc-mine__empty">
           <div className="pc-mine__empty-icon">📦</div>
-          <div className="pc-mine__empty-title">No orders yet</div>
-          <div className="pc-mine__empty-text">Orders you place will show up here.</div>
-          <Link to="/pc" className="pc-btn pc-btn-primary">Start Shopping</Link>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.myOrders.emptyTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.myOrders.emptyText")}</div>
+          <Link to="/pc" className="pc-btn pc-btn-primary">{i18n("estore.pc.myOrders.startShopping")}</Link>
         </div>
       )}
 
@@ -63,7 +64,7 @@ function MyOrders() {
             <div className="pc-card pc-mine__order-card" key={order.id}>
               <div className="pc-mine__order-head">
                 <div>
-                  <span className="pc-mine__order-id">Order #{order.id?.slice(-8).toUpperCase()}</span>
+                  <span className="pc-mine__order-id">{i18n("estore.pc.myOrders.order")} #{order.id?.slice(-8).toUpperCase()}</span>
                   <span className="pc-mine__order-date">{formatDate(order.createdAt)}</span>
                 </div>
                 <span className={`pc-mine__status-tag pc-mine__status-${order.status || "pending"}`}>
@@ -88,7 +89,7 @@ function MyOrders() {
               </div>
 
               <div className="pc-mine__order-footer">
-                <span>Total</span>
+                <span>{i18n("estore.pc.myOrders.total")}</span>
                 <span className="pc-mine__order-total">${Number(order.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>

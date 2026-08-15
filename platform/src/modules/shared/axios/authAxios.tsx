@@ -1,5 +1,6 @@
 
 
+
 import Axios from 'axios';
 // import config from 'src/config';
 import { getLanguageCode } from '../../../i18n';
@@ -9,10 +10,10 @@ import AuthToken from 'src/modules/auth/authToken';
 
 const authAxios = Axios.create({
   //Local
-  baseURL: "http://72.60.24.245:8081/api/",
+ //  baseURL: "http://72.60.24.245:8081/api/",
 
   //demo
-  // baseURL: "http://localhost:8081/api/",
+   baseURL: "http://localhost:8081/api/",
 
   //Randthis
   // baseURL: "https://eclicks-digital.com/api", 

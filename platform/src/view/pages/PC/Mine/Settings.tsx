@@ -11,6 +11,7 @@ import Message from "src/view/shared/message";
 import Errors from "src/modules/shared/error/errors";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
+import { i18n } from "../../../../i18n";
 
 function Settings() {
   const dispatch = useDispatch();
@@ -59,7 +60,7 @@ function Settings() {
 
   const handleSave = () => {
     if (!displayName.trim()) {
-      Message.error("Display name is required.");
+      Message.error(i18n("estore.pc.settings.displayNameRequired"));
       return;
     }
 
@@ -75,13 +76,13 @@ function Settings() {
 
   return (
     <MineShell active="settings">
-      <h1 className="pc-mine__page-title">Set Up</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.settings.title")}</h1>
 
       <div className="pc-mine__settings-layout">
         <div className="pc-card pc-mine__panel pc-mine__settings-profile">
-          <h2>Public Profile</h2>
+          <h2>{i18n("estore.pc.settings.publicProfile")}</h2>
           <p className="pc-mine__settings-sub">
-            This information will be displayed on your reviews and profile.
+            {i18n("estore.pc.settings.publicProfileSub")}
           </p>
 
           <div className="pc-mine__settings-avatar-row">
@@ -96,47 +97,47 @@ function Settings() {
               onChange={handleAvatarChange}
             />
             <button type="button" className="pc-btn pc-btn-ghost" onClick={handleAvatarClick} disabled={uploadingAvatar}>
-              {uploadingAvatar ? "Uploading…" : "Change Avatar"}
+              {uploadingAvatar ? i18n("estore.pc.settings.uploading") : i18n("estore.pc.settings.changeAvatar")}
             </button>
           </div>
 
-          <label className="pc-mine__field-label">Display Name</label>
+          <label className="pc-mine__field-label">{i18n("estore.pc.settings.displayName")}</label>
           <input
             className="pc-input"
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
-            placeholder="Your display name"
+            placeholder={i18n("estore.pc.settings.displayNamePlaceholder")}
           />
 
-          <label className="pc-mine__field-label pc-mine__field-label--sp">Email Address</label>
+          <label className="pc-mine__field-label pc-mine__field-label--sp">{i18n("estore.pc.settings.emailAddress")}</label>
           <input className="pc-input pc-mine__field-disabled" value={currentUser?.email || ""} disabled readOnly />
-          <div className="pc-mine__settings-hint">Contact support to change your email address.</div>
+          <div className="pc-mine__settings-hint">{i18n("estore.pc.settings.emailHint")}</div>
 
           <button
             className="pc-btn pc-btn-primary pc-mine__deposit-submit"
             onClick={handleSave}
             disabled={savingProfile}
           >
-            {savingProfile ? "Saving…" : "Save Changes"}
+            {savingProfile ? i18n("estore.pc.settings.saving") : i18n("estore.pc.settings.saveChanges")}
           </button>
         </div>
 
         <div className="pc-card pc-mine__panel pc-mine__settings-stats">
-          <h2>Account Stats</h2>
+          <h2>{i18n("estore.pc.settings.accountStats")}</h2>
           <div className="pc-mine__stat-row">
-            <span>Orders</span>
+            <span>{i18n("estore.pc.settings.orders")}</span>
             <span>{orders.length}</span>
           </div>
           <div className="pc-mine__stat-row">
-            <span>Reviews</span>
+            <span>{i18n("estore.pc.settings.reviews")}</span>
             <span>0</span>
           </div>
           <div className="pc-mine__stat-row">
-            <span>Wishlist</span>
+            <span>{i18n("estore.pc.settings.wishlist")}</span>
             <span>0</span>
           </div>
           <div className="pc-mine__stat-row pc-mine__stat-row--last">
-            <span>Joined</span>
+            <span>{i18n("estore.pc.settings.joined")}</span>
             <span>{joinedDate}</span>
           </div>
         </div>

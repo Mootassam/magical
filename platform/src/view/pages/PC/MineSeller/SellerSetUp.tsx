@@ -9,6 +9,7 @@ import Message from "src/view/shared/message";
 import Errors from "src/modules/shared/error/errors";
 import MineSellerShell from "./MineSellerShell";
 import { sharedMineStyles } from "src/view/pages/PC/Mine/MyAccount";
+import { i18n } from "../../../../i18n";
 
 function SellerSetUp() {
   const dispatch = useDispatch();
@@ -106,7 +107,7 @@ function SellerSetUp() {
 
   const handleSave = () => {
     if (!storeName.trim()) {
-      Message.error("Store name is required.");
+      Message.error(i18n("estore.pc.sellerSetup.storeNameRequired"));
       return;
     }
 
@@ -123,32 +124,32 @@ function SellerSetUp() {
 
   return (
     <MineSellerShell active="settings">
-      <h1 className="pc-mine__page-title">Set Up</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.sellerSetup.title")}</h1>
 
-      {showLoading && <div className="pc-mine__hint">Loading store settings…</div>}
+      {showLoading && <div className="pc-mine__hint">{i18n("estore.pc.sellerSetup.loading")}</div>}
 
       {!initLoading && !store && (
         <div className="pc-card pc-mine__empty">
-          <div className="pc-mine__empty-title">No store found for this account</div>
-          <div className="pc-mine__empty-text">Apply to become a merchant to manage store settings.</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.sellerSetup.noStoreTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.sellerSetup.noStoreText")}</div>
         </div>
       )}
 
       {store && (
         <div className="pc-mine__settings-layout">
           <div className="pc-card pc-mine__panel pc-mine__settings-main">
-            <h2>Store Information</h2>
+            <h2>{i18n("estore.pc.sellerSetup.storeInformation")}</h2>
             <p className="pc-mine__settings-sub">
-              Update your store details and business information.
+              {i18n("estore.pc.sellerSetup.storeInfoSub")}
             </p>
 
             <div className="pc-mine__settings-logo-row">
               <div className="pc-mine__settings-logo">
-                {logoUrl ? <img src={logoUrl} alt={storeName} /> : <span>{storeName || "Store"}</span>}
+                {logoUrl ? <img src={logoUrl} alt={storeName} /> : <span>{storeName || i18n("estore.pc.sellerSetup.store")}</span>}
               </div>
               <div className="pc-mine__settings-logo-info">
-                <div className="pc-mine__settings-logo-title">Store Logo</div>
-                <div className="pc-mine__settings-logo-sub">Upload a logo for your store</div>
+                <div className="pc-mine__settings-logo-title">{i18n("estore.pc.sellerSetup.storeLogo")}</div>
+                <div className="pc-mine__settings-logo-sub">{i18n("estore.pc.sellerSetup.uploadLogoSub")}</div>
                 <input
                   ref={logoInputRef}
                   type="file"
@@ -162,31 +163,31 @@ function SellerSetUp() {
                   onClick={handleLogoClick}
                   disabled={uploadingLogo}
                 >
-                  {uploadingLogo ? "Uploading…" : "Upload Logo"}
+                  {uploadingLogo ? i18n("estore.pc.sellerSetup.uploading") : i18n("estore.pc.sellerSetup.uploadLogo")}
                 </button>
               </div>
             </div>
 
-            <label className="pc-mine__field-label">Store Name *</label>
+            <label className="pc-mine__field-label">{i18n("estore.pc.sellerSetup.storeName")}</label>
             <input
               className="pc-input"
               value={storeName}
               onChange={(event) => setStoreName(event.target.value)}
-              placeholder="Your store name"
+              placeholder={i18n("estore.pc.sellerSetup.storeNamePlaceholder")}
             />
 
-            <label className="pc-mine__field-label pc-mine__field-label--sp">Store Description</label>
+            <label className="pc-mine__field-label pc-mine__field-label--sp">{i18n("estore.pc.sellerSetup.storeDescription")}</label>
             <textarea
               className="pc-input pc-mine__settings-textarea"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Describe your store..."
+              placeholder={i18n("estore.pc.sellerSetup.storeDescriptionPlaceholder")}
               rows={4}
             />
 
             <div className="pc-mine__settings-field-row">
               <div>
-                <label className="pc-mine__field-label">Business Email *</label>
+                <label className="pc-mine__field-label">{i18n("estore.pc.sellerSetup.businessEmail")}</label>
                 <input
                   className="pc-input pc-mine__field-disabled"
                   value={currentUser?.email || ""}
@@ -195,12 +196,12 @@ function SellerSetUp() {
                 />
               </div>
               <div>
-                <label className="pc-mine__field-label">Business Phone</label>
+                <label className="pc-mine__field-label">{i18n("estore.pc.sellerSetup.businessPhone")}</label>
                 <input
                   className="pc-input"
                   value={contact}
                   onChange={(event) => setContact(event.target.value)}
-                  placeholder="Phone number"
+                  placeholder={i18n("estore.pc.sellerSetup.businessPhonePlaceholder")}
                 />
               </div>
             </div>
@@ -211,19 +212,19 @@ function SellerSetUp() {
               onClick={handleSave}
               disabled={savingChanges}
             >
-              {savingChanges ? "Saving…" : "Save Changes"}
+              {savingChanges ? i18n("estore.pc.sellerSetup.saving") : i18n("estore.pc.sellerSetup.saveChanges")}
             </button>
           </div>
 
           <div className="pc-card pc-mine__panel pc-mine__settings-banner">
-            <h2>Store Banner</h2>
-            <p className="pc-mine__settings-sub">Shown at the top of your shop page.</p>
+            <h2>{i18n("estore.pc.sellerSetup.storeBanner")}</h2>
+            <p className="pc-mine__settings-sub">{i18n("estore.pc.sellerSetup.storeBannerSub")}</p>
 
             <div className="pc-mine__settings-banner-box">
               {bannerUrl ? (
                 <img src={bannerUrl} alt="Store banner" />
               ) : (
-                <span className="pc-mine__settings-banner-placeholder">No banner uploaded</span>
+                <span className="pc-mine__settings-banner-placeholder">{i18n("estore.pc.sellerSetup.noBanner")}</span>
               )}
             </div>
             <input
@@ -239,7 +240,7 @@ function SellerSetUp() {
               onClick={handleBannerClick}
               disabled={uploadingBanner}
             >
-              {uploadingBanner ? "Uploading…" : "Upload Banner"}
+              {uploadingBanner ? i18n("estore.pc.sellerSetup.uploading") : i18n("estore.pc.sellerSetup.uploadBanner")}
             </button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import cartActions from "src/modules/cart/cartActions";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
 
 function ProductDetails(props) {
   const dispatch = useDispatch();
@@ -61,7 +62,7 @@ function ProductDetails(props) {
 
               <div className="product-body">
                 {record.category?.name && (
-                  <div className="category-badge">{record.category.name}</div>
+                  <div className="category-badge">{categoryLabel(record.category.name)}</div>
                 )}
 
                 <div className="product-title">{record.title}</div>

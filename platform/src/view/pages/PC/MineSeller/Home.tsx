@@ -6,13 +6,7 @@ import storeActions from "src/modules/store/storeActions";
 import storeSelectors from "src/modules/store/storeSelectors";
 import MineSellerShell from "./MineSellerShell";
 import { sharedMineStyles } from "src/view/pages/PC/Mine/MyAccount";
-
-const ORDER_TILES = [
-  { icon: "📦", label: "Waiting for Delivery", tab: 0, bg: "#FEF5E7", fg: "#D08609" },
-  { icon: "🚚", label: "Waiting for Receipt", tab: 1, bg: "#E9EFFD", fg: "#2563EB" },
-  { icon: "✅", label: "Completed", tab: 2, bg: "#E9F9EF", fg: "#1DA750" },
-  { icon: "↩️", label: "Refund / After-sales", tab: 3, bg: "#FAECE9", fg: "#B93C1A" },
-];
+import { i18n } from "../../../../i18n";
 
 function Home() {
   const dispatch = useDispatch();
@@ -20,6 +14,13 @@ function Home() {
   const store = useSelector(storeSelectors.selectStore);
   const initLoading = useSelector(storeSelectors.selectInitLoading);
   const dashboard = useSelector(storeSelectors.selectDashboard);
+
+  const ORDER_TILES = [
+    { icon: "📦", label: i18n("estore.pc.sellerHub.waitingForDelivery"), tab: 0, bg: "#FEF5E7", fg: "#D08609" },
+    { icon: "🚚", label: i18n("estore.pc.sellerHub.waitingForReceipt"), tab: 1, bg: "#E9EFFD", fg: "#2563EB" },
+    { icon: "✅", label: i18n("estore.pc.sellerHub.completed"), tab: 2, bg: "#E9F9EF", fg: "#1DA750" },
+    { icon: "↩️", label: i18n("estore.pc.sellerHub.refundAfterSales"), tab: 3, bg: "#FAECE9", fg: "#B93C1A" },
+  ];
 
   useEffect(() => {
     dispatch(storeActions.doInit());
@@ -32,7 +33,7 @@ function Home() {
   if (initLoading || !store) {
     return (
       <MineSellerShell active="dashboard">
-        <div className="pc-mine__hint">Loading your shop...</div>
+        <div className="pc-mine__hint">{i18n("estore.pc.sellerHub.loadingShop")}</div>
         <style>{sharedMineStyles}</style>
       </MineSellerShell>
     );
@@ -43,13 +44,12 @@ function Home() {
       <MineSellerShell active="dashboard">
         <div className="pc-card pc-mine__frozen-panel">
           <div className="pc-mine__frozen-icon">🚫</div>
-          <div className="pc-mine__frozen-title">Store Frozen</div>
+          <div className="pc-mine__frozen-title">{i18n("estore.pc.sellerHub.storeFrozen")}</div>
           <p className="pc-mine__frozen-text">
-            Your seller account has been temporarily frozen because an order was left waiting for delivery for
-            too long. You can't access the seller dashboard until this is resolved.
+            {i18n("estore.pc.sellerHub.frozenText")}
           </p>
-          <Link to="/pc/mine/support" className="pc-btn pc-btn-primary">Contact Customer Service</Link>
-          <Link to="/pc/mine" className="pc-mine__frozen-back">Back to buyer account</Link>
+          <Link to="/pc/mine/support" className="pc-btn pc-btn-primary">{i18n("estore.pc.sellerHub.contactSupport")}</Link>
+          <Link to="/pc/mine" className="pc-mine__frozen-back">{i18n("estore.pc.sellerHub.backToBuyer")}</Link>
         </div>
         <style>{sharedMineStyles}</style>
         <style>{`
@@ -81,24 +81,24 @@ function Home() {
               {storePhoto ? <img src={storePhoto} alt={store?.storeName} /> : <span>🏪</span>}
             </div>
             <div>
-              <div className="pc-mine__hero-name">{store?.storeName || "My Store"}</div>
+              <div className="pc-mine__hero-name">{store?.storeName || i18n("estore.pc.mineSeller.myStore")}</div>
               <div className="pc-mine__hero-email">{currentUser?.email}</div>
             </div>
           </Link>
 
           <div className="pc-mine__hero-right">
             <div className="pc-mine__hero-balance">
-              <div className="pc-mine__hero-balance-label">Account Balance</div>
+              <div className="pc-mine__hero-balance-label">{i18n("estore.pc.sellerHub.accountBalance")}</div>
               <div className="pc-mine__hero-balance-value">${currentUser?.balance?.toFixed(2) || "0.00"}</div>
             </div>
             <Link to="/pc/mine-seller/shop-details" className="pc-btn pc-btn-primary pc-mine__hero-btn">
-              View Shop
+              {i18n("estore.pc.sellerHub.viewShop")}
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="pc-mine__section-label">Order Fulfillment</div>
+      <div className="pc-mine__section-label">{i18n("estore.pc.sellerHub.orderFulfillment")}</div>
       <div className="pc-mine__order-tiles">
         {ORDER_TILES.map((tile) => (
           <Link
@@ -114,23 +114,23 @@ function Home() {
         ))}
       </div>
 
-      <div className="pc-mine__section-label">Quick Actions</div>
+      <div className="pc-mine__section-label">{i18n("estore.pc.sellerHub.quickActions")}</div>
       <div className="pc-mine__quick-row">
         <Link to="/pc/mine/deposit" className="pc-card pc-mine__quick-btn">
           <div className="pc-mine__quick-btn-icon">⬆️</div>
-          <div>Top Up</div>
+          <div>{i18n("estore.pc.sellerHub.topUp")}</div>
         </Link>
         <Link to="/pc/mine/withdrawal" className="pc-card pc-mine__quick-btn">
           <div className="pc-mine__quick-btn-icon">⬇️</div>
-          <div>Withdrawal</div>
+          <div>{i18n("estore.pc.sellerHub.withdrawal")}</div>
         </Link>
         <Link to="/pc/mine-seller/wholesale" className="pc-card pc-mine__quick-btn">
           <div className="pc-mine__quick-btn-icon">🏷️</div>
-          <div>Wholesale Catalog</div>
+          <div>{i18n("estore.pc.sellerHub.wholesaleCatalog")}</div>
         </Link>
         <Link to="/pc/mine-seller/products" className="pc-card pc-mine__quick-btn">
           <div className="pc-mine__quick-btn-icon">📦</div>
-          <div>Manage Products</div>
+          <div>{i18n("estore.pc.sellerHub.manageProducts")}</div>
         </Link>
       </div>
 

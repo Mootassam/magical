@@ -2,22 +2,23 @@ import React from "react";
 import { useHistory } from "react-router-dom";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
+import { i18n } from "../../../../i18n";
 
 function MyCollection() {
   const history = useHistory();
 
   return (
     <MineShell active="collection">
-      <h1 className="pc-mine__page-title">My Collection</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.mine.myCollection.title")}</h1>
 
       <div className="pc-card pc-mine__empty">
         <div className="pc-mine__empty-icon">❤️</div>
-        <div className="pc-mine__empty-title">No saved items yet</div>
+        <div className="pc-mine__empty-title">{i18n("estore.pc.mine.myCollection.emptyTitle")}</div>
         <div className="pc-mine__empty-text">
-          Products you save will appear here so you can find them again quickly.
+          {i18n("estore.pc.mine.myCollection.emptyText")}
         </div>
         <button type="button" className="pc-btn pc-btn-primary" onClick={() => history.push("/pc/classification")}>
-          Browse Products
+          {i18n("estore.pc.mine.myCollection.browseProducts")}
         </button>
       </div>
 

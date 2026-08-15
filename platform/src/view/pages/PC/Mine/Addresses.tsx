@@ -82,47 +82,47 @@ function Addresses() {
   return (
     <MineShell active="addresses">
       <div className="pc-mine__addr-head">
-        <h1 className="pc-mine__page-title">Delivery Addresses</h1>
+        <h1 className="pc-mine__page-title">{i18n("estore.pc.addresses.title")}</h1>
         <button type="button" className="pc-btn pc-btn-primary" onClick={openAddForm}>
-          + Add Address
+          {i18n("estore.pc.addresses.addAddress")}
         </button>
       </div>
 
       {showForm && (
         <div className="pc-card pc-mine__panel pc-mine__addr-form-panel">
-          <h2>{editingId ? "Edit Address" : "Add New Address"}</h2>
+          <h2>{editingId ? i18n("estore.pc.addresses.editAddress") : i18n("estore.pc.addresses.addNewAddress")}</h2>
           <form onSubmit={doSubmit}>
-            <label className="pc-mine__field-label">Address</label>
+            <label className="pc-mine__field-label">{i18n("estore.pc.addresses.address")}</label>
             <textarea
               className="pc-input pc-mine__textarea"
               value={address}
               onChange={(event) => setAddress(event.target.value)}
-              placeholder="Street, city, state, zip"
+              placeholder={i18n("estore.pc.addresses.addressPlaceholder")}
               rows={3}
             />
 
-            <label className="pc-mine__field-label">Contact Name</label>
+            <label className="pc-mine__field-label">{i18n("estore.pc.addresses.contactName")}</label>
             <input
               className="pc-input"
               value={contact}
               onChange={(event) => setContact(event.target.value)}
-              placeholder="Recipient name"
+              placeholder={i18n("estore.pc.addresses.contactNamePlaceholder")}
             />
 
-            <label className="pc-mine__field-label">Contact Number</label>
+            <label className="pc-mine__field-label">{i18n("estore.pc.addresses.contactNumber")}</label>
             <input
               className="pc-input"
               value={contactNumber}
               onChange={(event) => setContactNumber(event.target.value)}
-              placeholder="Phone number"
+              placeholder={i18n("estore.pc.addresses.contactNumberPlaceholder")}
             />
 
             <div className="pc-mine__form-actions">
               <button type="button" className="pc-btn pc-btn-ghost" onClick={() => setShowForm(false)}>
-                Cancel
+                {i18n("estore.pc.addresses.cancel")}
               </button>
               <button className="pc-btn pc-btn-primary" disabled={saveLoading} type="submit">
-                {saveLoading ? "Saving..." : "Save Address"}
+                {saveLoading ? i18n("estore.pc.addresses.saving") : i18n("estore.pc.addresses.saveAddress")}
               </button>
             </div>
           </form>
@@ -143,10 +143,10 @@ function Addresses() {
       {!loading && rows.length === 0 && !showForm && (
         <div className="pc-card pc-mine__empty">
           <div className="pc-mine__empty-icon">📍</div>
-          <div className="pc-mine__empty-title">No saved addresses</div>
-          <div className="pc-mine__empty-text">Add a delivery address to speed up checkout.</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.addresses.emptyTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.addresses.emptyText")}</div>
           <button type="button" className="pc-btn pc-btn-primary" onClick={openAddForm}>
-            + Add Address
+            {i18n("estore.pc.addresses.addAddress")}
           </button>
         </div>
       )}
@@ -162,30 +162,30 @@ function Addresses() {
 
               {confirmDeleteId === row.id ? (
                 <div className="pc-mine__addr-confirm">
-                  <span>Delete this address?</span>
+                  <span>{i18n("estore.pc.addresses.deleteConfirm")}</span>
                   <button
                     type="button"
                     className="pc-mine__link-btn pc-mine__link-btn--danger"
                     disabled={destroyLoading}
                     onClick={() => doConfirmDelete(row.id)}
                   >
-                    Yes, delete
+                    {i18n("estore.pc.addresses.yesDelete")}
                   </button>
                   <button type="button" className="pc-mine__link-btn" onClick={() => setConfirmDeleteId(null)}>
-                    Cancel
+                    {i18n("estore.pc.addresses.cancel")}
                   </button>
                 </div>
               ) : (
                 <div className="pc-mine__addr-actions">
                   <button type="button" className="pc-mine__link-btn" onClick={() => openEditForm(row)}>
-                    Edit
+                    {i18n("estore.pc.addresses.edit")}
                   </button>
                   <button
                     type="button"
                     className="pc-mine__link-btn pc-mine__link-btn--danger"
                     onClick={() => setConfirmDeleteId(row.id)}
                   >
-                    Delete
+                    {i18n("estore.pc.addresses.delete")}
                   </button>
                 </div>
               )}

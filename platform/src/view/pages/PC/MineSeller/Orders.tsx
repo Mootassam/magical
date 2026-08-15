@@ -7,6 +7,7 @@ import orderShipmentActions from "src/modules/orderShipment/orderShipmentActions
 import orderShipmentSelectors from "src/modules/orderShipment/orderShipmentSelectors";
 import MineSellerShell from "./MineSellerShell";
 import { sharedMineStyles } from "src/view/pages/PC/Mine/MyAccount";
+import { i18n } from "../../../../i18n";
 
 const WHOLESALE_DISCOUNT = 0.2;
 
@@ -30,17 +31,17 @@ function PendingOrderCard({ order, shipping, onShip }: { order: any; shipping: b
         </div>
         <div className="pc-mine__ord-info">
           <div className="pc-mine__ord-name">{product.title}</div>
-          <div className="pc-mine__ord-line">Lump sum: {formatPrice(lumpSum)} × {qty}</div>
-          <div className="pc-mine__ord-line">Sales profit: {formatPrice(salesProfit)} × {qty}</div>
-          <div className="pc-mine__ord-line">Wholesale price: {formatPrice(wholesalePrice)} × {qty}</div>
+          <div className="pc-mine__ord-line">{i18n("estore.pc.sellerOrders.lumpSum")}: {formatPrice(lumpSum)} × {qty}</div>
+          <div className="pc-mine__ord-line">{i18n("estore.pc.sellerOrders.salesProfit")}: {formatPrice(salesProfit)} × {qty}</div>
+          <div className="pc-mine__ord-line">{i18n("estore.pc.sellerOrders.wholesalePrice")}: {formatPrice(wholesalePrice)} × {qty}</div>
         </div>
       </div>
       <div className="pc-mine__ord-bottom">
         <div className="pc-mine__ord-payment">
-          Actual payment <b>{formatPrice(actualPayment)}</b>
+          {i18n("estore.pc.sellerOrders.actualPayment")} <b>{formatPrice(actualPayment)}</b>
         </div>
         <button type="button" className="pc-btn pc-btn-primary pc-mine__ord-ship-btn" disabled={shipping} onClick={onShip}>
-          {shipping ? "Processing…" : "Go to Shipment"}
+          {shipping ? i18n("estore.pc.sellerOrders.processing") : i18n("estore.pc.sellerOrders.goToShipment")}
         </button>
       </div>
     </div>
@@ -55,17 +56,17 @@ function ShipmentCard({ shipment }: { shipment: any }) {
   if (shipment.status === "completed") {
     statusTag = (
       <span className="pc-mine__ord-tag pc-mine__ord-tag--success">
-        Profit credited: {formatPrice(shipment.profitAmount)}
+        {i18n("estore.pc.sellerOrders.profitCredited")}: {formatPrice(shipment.profitAmount)}
       </span>
     );
   } else if (shipment.status === "refunded") {
     statusTag = (
       <span className="pc-mine__ord-tag pc-mine__ord-tag--refund">
-        Refunded: {formatPrice(shipment.wholesaleAmount + shipment.profitAmount)}
+        {i18n("estore.pc.sellerOrders.refunded")}: {formatPrice(shipment.wholesaleAmount + shipment.profitAmount)}
       </span>
     );
   } else {
-    statusTag = <span className="pc-mine__ord-tag pc-mine__ord-tag--pending">Awaiting review</span>;
+    statusTag = <span className="pc-mine__ord-tag pc-mine__ord-tag--pending">{i18n("estore.pc.sellerOrders.awaitingReview")}</span>;
   }
 
   return (
@@ -76,12 +77,12 @@ function ShipmentCard({ shipment }: { shipment: any }) {
         </div>
         <div className="pc-mine__ord-info">
           <div className="pc-mine__ord-name">{product.title}</div>
-          <div className="pc-mine__ord-line">Wholesale price: {formatPrice(shipment.wholesaleAmount)} × {qty}</div>
+          <div className="pc-mine__ord-line">{i18n("estore.pc.sellerOrders.wholesalePrice")}: {formatPrice(shipment.wholesaleAmount)} × {qty}</div>
         </div>
       </div>
       <div className="pc-mine__ord-bottom">
         <div className="pc-mine__ord-payment">
-          Paid <b>{formatPrice(shipment.wholesaleAmount)}</b>
+          {i18n("estore.pc.sellerOrders.paid")} <b>{formatPrice(shipment.wholesaleAmount)}</b>
         </div>
         {statusTag}
       </div>
@@ -103,17 +104,17 @@ function OrderCardSkeleton() {
   );
 }
 
-const TABS = [
-  { key: "waiting-delivery", label: "Waiting for Delivery", icon: "📦" },
-  { key: "waiting-receipt", label: "Waiting for Receipt", icon: "🚚" },
-  { key: "completed", label: "Completed", icon: "✅" },
-  { key: "refund", label: "Refund / After-sales", icon: "↩️" },
-];
-
 function Orders() {
   const dispatch = useDispatch();
   const location = useLocation<{ tab?: number }>();
   const [activeTab, setActiveTab] = useState(location.state?.tab || 0);
+
+  const TABS = [
+    { key: "waiting-delivery", label: i18n("estore.pc.sellerOrders.waitingForDelivery"), icon: "📦" },
+    { key: "waiting-receipt", label: i18n("estore.pc.sellerOrders.waitingForReceipt"), icon: "🚚" },
+    { key: "completed", label: i18n("estore.pc.sellerOrders.completed"), icon: "✅" },
+    { key: "refund", label: i18n("estore.pc.sellerOrders.refundAfterSales"), icon: "↩️" },
+  ];
 
   const automatOrders = useSelector(automatOrderSelectors.selectRows);
   const automatOrdersLoading = useSelector(automatOrderSelectors.selectLoading);
@@ -147,7 +148,7 @@ function Orders() {
 
   return (
     <MineSellerShell active="orders">
-      <h1 className="pc-mine__page-title">Store Orders</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.sellerOrders.title")}</h1>
 
       <div className="pc-mine__ord-tabs">
         {TABS.map((tab, index) => (
@@ -174,8 +175,8 @@ function Orders() {
       {!isInitialLoading && tabData[activeTab].length === 0 && (
         <div className="pc-card pc-mine__empty">
           <div className="pc-mine__empty-icon">{TABS[activeTab].icon}</div>
-          <div className="pc-mine__empty-title">Nothing here yet</div>
-          <div className="pc-mine__empty-text">Orders in this stage will show up here.</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.sellerOrders.emptyTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.sellerOrders.emptyText")}</div>
         </div>
       )}
 

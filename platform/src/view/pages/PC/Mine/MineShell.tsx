@@ -3,32 +3,33 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import authActions from "src/modules/auth/authActions";
 import authSelectors from "src/modules/auth/authSelectors";
-
-const BASE_MENU = [
-  { key: "account", label: "My Account", icon: "👤", path: "/pc/mine/account" },
-  { key: "balance", label: "Balance", icon: "💰", path: "/pc/mine/balance" },
-  { key: "orders", label: "My Orders", icon: "📦", path: "/pc/mine/orders" },
-  { key: "deposit", label: "Deposit", icon: "⬆️", path: "/pc/mine/deposit" },
-  { key: "deposit-record", label: "Deposit Record", icon: "🧾", path: "/pc/mine/deposit-record" },
-  { key: "withdrawal", label: "Withdrawal", icon: "⬇️", path: "/pc/mine/withdrawal" },
-  { key: "withdrawal-record", label: "Withdrawal Record", icon: "📤", path: "/pc/mine/withdrawal-record" },
-  { key: "payment-password", label: "Payment Password", icon: "🔒", path: "/pc/mine/payment-password" },
-];
-
-const AFTER_MERCHANT_MENU = [
-  { key: "addresses", label: "Delivery Addresses", icon: "📍", path: "/pc/mine/addresses" },
-  { key: "collection", label: "My Collection", icon: "❤️", path: "/pc/mine/collection" },
-  { key: "browse", label: "My Browse", icon: "🕓", path: "/pc/mine/browse" },
-  { key: "messages", label: "Messages", icon: "💬", path: "/pc/mine/messages" },
-  { key: "settings", label: "Set Up", icon: "⚙️", path: "/pc/mine/settings" },
-  { key: "support", label: "Live Chat", icon: "🎧", path: "/pc/mine/support" },
-];
+import { i18n } from "../../../../i18n";
 
 function MineShell(props: { active: string; children: React.ReactNode }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const currentUser = useSelector(authSelectors.selectCurrentUser);
   const userLabel = useSelector(authSelectors.selectCurrentUserNameOrEmailPrefix);
+
+  const BASE_MENU = [
+    { key: "account", label: i18n("estore.pc.mine.menu.account"), icon: "👤", path: "/pc/mine/account" },
+    { key: "balance", label: i18n("estore.pc.mine.menu.balance"), icon: "💰", path: "/pc/mine/balance" },
+    { key: "orders", label: i18n("estore.pc.mine.menu.orders"), icon: "📦", path: "/pc/mine/orders" },
+    { key: "deposit", label: i18n("estore.pc.mine.menu.deposit"), icon: "⬆️", path: "/pc/mine/deposit" },
+    { key: "deposit-record", label: i18n("estore.pc.mine.menu.depositRecord"), icon: "🧾", path: "/pc/mine/deposit-record" },
+    { key: "withdrawal", label: i18n("estore.pc.mine.menu.withdrawal"), icon: "⬇️", path: "/pc/mine/withdrawal" },
+    { key: "withdrawal-record", label: i18n("estore.pc.mine.menu.withdrawalRecord"), icon: "📤", path: "/pc/mine/withdrawal-record" },
+    { key: "payment-password", label: i18n("estore.pc.mine.menu.paymentPassword"), icon: "🔒", path: "/pc/mine/payment-password" },
+  ];
+
+  const AFTER_MERCHANT_MENU = [
+    { key: "addresses", label: i18n("estore.pc.mine.menu.addresses"), icon: "📍", path: "/pc/mine/addresses" },
+    { key: "collection", label: i18n("estore.pc.mine.menu.collection"), icon: "❤️", path: "/pc/mine/collection" },
+    { key: "browse", label: i18n("estore.pc.mine.menu.browse"), icon: "🕓", path: "/pc/mine/browse" },
+    { key: "messages", label: i18n("estore.pc.mine.menu.messages"), icon: "💬", path: "/pc/mine/messages" },
+    { key: "settings", label: i18n("estore.pc.mine.menu.settings"), icon: "⚙️", path: "/pc/mine/settings" },
+    { key: "support", label: i18n("estore.pc.mine.menu.support"), icon: "🎧", path: "/pc/mine/support" },
+  ];
 
   const MENU = [...BASE_MENU, ...AFTER_MERCHANT_MENU];
 
@@ -46,17 +47,17 @@ function MineShell(props: { active: string; children: React.ReactNode }) {
               <div className="pc-mine__avatar">
                 {(userLabel || "U").slice(0, 1).toUpperCase()}
               </div>
-              <div className="pc-mine__name">{userLabel || "Account"}</div>
+              <div className="pc-mine__name">{userLabel || i18n("estore.header.account")}</div>
               <div className="pc-mine__email">{currentUser?.email}</div>
             </Link>
 
             {currentUser?.store ? (
               <Link to="/pc/mine-seller" className="pc-mine__switch-link pc-mine__switch-link--primary">
-                🏪 Go to Seller Dashboard
+                🏪 {i18n("estore.pc.mine.goToSellerDashboard")}
               </Link>
             ) : (
               <Link to="/pc/mine/apply-merchant" className="pc-mine__switch-link">
-                🏪 Apply to Become a Merchant
+                🏪 {i18n("estore.pc.mine.applyMerchant")}
               </Link>
             )}
 
@@ -74,7 +75,7 @@ function MineShell(props: { active: string; children: React.ReactNode }) {
             </nav>
 
             <button type="button" className="pc-mine__logout" onClick={doSignout}>
-              <span>↩</span> Log out
+              <span>↩</span> {i18n("estore.pc.mine.logOut")}
             </button>
           </aside>
 

@@ -5,6 +5,7 @@ import storeActions from "src/modules/store/storeActions";
 import storeSelectors from "src/modules/store/storeSelectors";
 import MineSellerShell from "./MineSellerShell";
 import { sharedMineStyles } from "src/view/pages/PC/Mine/MyAccount";
+import { i18n } from "../../../../i18n";
 
 function formatPrice(value) {
   return `$${(Number(value) || 0).toFixed(2)}`;
@@ -34,38 +35,38 @@ function ShopDetails() {
 
   const healthStats = store
     ? [
-        { icon: "🛡️", value: store.creditScore, label: "Credit Score" },
-        { icon: "👥", value: store.numberOfFollowers, label: "Followers" },
-        { icon: "🧾", value: dashboard.waitingForDeliveryCount, label: "Today's Orders" },
-        { icon: "📦", value: dashboard.cumulativeOrderQty, label: "Cumulative Order Qty" },
+        { icon: "🛡️", value: store.creditScore, label: i18n("estore.pc.shopDetails.creditScore") },
+        { icon: "👥", value: store.numberOfFollowers, label: i18n("estore.pc.shopDetails.followers") },
+        { icon: "🧾", value: dashboard.waitingForDeliveryCount, label: i18n("estore.pc.shopDetails.todaysOrders") },
+        { icon: "📦", value: dashboard.cumulativeOrderQty, label: i18n("estore.pc.shopDetails.cumulativeOrderQty") },
       ]
     : [];
 
   const salesStats = store
     ? [
-        { icon: "💵", value: formatPrice(dashboard.todayTotalSales), label: "Today's Sales" },
-        { icon: "📊", value: formatPrice(dashboard.totalSales), label: "Total Sales" },
-        { icon: "📈", value: formatPrice(dashboard.todaySalesProfit), label: "Today's Profit" },
-        { icon: "💰", value: formatPrice(dashboard.salesProfit), label: "Total Profit", highlight: true },
+        { icon: "💵", value: formatPrice(dashboard.todayTotalSales), label: i18n("estore.pc.shopDetails.todaysSales") },
+        { icon: "📊", value: formatPrice(dashboard.totalSales), label: i18n("estore.pc.shopDetails.totalSales") },
+        { icon: "📈", value: formatPrice(dashboard.todaySalesProfit), label: i18n("estore.pc.shopDetails.todaysProfit") },
+        { icon: "💰", value: formatPrice(dashboard.salesProfit), label: i18n("estore.pc.shopDetails.totalProfit"), highlight: true },
       ]
     : [];
 
   return (
     <MineSellerShell active="shop-details">
-      <h1 className="pc-mine__page-title">Shop Details</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.shopDetails.title")}</h1>
 
-      {isInitialLoading && <div className="pc-mine__hint">Loading shop details…</div>}
+      {isInitialLoading && <div className="pc-mine__hint">{i18n("estore.pc.shopDetails.loading")}</div>}
 
       {!isInitialLoading && !store && (
         <div className="pc-card pc-mine__empty">
-          <div className="pc-mine__empty-title">You don't have a store yet</div>
-          <div className="pc-mine__empty-text">Apply to become a merchant to see your shop details here.</div>
+          <div className="pc-mine__empty-title">{i18n("estore.pc.shopDetails.noStoreTitle")}</div>
+          <div className="pc-mine__empty-text">{i18n("estore.pc.shopDetails.noStoreText")}</div>
           <button
             type="button"
             className="pc-btn pc-btn-primary"
             onClick={() => history.push("/pc/mine/apply-merchant")}
           >
-            Apply Now
+            {i18n("estore.pc.shopDetails.applyNow")}
           </button>
         </div>
       )}
@@ -96,13 +97,13 @@ function ShopDetails() {
               </div>
 
               <div className="pc-mine__sd-hero-balance">
-                <div className="pc-mine__sd-hero-balance-label">Account Balance</div>
+                <div className="pc-mine__sd-hero-balance-label">{i18n("estore.pc.shopDetails.accountBalance")}</div>
                 <div className="pc-mine__sd-hero-balance-value">{formatPrice(dashboard.accountBalance)}</div>
               </div>
             </div>
           </div>
 
-          <div className="pc-mine__sd-section-label">Store Health</div>
+          <div className="pc-mine__sd-section-label">{i18n("estore.pc.shopDetails.storeHealth")}</div>
           <div className="pc-mine__sd-stats-grid">
             {healthStats.map((stat) => (
               <div className="pc-card pc-mine__sd-stat-card" key={stat.label}>
@@ -113,7 +114,7 @@ function ShopDetails() {
             ))}
           </div>
 
-          <div className="pc-mine__sd-section-label">Sales Performance</div>
+          <div className="pc-mine__sd-section-label">{i18n("estore.pc.shopDetails.salesPerformance")}</div>
           <div className="pc-mine__sd-stats-grid">
             {salesStats.map((stat) => (
               <div

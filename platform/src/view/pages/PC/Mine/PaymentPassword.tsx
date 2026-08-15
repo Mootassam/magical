@@ -51,7 +51,7 @@ function PaymentPassword() {
 
   return (
     <MineShell active="payment-password">
-      <h1 className="pc-mine__page-title">Payment Password</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.paymentPassword.title")}</h1>
 
       <div className="pc-card pc-mine__password-panel">
         <FormProvider {...form}>
@@ -63,7 +63,7 @@ function PaymentPassword() {
                   type="password"
                   name="oldWithdrawPassword"
                   autoComplete="current-password"
-                  placeholder="Enter your current transaction password"
+                  placeholder={i18n("estore.pc.paymentPassword.oldPlaceholder")}
                   className="pc-input"
                 />
               </>
@@ -74,7 +74,7 @@ function PaymentPassword() {
               type="password"
               name="newWithdrawPassword"
               autoComplete="new-password"
-              placeholder="Enter your new transaction password"
+              placeholder={i18n("estore.pc.paymentPassword.newPlaceholder")}
               className="pc-input"
             />
 
@@ -83,17 +83,17 @@ function PaymentPassword() {
               type="password"
               name="newWithdrawPasswordConfirmation"
               autoComplete="new-password"
-              placeholder="Confirm your new transaction password"
+              placeholder={i18n("estore.pc.paymentPassword.confirmPlaceholder")}
               className="pc-input"
             />
 
             <p className="pc-mine__hint pc-mine__hint--left">
-              Your transaction password is used to confirm withdrawals and other sensitive account changes. Keep it secure and never share it with anyone.
+              {i18n("estore.pc.paymentPassword.hint")}
             </p>
 
             <button className="pc-btn pc-btn-primary pc-mine__deposit-submit" disabled={saveLoading} type="submit">
               <ButtonIcon loading={saveLoading} />
-              <span>{saveLoading ? "Saving..." : "Confirm"}</span>
+              <span>{saveLoading ? i18n("estore.pc.common.saving") : i18n("estore.pc.common.confirm")}</span>
             </button>
           </form>
         </FormProvider>

@@ -122,7 +122,7 @@ function Checkout() {
                 <div className="pc-checkout__section-label">{i18n("pages.checkout.sectionAddress")}</div>
                 <div className="pc-card pc-checkout__address-card">
                   {addressesLoading && addresses.length === 0 && (
-                    <div className="pc-checkout__address-empty">Loading...</div>
+                    <div className="pc-checkout__address-empty">{i18n("estore.pc.checkout.loading")}</div>
                   )}
 
                   {!addressesLoading && addresses.length === 0 && (
@@ -184,7 +184,7 @@ function Checkout() {
                       </div>
                       <div className="pc-checkout__summary-body">
                         <div className="pc-checkout__summary-name">{item.title}</div>
-                        <div className="pc-checkout__summary-qty">Qty: {item.qty}</div>
+                        <div className="pc-checkout__summary-qty">{i18n("estore.pc.checkout.qty")}: {item.qty}</div>
                       </div>
                       <div className="pc-checkout__summary-price">
                         ${((Number(item.price) || 0) * item.qty).toFixed(2)}

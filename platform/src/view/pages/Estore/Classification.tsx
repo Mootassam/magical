@@ -6,6 +6,7 @@ import shopCategorySelectors from "src/modules/shop/shopCategorySelectors";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
 import categoryIconImage from "src/view/pages/PC/categoryIconImage";
 import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
 
@@ -139,7 +140,7 @@ function Classification() {
                       <span>{categoryIcon(category.name)}</span>
                     )}
                   </div>
-                  <span>{category.name}</span>
+                  <span>{categoryLabel(category.name)}</span>
                 </div>
               ))}
           </div>
@@ -151,7 +152,7 @@ function Classification() {
                 <div className="txt">
                   <div className="eyebrow">Category</div>
                   <div className="name">
-                    {categoryIcon(selectedCategory.name)} {selectedCategory.name}
+                    {categoryIcon(selectedCategory.name)} {categoryLabel(selectedCategory.name)}
                   </div>
                 </div>
               </div>

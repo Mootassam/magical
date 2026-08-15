@@ -9,6 +9,8 @@ import cartActions from "src/modules/cart/cartActions";
 import categoryIcon from "src/view/pages/Estore/shared/categoryIcon";
 import categoryIconImage from "src/view/pages/PC/categoryIconImage";
 import { sortCategoriesByPriority } from "src/view/pages/PC/categoryOrder";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
+import { i18n } from "../../../i18n";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -102,19 +104,19 @@ function Classification() {
               <span>🔍</span>
               <input
                 type="text"
-                placeholder="Search in categories"
+                placeholder={i18n("estore.pc.classification.searchPlaceholder")}
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
               />
             </div>
 
-            <div className="pc-classification__side-title">Categories</div>
+            <div className="pc-classification__side-title">{i18n("estore.pc.classification.categories")}</div>
 
             {categoriesLoading && categories.length === 0 && (
-              <div className="pc-classification__side-loading">Loading...</div>
+              <div className="pc-classification__side-loading">{i18n("estore.pc.classification.loading")}</div>
             )}
             {!categoriesLoading && categories.length === 0 && (
-              <div className="pc-classification__side-loading">No categories</div>
+              <div className="pc-classification__side-loading">{i18n("estore.pc.classification.noCategories")}</div>
             )}
 
             <div className="pc-classification__side-list">
@@ -132,7 +134,7 @@ function Classification() {
                       categoryIcon(category.name)
                     )}
                   </span>
-                  <span>{category.name}</span>
+                  <span>{categoryLabel(category.name)}</span>
                 </button>
               ))}
             </div>
@@ -141,9 +143,9 @@ function Classification() {
           <div className="pc-classification__content">
             {selectedCategory && (
               <div className="pc-classification__banner">
-                <span className="pc-classification__banner-eyebrow">Category</span>
+                <span className="pc-classification__banner-eyebrow">{i18n("estore.pc.classification.category")}</span>
                 <div className="pc-classification__banner-name">
-                  {categoryIcon(selectedCategory.name)} {selectedCategory.name}
+                  {categoryIcon(selectedCategory.name)} {categoryLabel(selectedCategory.name)}
                 </div>
               </div>
             )}
@@ -163,7 +165,7 @@ function Classification() {
             )}
 
             {!productsLoading && products.length === 0 && (
-              <div className="pc-classification__state">No products found in this category.</div>
+              <div className="pc-classification__state">{i18n("estore.pc.classification.noProducts")}</div>
             )}
 
             {!productsLoading && products.length > 0 && (
@@ -198,10 +200,10 @@ function Classification() {
 
             <div className="pc-classification__sentinel" ref={sentinelRef}>
               {!productsLoading && loadingMore && (
-                <div className="pc-classification__state">Loading more...</div>
+                <div className="pc-classification__state">{i18n("estore.pc.classification.loadingMore")}</div>
               )}
               {!productsLoading && !loadingMore && !hasMore && products.length > 0 && (
-                <div className="pc-classification__state">You've reached the end.</div>
+                <div className="pc-classification__state">{i18n("estore.pc.classification.reachedEnd")}</div>
               )}
             </div>
           </div>

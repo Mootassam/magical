@@ -7,6 +7,7 @@ import Nodata from "src/view/shared/Nodata";
 import RecordListSkeleton, { SummarySkeleton } from "src/view/pages/Estore/shared/RecordListSkeleton";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
+import { i18n } from "../../../../i18n";
 
 const WALLET_LABELS = {
   eth: "ETH",
@@ -15,18 +16,18 @@ const WALLET_LABELS = {
   usdt_erc20: "USDT-ERC20",
 };
 
-const STATUS_CONFIG = {
-  success: { className: "completed", label: "Completed" },
-  pending: { className: "processing", label: "Processing" },
-  canceled: { className: "failed", label: "Canceled" },
-};
-
 function DepositRecord() {
   const dispatch = useDispatch();
   const loading = useSelector(transactionListSelectors.selectLoading);
   const rows = useSelector(transactionListSelectors.selectRows);
   const count = useSelector(transactionListSelectors.selectCount);
   const [initialized, setInitialized] = useState(false);
+
+  const STATUS_CONFIG = {
+    success: { className: "completed", label: i18n("estore.pc.records.completed") },
+    pending: { className: "processing", label: i18n("estore.pc.records.processing") },
+    canceled: { className: "failed", label: i18n("estore.pc.records.canceled") },
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -60,7 +61,7 @@ function DepositRecord() {
 
   return (
     <MineShell active="deposit-record">
-      <h1 className="pc-mine__page-title">Deposit Record</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.depositRecord.title")}</h1>
 
       <div className="pc-card summary-strip">
         {showSkeleton ? (
@@ -69,15 +70,15 @@ function DepositRecord() {
           <>
             <div className="summary-item">
               <div className="summary-value">${totalDeposited.toFixed(2)}</div>
-              <div className="summary-label">Total Deposited</div>
+              <div className="summary-label">{i18n("estore.pc.depositRecord.totalDeposited")}</div>
             </div>
             <div className="summary-item">
               <div className="summary-value">{count}</div>
-              <div className="summary-label">Transactions</div>
+              <div className="summary-label">{i18n("estore.pc.records.transactions")}</div>
             </div>
             <div className="summary-item">
               <div className="summary-value">{processingCount}</div>
-              <div className="summary-label">Processing</div>
+              <div className="summary-label">{i18n("estore.pc.records.processing")}</div>
             </div>
           </>
         )}
@@ -97,9 +98,9 @@ function DepositRecord() {
                   <div className="record-card" key={row.id}>
                     <div className="record-top">
                       <div>
-                        <div className="record-id">ID: {row.id}</div>
+                        <div className="record-id">{i18n("estore.pc.records.id")}: {row.id}</div>
                         <div className="record-time">
-                          Time: {moment(row.createdAt).format("YYYY-MM-DD HH:mm:ss")}
+                          {i18n("estore.pc.records.time")}: {moment(row.createdAt).format("YYYY-MM-DD HH:mm:ss")}
                         </div>
                       </div>
                       <div className="record-right">
@@ -111,7 +112,7 @@ function DepositRecord() {
                       <span className={`status-pill ${status.className}`}>{status.label}</span>
                       {row.photo && row.photo.length > 0 && (
                         <a className="proof-link" href={row.photo[0].downloadUrl} target="_blank" rel="noopener noreferrer">
-                          View proof
+                          {i18n("estore.pc.records.viewProof")}
                         </a>
                       )}
                     </div>

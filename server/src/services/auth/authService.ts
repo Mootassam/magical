@@ -11,6 +11,7 @@ import TenantRepository from "../../database/repositories/tenantRepository";
 import { tenantSubdomain } from "../tenantSubdomain";
 import Error401 from "../../errors/Error401";
 import moment from "moment";
+import Roles from "../../security/roles";
 
 const BCRYPT_SALT_ROUNDS = 12;
 
@@ -464,14 +465,16 @@ class AuthService {
         currentUser,
       }).joinDefaultUsingInvitedEmail(options.session);
 
-      // Creates or join default Tenant
+      // Creates or join default Tenant. Estore/mobile customers are
+      // self-service shoppers, not invited teammates, so they get the
+      // default "member" role immediately instead of landing in
+      // "empty-permissions" limbo waiting on an admin to assign roles.
       await new TenantService({
         ...options,
         currentUser,
       }).createOrJoinDefaultMobile(
         {
-          // leave empty to require admin's approval
-          roles: [],
+          roles: [Roles.values.member],
         },
         options.session
       );

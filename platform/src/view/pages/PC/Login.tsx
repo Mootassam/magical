@@ -62,48 +62,48 @@ function Login() {
         >
           <div className="pc-auth__brand-content">
             <Link to="/pc" className="pc-auth__logo">Estore</Link>
-            <h1>Shop More, Live Better</h1>
-            <p>Thousands of products, unbeatable prices, delivered to your door.</p>
+            <h1>{i18n("estore.pc.login.brandTitle")}</h1>
+            <p>{i18n("estore.pc.login.brandSubtitle")}</p>
           </div>
         </div>
 
         <div className="pc-auth__panel pc-auth__panel--form">
           <div className="pc-auth__form-wrap">
-            <h2 className="pc-auth__title">Welcome back</h2>
-            <p className="pc-auth__subtitle">Sign in to continue shopping</p>
+            <h2 className="pc-auth__title">{i18n("estore.pc.login.title")}</h2>
+            <p className="pc-auth__subtitle">{i18n("estore.pc.login.subtitle")}</p>
 
             <FormProvider {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
-                <label className="pc-auth__label" htmlFor="email">Phone Number / Email</label>
+                <label className="pc-auth__label" htmlFor="email">{i18n("estore.auth.login.phoneOrEmail")}</label>
                 <InputFormItem
                   type="text"
                   name="email"
-                  placeholder="Phone Number / Email"
+                  placeholder={i18n("estore.auth.login.phoneOrEmailPlaceholder")}
                   className="pc-input"
                   externalErrorMessage={externalErrorMessage}
                 />
 
-                <label className="pc-auth__label" htmlFor="password">Password</label>
+                <label className="pc-auth__label" htmlFor="password">{i18n("estore.pc.login.password")}</label>
                 <div className="pc-auth__field-wrap">
                   <InputFormItem
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    placeholder="Login Password"
+                    placeholder={i18n("estore.auth.login.passwordPlaceholder")}
                     className="pc-input"
                   />
                   <button type="button" className="pc-auth__toggle-eye" onClick={togglePassword}>👁</button>
                 </div>
 
                 <div className="pc-auth__links-row">
-                  <a href="#">Forgot Password?</a>
+                  <a href="#">{i18n("estore.pc.login.forgotPassword")}</a>
                   <span>
-                    No account? <Link to="/pc/auth/signup">Sign up</Link>
+                    {i18n("estore.auth.login.noAccount")} <Link to="/pc/auth/signup">{i18n("estore.auth.login.signUp")}</Link>
                   </span>
                 </div>
 
                 <button className="pc-btn pc-btn-primary pc-auth__submit" disabled={loading} type="submit">
                   <ButtonIcon loading={loading} />
-                  <span>Login</span>
+                  <span>{i18n("estore.auth.login.loginButton")}</span>
                 </button>
               </form>
             </FormProvider>

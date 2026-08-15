@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import authSelectors from "src/modules/auth/authSelectors";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
+import { i18n } from "../../../../i18n";
 
 function Balance() {
   const currentUser = useSelector(authSelectors.selectCurrentUser);
@@ -17,11 +18,11 @@ function Balance() {
 
   return (
     <MineShell active="balance">
-      <h1 className="pc-mine__page-title">Balance</h1>
+      <h1 className="pc-mine__page-title">{i18n("estore.pc.balance.title")}</h1>
 
       <div className="pc-card pc-mine__balance-card">
         <div className="pc-mine__balance-head">
-          <span>Total Balance</span>
+          <span>{i18n("estore.pc.balance.totalBalance")}</span>
           <button type="button" className="pc-mine__eye-toggle" onClick={() => setHidden(!hidden)}>
             {hidden ? "🙈" : "👁"}
           </button>
@@ -29,38 +30,38 @@ function Balance() {
 
         <div className="pc-mine__balance-split">
           <div>
-            <div className="pc-mine__balance-label">Account Balance</div>
+            <div className="pc-mine__balance-label">{i18n("estore.pc.balance.accountBalance")}</div>
             <div className="pc-mine__balance-value">{format(totalBalance)}</div>
           </div>
           <div>
-            <div className="pc-mine__balance-label">Available Balance</div>
+            <div className="pc-mine__balance-label">{i18n("estore.pc.balance.availableBalance")}</div>
             <div className="pc-mine__balance-value">{format(availableBalance)}</div>
           </div>
         </div>
 
         <div className="pc-mine__balance-actions">
-          <Link to="/pc/mine/deposit" className="pc-btn pc-btn-primary">⬆ Deposit</Link>
-          <Link to="/pc/mine/withdrawal" className="pc-btn pc-btn-outline pc-mine__balance-outline">⬇ Withdraw</Link>
+          <Link to="/pc/mine/deposit" className="pc-btn pc-btn-primary">⬆ {i18n("estore.pc.balance.deposit")}</Link>
+          <Link to="/pc/mine/withdrawal" className="pc-btn pc-btn-outline pc-mine__balance-outline">⬇ {i18n("estore.pc.balance.withdraw")}</Link>
         </div>
       </div>
 
       <div className="pc-mine__quick-grid">
         <Link to="/pc/mine/deposit-record" className="pc-card pc-mine__quick-item">
           <div className="pc-mine__quick-icon" style={{ background: "#E9F9EF" }}>🧾</div>
-          <span>Deposit Record</span>
+          <span>{i18n("estore.pc.depositRecord.title")}</span>
         </Link>
         <Link to="/pc/mine/withdrawal-record" className="pc-card pc-mine__quick-item">
           <div className="pc-mine__quick-icon" style={{ background: "#FEF5E7" }}>📤</div>
-          <span>Withdrawal Record</span>
+          <span>{i18n("estore.pc.withdrawalRecord.title")}</span>
         </Link>
         <Link to="/pc/mine/payment-password" className="pc-card pc-mine__quick-item">
           <div className="pc-mine__quick-icon" style={{ background: "#E9EFFD" }}>🔒</div>
-          <span>Payment Password</span>
+          <span>{i18n("estore.pc.paymentPassword.title")}</span>
         </Link>
       </div>
 
       <p className="pc-mine__hint">
-        Available balance can be used for purchases and withdrawn to your linked wallet.
+        {i18n("estore.pc.balance.hint")}
       </p>
 
       <style>{sharedMineStyles}</style>

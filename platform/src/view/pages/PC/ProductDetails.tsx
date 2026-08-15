@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import shopProductActions from "src/modules/shop/shopProductActions";
 import shopProductSelectors from "src/modules/shop/shopProductSelectors";
 import cartActions from "src/modules/cart/cartActions";
+import { categoryLabel } from "src/view/pages/Estore/shared/categoryLabel";
+import { i18n } from "../../../i18n";
 
 function ProductDetails(props) {
   const dispatch = useDispatch();
@@ -52,7 +54,7 @@ function ProductDetails(props) {
           )}
 
           {!loading && !record && (
-            <div className="pc-pd__state">Product not found.</div>
+            <div className="pc-pd__state">{i18n("estore.pc.productDetails.notFound")}</div>
           )}
 
           {!loading && record && (
@@ -61,13 +63,13 @@ function ProductDetails(props) {
                 {record.image ? (
                   <img src={record.image} alt={record.title} />
                 ) : (
-                  <div className="pc-pd__gallery-placeholder">No image</div>
+                  <div className="pc-pd__gallery-placeholder">{i18n("estore.pc.productDetails.noImage")}</div>
                 )}
               </div>
 
               <div className="pc-pd__info">
                 {record.category?.name && (
-                  <div className="pc-pd__category">{record.category.name}</div>
+                  <div className="pc-pd__category">{categoryLabel(record.category.name)}</div>
                 )}
 
                 <h1 className="pc-pd__title">{record.title}</h1>
@@ -75,12 +77,12 @@ function ProductDetails(props) {
 
                 {record.description && (
                   <>
-                    <div className="pc-pd__label">Description</div>
+                    <div className="pc-pd__label">{i18n("estore.pc.productDetails.description")}</div>
                     <p className="pc-pd__description">{record.description}</p>
                   </>
                 )}
 
-                <div className="pc-pd__label">Quantity</div>
+                <div className="pc-pd__label">{i18n("estore.pc.productDetails.quantity")}</div>
                 <div className="pc-pd__stepper">
                   <button onClick={() => setQty((value) => Math.max(1, value - 1))}>−</button>
                   <span>{qty}</span>
@@ -89,10 +91,10 @@ function ProductDetails(props) {
 
                 <div className="pc-pd__actions">
                   <button className="pc-btn pc-btn-outline" onClick={doAddToCart}>
-                    🛒 Add to Cart
+                    🛒 {i18n("estore.pc.productDetails.addToCart")}
                   </button>
                   <button className="pc-btn pc-btn-primary" onClick={doBuyNow}>
-                    Buy Now
+                    {i18n("estore.pc.productDetails.buyNow")}
                   </button>
                 </div>
               </div>
