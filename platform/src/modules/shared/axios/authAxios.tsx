@@ -10,12 +10,12 @@ import AuthToken from 'src/modules/auth/authToken';
 
 const authAxios = Axios.create({
   //Local
-  baseURL: "http://72.60.24.245:8081/api/",
+  // baseURL: "http://45.90.109.64:8081/api/",
 
   // baseURL: "http://localhost:8081/api/",
 
   //Randthis
-  // baseURL: "https://eclicks-digital.com/api", 
+  baseURL: "https://zalandostyle.com/api", 
 
   paramsSerializer: function (params) {
     return Qs.stringify(params, {
