@@ -1,48 +1,13 @@
-import React, { useEffect } from "react";
-import settingsService from "src/modules/settings/settingsService";
+import React from "react";
+import useTawkChat from "src/view/shared/hooks/useTawkChat";
 import MineShell from "./MineShell";
 import { sharedMineStyles } from "./MyAccount";
 import { i18n } from "../../../../i18n";
 
 const TAWK_CONTAINER_ID = "pc-tawk-chat-embed";
 
-function extractScriptBody(rawCode) {
-  if (!rawCode) return "";
-  const withoutComments = rawCode.replace(/<!--[\s\S]*?-->/g, "");
-  const match = withoutComments.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
-  return match ? match[1] : withoutComments;
-}
-
 function Support() {
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const settings = await settingsService.find();
-        const code = extractScriptBody(settings?.tawkToCode);
-        if (!code || cancelled) return;
-
-        const win = window as any;
-        win.Tawk_API = win.Tawk_API || {};
-        win.Tawk_API.embedded = TAWK_CONTAINER_ID;
-
-        if (!win.__tawkScriptInjected) {
-          const script = document.createElement("script");
-          script.type = "text/javascript";
-          script.text = code;
-          document.body.appendChild(script);
-          win.__tawkScriptInjected = true;
-        }
-      } catch (error) {
-        // No widget configured yet - falls back to the empty state below.
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  useTawkChat(TAWK_CONTAINER_ID);
 
   return (
     <MineShell active="support">

@@ -39,7 +39,6 @@ function Register() {
 
   const [initialValues] = useState({
     email: "",
-    otp: "",
     password: "",
     phoneNumber: "",
     rememberMe: true,
@@ -54,10 +53,6 @@ function Register() {
     mode: "onSubmit",
     defaultValues: initialValues,
   });
-
-  // Formal placeholder only - wiring this up to actually send/verify an
-  // email OTP is a follow-up task.
-  const handleGetOtp = () => {};
 
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -101,23 +96,11 @@ function Register() {
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <label className="field-label" htmlFor="email">Email</label>
-            <div className="otp-row">
-              <InputFormItem
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                externalErrorMessage={externalErrorMessage}
-              />
-              <button type="button" className="otp-btn" onClick={handleGetOtp}>
-                Get OTP
-              </button>
-            </div>
-
-            <label className="field-label" htmlFor="otp">Verification Code</label>
             <InputFormItem
-              type="text"
-              name="otp"
-              placeholder="Enter the OTP sent to your email"
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              externalErrorMessage={externalErrorMessage}
             />
 
             <label className="field-label">Phone Number</label>
@@ -303,36 +286,6 @@ function Register() {
           color:#DC2626;
           margin-top:4px;
         }
-
-        .otp-row{
-          display:flex;
-          gap:10px;
-          align-items:flex-start;
-        }
-        .otp-row .form-group{
-          flex:1;
-          min-width:0;
-        }
-
-        .otp-btn{
-          flex:0 0 auto;
-          height:46px;
-          padding:0 16px;
-          border-radius:12px;
-          border:1.5px solid var(--blue-bright);
-          background:#fff;
-          color:var(--blue-bright);
-          font-size:12.5px;
-          font-weight:700;
-          white-space:nowrap;
-          cursor:pointer;
-          transition:background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
-        }
-        .otp-btn:hover{
-          background:var(--blue-bright);
-          color:#fff;
-        }
-        .otp-btn:active{ transform:scale(0.96); }
 
         .toggle-eye{
           position:absolute;

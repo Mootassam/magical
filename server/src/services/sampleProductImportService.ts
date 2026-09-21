@@ -27,6 +27,9 @@ const FASHION_CSV = path.join(DATA_DIR, "fashion.csv");
 const UK_DATA_CSV = path.join(DATA_DIR, "UK_data.csv");
 const PERFUME_CSV = path.join(DATA_DIR, "perfume.csv");
 const CLOTHING_CSV = path.join(DATA_DIR, "clothing.csv");
+const MEN_BAGS_CSV = path.join(DATA_DIR, "men-bags.csv");
+const WOMEN_BAGS_CSV = path.join(DATA_DIR, "women-bags.csv");
+const ACCESSORIES_CSV = path.join(DATA_DIR, "accessories.csv");
 
 const BATCH_SIZE = 500;
 // UK_data.csv is ~2.2M rows - bigger batches keep the round trips to Mongo
@@ -350,6 +353,37 @@ async function mapClothingRow(record, ctx) {
   };
 }
 
+// men-bags.csv/women-bags.csv/accessories.csv columns: title,description,
+// imageUrl,price - same shape as perfume.csv, and each file already only
+// contains rows for its own target category (Men Bags/Women Bags/
+// Accessories), so no title classification is needed - just resolve
+// straight to that fixed category, same as mapPerfumeRow does for
+// "Global Purchase".
+function makeDirectCategoryRowMapper(targetCategory, datasetTag) {
+  return async function mapDirectCategoryRow(record, ctx) {
+    const title = (record.title || "").toString().trim();
+
+    if (!title) {
+      return null;
+    }
+
+    const categoryId = await ctx.categoryResolver.resolve(targetCategory);
+    const price = toPositiveNumber(record.price) || randomPrice();
+
+    return {
+      title: title.slice(0, 500),
+      description: (record.description || "").toString().trim().slice(0, 2000),
+      image: toHttpUrl(record.imageUrl),
+      importHash: `import:${datasetTag}:${hashTitle(title)}`,
+      ...baseFields(ctx, price, categoryId),
+    };
+  };
+}
+
+const mapMenBagsRow = makeDirectCategoryRowMapper("Men Bags", "men-bags-csv");
+const mapWomenBagsRow = makeDirectCategoryRowMapper("Women Bags", "women-bags-csv");
+const mapAccessoriesRow = makeDirectCategoryRowMapper("Accessories", "accessories-csv");
+
 class SampleProductImportService {
   static async run(options) {
     if (!fs.existsSync(DATA_DIR)) {
@@ -406,6 +440,39 @@ class SampleProductImportService {
       productsCreated += created;
       productsSkipped += skipped;
       datasetSummaries.push({ dataset: "clothing.csv", imported: created });
+    }
+
+    if (fs.existsSync(MEN_BAGS_CSV)) {
+      const { created, skipped } = await importCsvFile(
+        MEN_BAGS_CSV,
+        Product,
+        (record) => mapMenBagsRow(record, ctx)
+      );
+      productsCreated += created;
+      productsSkipped += skipped;
+      datasetSummaries.push({ dataset: "men-bags.csv", imported: created });
+    }
+
+    if (fs.existsSync(WOMEN_BAGS_CSV)) {
+      const { created, skipped } = await importCsvFile(
+        WOMEN_BAGS_CSV,
+        Product,
+        (record) => mapWomenBagsRow(record, ctx)
+      );
+      productsCreated += created;
+      productsSkipped += skipped;
+      datasetSummaries.push({ dataset: "women-bags.csv", imported: created });
+    }
+
+    if (fs.existsSync(ACCESSORIES_CSV)) {
+      const { created, skipped } = await importCsvFile(
+        ACCESSORIES_CSV,
+        Product,
+        (record) => mapAccessoriesRow(record, ctx)
+      );
+      productsCreated += created;
+      productsSkipped += skipped;
+      datasetSummaries.push({ dataset: "accessories.csv", imported: created });
     }
 
     let backgroundImport: any = null;

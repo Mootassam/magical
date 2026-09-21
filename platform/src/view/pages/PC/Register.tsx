@@ -40,7 +40,6 @@ function Register() {
 
   const [initialValues] = useState({
     email: "",
-    otp: "",
     password: "",
     phoneNumber: "",
     rememberMe: true,
@@ -55,10 +54,6 @@ function Register() {
     mode: "onSubmit",
     defaultValues: initialValues,
   });
-
-  // Formal placeholder only - wiring this up to actually send/verify an
-  // email OTP is a follow-up task (matches the mobile Estore/Register.tsx).
-  const handleGetOtp = () => {};
 
   const togglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -93,33 +88,14 @@ function Register() {
 
             <FormProvider {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="pc-auth__grid-2">
-                  <div>
-                    <label className="pc-auth__label" htmlFor="email">{i18n("estore.pc.register.email")}</label>
-                    <div className="pc-auth__otp-row">
-                      <InputFormItem
-                        type="email"
-                        name="email"
-                        placeholder={i18n("estore.pc.register.emailPlaceholder")}
-                        className="pc-input"
-                        externalErrorMessage={externalErrorMessage}
-                      />
-                      <button type="button" className="pc-btn pc-btn-ghost pc-auth__otp-btn" onClick={handleGetOtp}>
-                        {i18n("estore.pc.register.getOtp")}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="pc-auth__label" htmlFor="otp">{i18n("estore.pc.register.otp")}</label>
-                    <InputFormItem
-                      type="text"
-                      name="otp"
-                      placeholder={i18n("estore.pc.register.otpPlaceholder")}
-                      className="pc-input"
-                    />
-                  </div>
-                </div>
+                <label className="pc-auth__label" htmlFor="email">{i18n("estore.pc.register.email")}</label>
+                <InputFormItem
+                  type="email"
+                  name="email"
+                  placeholder={i18n("estore.pc.register.emailPlaceholder")}
+                  className="pc-input"
+                  externalErrorMessage={externalErrorMessage}
+                />
 
                 <label className="pc-auth__label" htmlFor="phoneNumber">{i18n("estore.pc.register.phoneNumber")}</label>
                 <InputFormItem
@@ -182,22 +158,6 @@ function Register() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 16px;
-        }
-
-        .pc-auth__otp-row {
-          display: flex;
-          gap: 8px;
-          align-items: flex-start;
-        }
-
-        .pc-auth__otp-row .form-group {
-          flex: 1;
-        }
-
-        .pc-auth__otp-btn {
-          margin-top: 0;
-          padding: 12px 14px;
-          white-space: nowrap;
         }
 
         .pc-auth__login-note {
