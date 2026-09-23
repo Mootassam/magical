@@ -1487,10 +1487,10 @@ const it = {
           forgotPassword: "Password dimenticata?",
         },
         register: {
-          brandTitle: "Unisciti a Estore oggi",
+          brandTitle: "Unisciti a zalandostyle oggi",
           brandSubtitle: "Crea un account per tracciare gli ordini, salvare indirizzi e fare il checkout più velocemente.",
           title: "Crea il tuo account",
-          subtitle: "Unisciti a Estore e fai acquisti in modo più intelligente",
+          subtitle: "Unisciti a zalandostyle e fai acquisti in modo più intelligente",
           email: "Email",
           emailPlaceholder: "Inserisci la tua email",
           getOtp: "Ottieni OTP",

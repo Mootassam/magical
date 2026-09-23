@@ -1519,10 +1519,10 @@ tabBottomNavigator: {
         forgotPassword: "Mot de passe oublié ?",
       },
       register: {
-        brandTitle: "Rejoignez Estore dès aujourd'hui",
+        brandTitle: "Rejoignez zalandostyle dès aujourd'hui",
         brandSubtitle: "Créez un compte pour suivre vos commandes, enregistrer des adresses et payer plus rapidement.",
         title: "Créez votre compte",
-        subtitle: "Rejoignez Estore et achetez plus intelligemment",
+        subtitle: "Rejoignez zalandostyle et achetez plus intelligemment",
         email: "E-mail",
         emailPlaceholder: "Entrez votre e-mail",
         getOtp: "Obtenir le code",

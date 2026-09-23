@@ -1,12 +1,8 @@
 import React from "react";
 import useTawkChat from "src/view/shared/hooks/useTawkChat";
 
-// The div Tawk.to renders the chat into instead of its default floating
-// corner bubble - see useTawkChat.
-const TAWK_CONTAINER_ID = "tawk-chat-embed";
-
 function CustomerService() {
-  useTawkChat(TAWK_CONTAINER_ID);
+  const tawkRef = useTawkChat();
 
   return (
     <>
@@ -20,10 +16,13 @@ function CustomerService() {
         </div>
 
         <div className="scroll-area">
-          <div id={TAWK_CONTAINER_ID} className="tawk-embed">
-            <div className="empty-state">
-              Our support team will get back to you shortly.
-            </div>
+          {/* Left empty for useTawkChat to fill in with real Tawk.to embed
+              markup - never given JSX children, so the hook's direct DOM
+              writes never conflict with React's own reconciliation. */}
+          <div ref={tawkRef} className="tawk-embed" />
+
+          <div className="empty-state">
+            Our support team will get back to you shortly.
           </div>
         </div>
 
@@ -96,6 +95,14 @@ function CustomerService() {
     display:flex;
     flex-direction:column;
     min-height:100%;
+  }
+
+  .tawk-embed:empty{
+    display:none;
+  }
+
+  .tawk-embed:not(:empty) ~ .empty-state{
+    display:none;
   }
 
   .empty-state{

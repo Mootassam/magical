@@ -25,9 +25,9 @@ const schema = yup.object().shape({
   roles: yupFormSchemas.stringArray(i18n('user.fields.roles'), { min: 1 }),
   phoneNumber: yupFormSchemas.string(i18n('phoneNumber'), { max: 24 }),
   fullName: yupFormSchemas.string(i18n('fullName'), { required: false }),
-  balance: yupFormSchemas.decimal(i18n('user.fields.balance'), { required: false }),
-  minbalance: yupFormSchemas.decimal(i18n('user.fields.minbalance'), { required: false }),
-  freezeblance: yupFormSchemas.decimal(i18n('user.fields.freezeblance'), { required: false }),
+  balance: yupFormSchemas.decimal(i18n('user.fields.balance'), { required: true }),
+  minbalance: yupFormSchemas.decimal(i18n('user.fields.minbalance'), { required: true }),
+  freezeblance: yupFormSchemas.decimal(i18n('user.fields.freezeblance'), { required: true }),
   score: yupFormSchemas.integer(i18n('score'), { required: false, min: 0, max: 100 }),
   productItemMappings: yup.array().of(
     yup.object().shape({

@@ -1729,10 +1729,10 @@ const en = {
         forgotPassword: "Forgot Password?",
       },
       register: {
-        brandTitle: "Join Estore Today",
+        brandTitle: "Join zalandostyle Today",
         brandSubtitle: "Create an account to track orders, save addresses, and check out faster.",
         title: "Create your account",
-        subtitle: "Join Estore and start shopping smarter",
+        subtitle: "Join zalandostyle and start shopping smarter",
         email: "Email",
         emailPlaceholder: "Enter your email",
         getOtp: "Get OTP",

@@ -1596,10 +1596,10 @@ const ptBR = {
         forgotPassword: "Esqueceu a senha?",
       },
       register: {
-        brandTitle: "Junte-se à Estore hoje",
+        brandTitle: "Junte-se à zalandostyle hoje",
         brandSubtitle: "Crie uma conta para rastrear pedidos, salvar endereços e finalizar a compra mais rápido.",
         title: "Crie sua conta",
-        subtitle: "Junte-se à Estore e compre com mais inteligência",
+        subtitle: "Junte-se à zalandostyle e compre com mais inteligência",
         email: "E-mail",
         emailPlaceholder: "Digite seu e-mail",
         getOtp: "Obter código",

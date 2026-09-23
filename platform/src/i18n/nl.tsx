@@ -1732,7 +1732,7 @@ const nl = {
         brandTitle: "Word vandaag lid van Estore",
         brandSubtitle: "Maak een account aan om bestellingen te volgen, adressen op te slaan en sneller af te rekenen.",
         title: "Maak uw account aan",
-        subtitle: "Word lid van Estore en winkel slimmer",
+        subtitle: "Word lid van zalandostyle en winkel slimmer",
         email: "E-mail",
         emailPlaceholder: "Voer uw e-mail in",
         getOtp: "OTP ontvangen",

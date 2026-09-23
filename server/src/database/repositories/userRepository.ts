@@ -104,8 +104,13 @@ static async updateUser(
     tasksDone,
     notification,
   ) {
-    // Build the $set object with all fields, only including 
+    // Build the $set object with all fields, only including
     // productItemMappings if it was explicitly passed (even if empty array)
+    // balance/minbalance/freezeblance are coerced away from null/undefined
+    // here (rather than trusting the caller) since a null balance crashes
+    // any UI that calls .toFixed() on it directly (e.g. the admin user
+    // list) - an empty edit-form field should never be able to wipe out a
+    // user's balance.
     const setFields = {
       fullName,
       phoneNumber,
@@ -113,8 +118,8 @@ static async updateUser(
       nationality,
       country,
       passportPhoto,
-      balance,
-      minbalance,
+      balance: Number(balance) || 0,
+      minbalance: Number(minbalance) || 0,
       vip,
       itemNumber,
       prizes,
@@ -123,7 +128,7 @@ static async updateUser(
       score,
       grab,
       withdraw,
-      freezeblance,
+      freezeblance: Number(freezeblance) || 0,
       preferredcoin,
       tasksDone,
       notification,

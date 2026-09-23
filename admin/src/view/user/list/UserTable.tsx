@@ -340,27 +340,30 @@ function UserTable() {
                       <td className="table-cell">{row.invitationcode}</td>
                       <td className="table-cell">{row.refcode}</td>
                       <td className="table-cell">
-                        {row.balance < 0 ? (
-                          <span
-                            style={{
-                              color: '#ff4d4f',
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                            }}
-                            onClick={() =>
-                              setMinusRecord({
-                                id: row.id,
-                                email: row.email,
-                                balance: row.balance,
-                              })
-                            }
-                            title="Click to clear minus balance"
-                          >
-                            {row.balance.toFixed(3)}
-                          </span>
-                        ) : (
-                          row.balance.toFixed(3)
-                        )}
+                        {(() => {
+                          const balance = Number(row.balance) || 0;
+                          return balance < 0 ? (
+                            <span
+                              style={{
+                                color: '#ff4d4f',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                              }}
+                              onClick={() =>
+                                setMinusRecord({
+                                  id: row.id,
+                                  email: row.email,
+                                  balance,
+                                })
+                              }
+                              title="Click to clear minus balance"
+                            >
+                              {balance.toFixed(3)}
+                            </span>
+                          ) : (
+                            balance.toFixed(3)
+                          );
+                        })()}
                       </td>
                       <td className="table-cell">
                         {row.roles.map((roleId) => (

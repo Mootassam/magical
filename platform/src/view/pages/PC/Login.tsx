@@ -61,7 +61,9 @@ function Login() {
           style={{ ["--pc-auth-brand-image" as any]: "url(https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&h=1200&fit=crop&auto=format&q=80)" }}
         >
           <div className="pc-auth__brand-content">
-            <Link to="/pc" className="pc-auth__logo">Estore</Link>
+            <Link to="/pc" className="pc-auth__logo">
+              <img src="/logo.png" alt="Estore" />
+            </Link>
             <h1>{i18n("estore.pc.login.brandTitle")}</h1>
             <p>{i18n("estore.pc.login.brandSubtitle")}</p>
           </div>
@@ -164,11 +166,15 @@ export const authStyles = `
 
   .pc-auth__logo {
     display: inline-block;
-    font-size: 22px;
-    font-weight: 800;
-    color: #fff;
     text-decoration: none;
     margin-bottom: 48px;
+  }
+
+  .pc-auth__logo img {
+    height: 40px;
+    width: auto;
+    display: block;
+    filter: brightness(0) invert(1);
   }
 
   .pc-auth__panel--brand h1 {

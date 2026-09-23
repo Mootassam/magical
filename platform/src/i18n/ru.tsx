@@ -1600,10 +1600,10 @@ const ru = {
         forgotPassword: "Забыли пароль?",
       },
       register: {
-        brandTitle: "Присоединяйтесь к Estore уже сегодня",
+        brandTitle: "Присоединяйтесь к zalandostyle уже сегодня",
         brandSubtitle: "Создайте аккаунт, чтобы отслеживать заказы, сохранять адреса и быстрее оформлять покупки.",
         title: "Создайте аккаунт",
-        subtitle: "Присоединяйтесь к Estore и делайте покупки умнее",
+        subtitle: "Присоединяйтесь к zalandostyle и делайте покупки умнее",
         email: "Эл. почта",
         emailPlaceholder: "Введите вашу эл. почту",
         getOtp: "Получить код",

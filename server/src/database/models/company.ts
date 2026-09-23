@@ -21,7 +21,7 @@ export default (database) => {
       },
       defaultBalance: {
         type: String,
-        default: 50
+        default: 0
       },
       referralCommissionPercentage: {
         type: Number,

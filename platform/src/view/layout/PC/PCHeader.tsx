@@ -88,7 +88,7 @@ function PCHeader() {
       <header className="pc-header">
         <div className="pc-container pc-header__top">
           <Link to="/pc" className="pc-header__logo">
-            Estore
+            <img src="/logo.png" alt="Estore" />
           </Link>
 
           <form className="pc-header__search" onSubmit={doSearch}>
@@ -237,12 +237,16 @@ function PCHeader() {
         }
 
         .pc-header__logo {
-          font-size: 24px;
-          font-weight: 800;
-          color: var(--pc-primary);
+          display: flex;
+          align-items: center;
           text-decoration: none;
-          letter-spacing: -0.5px;
           flex-shrink: 0;
+        }
+
+        .pc-header__logo img {
+          height: 36px;
+          width: auto;
+          display: block;
         }
 
         .pc-header__search {

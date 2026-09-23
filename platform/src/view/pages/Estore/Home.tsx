@@ -208,7 +208,7 @@ function Home() {
                     {product.image && <img src={product.image} alt={product.title} loading="lazy" />}
                     <div className="promo-overlay" />
                     <div className="promo-content">
-                      <span className="promo-eyebrow">✨ Estore Exclusive</span>
+                      <span className="promo-eyebrow">✨ zalandostyle Exclusive</span>
                       <div className="promo-title">{product.title}</div>
                       <span className="promo-badge">
                         UP TO <b>{PROMO_DISCOUNTS[index % PROMO_DISCOUNTS.length]}%</b> OFF

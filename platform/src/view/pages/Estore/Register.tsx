@@ -91,7 +91,7 @@ function Register() {
 
 
         <div className="form-title">Create your account</div>
-        <div className="form-sub">Join Estore and start shopping smarter</div>
+        <div className="form-sub">Join zalandostyle and start shopping smarter</div>
 
         <FormProvider {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

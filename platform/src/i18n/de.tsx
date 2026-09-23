@@ -1605,7 +1605,7 @@ const de = {
         brandTitle: "Werden Sie noch heute Teil von Estore",
         brandSubtitle: "Erstellen Sie ein Konto, um Bestellungen zu verfolgen, Adressen zu speichern und schneller zur Kasse zu gehen.",
         title: "Konto erstellen",
-        subtitle: "Werden Sie Teil von Estore und kaufen Sie smarter ein",
+        subtitle: "Werden Sie Teil von zalandostyle und kaufen Sie smarter ein",
         email: "E-Mail",
         emailPlaceholder: "Geben Sie Ihre E-Mail ein",
         getOtp: "OTP anfordern",

@@ -111,12 +111,7 @@ function Login() {
         </div>
 
         <div className="logo-wrap">
-
-          {/* Estore logo (simplified inline SVG matching provided artwork) */}
-          {/* <img src="/images/home/logo.webp" alt="" style={{ width: '60%' }} /> */}
-
-{/* Here we will add the logo later  */}
-
+          <img src="/logo.png" alt="Estore" className="logo-img" />
           <div className="tagline">{i18n("estore.auth.login.tagline")}</div>
         </div>
 
@@ -300,19 +295,10 @@ function Login() {
           margin-bottom:30px;
         }
 
-        .logo-badge{
-          width:150px;
-          height:150px;
-          border-radius:26px;
-          background:#FAFAFA;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          box-shadow:0 8px 24px rgba(209,69,31,0.18), 0 0 0 1px rgba(209,69,31,0.12);
-          overflow:hidden;
+        .logo-img{
+          height:64px;
+          width:auto;
         }
-
-        .logo-badge svg{ width:110px; height:110px; }
 
         .brand-name{
           margin-top:14px;
